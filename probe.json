@@ -1,0 +1,1105 @@
+{
+  "meta": {
+    "version": "nse_probe v1.0",
+    "run_at": "2026-10-31 14:19:25",
+    "today": "2026-10-31",
+    "python": "3.13.12",
+    "requests": "2.32.5",
+    "out": "C:\\QuantData\\nse_ext\\probe\\PROBE_20261031_141753"
+  },
+  "verdicts": {
+    "delivery": {
+      "usable": true,
+      "earliest_window_with_rows": "2020-06-01",
+      "has_timestamp": false,
+      "line": "USABLE - earliest window with rows: 2020-06-01 (5 of 5 probes ok); delivery columns present"
+    },
+    "announce": {
+      "usable": true,
+      "earliest_window_with_rows": "2020-06-01..2020-06-05",
+      "has_timestamp": true,
+      "line": "USABLE - earliest window with rows: 2020-06-01..2020-06-05 (5 of 5 probes ok); timestamps with time of day"
+    },
+    "boardmeet": {
+      "usable": true,
+      "earliest_window_with_rows": "2020-06-01..2020-06-05",
+      "has_timestamp": true,
+      "line": "USABLE - earliest window with rows: 2020-06-01..2020-06-05 (5 of 5 probes ok); timestamps with time of day"
+    },
+    "pit": {
+      "usable": true,
+      "earliest_window_with_rows": "2020-06-01..2020-06-05",
+      "has_timestamp": true,
+      "line": "USABLE - earliest window with rows: 2020-06-01..2020-06-05 (4 of 5 probes ok); timestamps with time of day"
+    },
+    "bulk": {
+      "usable": false,
+      "line": "NOT USABLE from this PC: HTTP 503"
+    },
+    "block": {
+      "usable": false,
+      "line": "NOT USABLE from this PC: HTTP 503"
+    }
+  },
+  "results": [
+    {
+      "source": "warmup",
+      "window": "-",
+      "url": "https://www.nseindia.com/",
+      "status": 403,
+      "ok": false,
+      "error": "HTTP 403"
+    },
+    {
+      "url": "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_30102026.csv",
+      "kind": "csv",
+      "status": 200,
+      "bytes": 395929,
+      "content_type": "text/csv",
+      "ok": true,
+      "rows": 3503,
+      "columns": [
+        "SYMBOL",
+        "SERIES",
+        "DATE1",
+        "PREV_CLOSE",
+        "OPEN_PRICE",
+        "HIGH_PRICE",
+        "LOW_PRICE",
+        "LAST_PRICE",
+        "CLOSE_PRICE",
+        "AVG_PRICE",
+        "TTL_TRD_QNTY",
+        "TURNOVER_LACS",
+        "NO_OF_TRADES",
+        "DELIV_QTY",
+        "DELIV_PER"
+      ],
+      "has_delivery": true,
+      "dates_in_file": [
+        "30-Oct-2026"
+      ],
+      "source": "delivery",
+      "window": "2026-10-30"
+    },
+    {
+      "url": "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_02062025.csv",
+      "kind": "csv",
+      "status": 200,
+      "bytes": 329448,
+      "content_type": "text/csv",
+      "ok": true,
+      "rows": 2889,
+      "columns": [
+        "SYMBOL",
+        "SERIES",
+        "DATE1",
+        "PREV_CLOSE",
+        "OPEN_PRICE",
+        "HIGH_PRICE",
+        "LOW_PRICE",
+        "LAST_PRICE",
+        "CLOSE_PRICE",
+        "AVG_PRICE",
+        "TTL_TRD_QNTY",
+        "TURNOVER_LACS",
+        "NO_OF_TRADES",
+        "DELIV_QTY",
+        "DELIV_PER"
+      ],
+      "has_delivery": true,
+      "dates_in_file": [
+        "02-Jun-2025"
+      ],
+      "source": "delivery",
+      "window": "2025-06-02"
+    },
+    {
+      "url": "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_01062023.csv",
+      "kind": "csv",
+      "status": 200,
+      "bytes": 272715,
+      "content_type": "text/csv",
+      "ok": true,
+      "rows": 2399,
+      "columns": [
+        "SYMBOL",
+        "SERIES",
+        "DATE1",
+        "PREV_CLOSE",
+        "OPEN_PRICE",
+        "HIGH_PRICE",
+        "LOW_PRICE",
+        "LAST_PRICE",
+        "CLOSE_PRICE",
+        "AVG_PRICE",
+        "TTL_TRD_QNTY",
+        "TURNOVER_LACS",
+        "NO_OF_TRADES",
+        "DELIV_QTY",
+        "DELIV_PER"
+      ],
+      "has_delivery": true,
+      "dates_in_file": [
+        "01-Jun-2023"
+      ],
+      "source": "delivery",
+      "window": "2023-06-01"
+    },
+    {
+      "url": "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_01062021.csv",
+      "kind": "csv",
+      "status": 200,
+      "bytes": 230526,
+      "content_type": "text/csv",
+      "ok": true,
+      "rows": 2031,
+      "columns": [
+        "SYMBOL",
+        "SERIES",
+        "DATE1",
+        "PREV_CLOSE",
+        "OPEN_PRICE",
+        "HIGH_PRICE",
+        "LOW_PRICE",
+        "LAST_PRICE",
+        "CLOSE_PRICE",
+        "AVG_PRICE",
+        "TTL_TRD_QNTY",
+        "TURNOVER_LACS",
+        "NO_OF_TRADES",
+        "DELIV_QTY",
+        "DELIV_PER"
+      ],
+      "has_delivery": true,
+      "dates_in_file": [
+        "01-Jun-2021"
+      ],
+      "source": "delivery",
+      "window": "2021-06-01"
+    },
+    {
+      "url": "https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_01062020.csv",
+      "kind": "csv",
+      "status": 200,
+      "bytes": 215346,
+      "content_type": "text/csv",
+      "ok": true,
+      "rows": 1952,
+      "columns": [
+        "SYMBOL",
+        "SERIES",
+        "DATE1",
+        "PREV_CLOSE",
+        "OPEN_PRICE",
+        "HIGH_PRICE",
+        "LOW_PRICE",
+        "LAST_PRICE",
+        "CLOSE_PRICE",
+        "AVG_PRICE",
+        "TTL_TRD_QNTY",
+        "TURNOVER_LACS",
+        "NO_OF_TRADES",
+        "DELIV_QTY",
+        "DELIV_PER"
+      ],
+      "has_delivery": true,
+      "dates_in_file": [
+        "01-Jun-2020"
+      ],
+      "source": "delivery",
+      "window": "2020-06-01"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-announcements?index=equities&from_date=24-10-2026&to_date=30-10-2026",
+      "kind": "json",
+      "status": 200,
+      "bytes": 2965955,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 4252,
+      "date_fields": {
+        "an_dt": {
+          "min": "2026-10-24 01:33:09",
+          "max": "2026-10-30 23:50:10",
+          "has_time": true
+        },
+        "exchdisstime": {
+          "min": "2026-10-24 01:33:11",
+          "max": "2026-10-30 23:50:11",
+          "has_time": true
+        },
+        "sort_date": {
+          "min": "2026-10-24 01:33:09",
+          "max": "2026-10-30 23:50:10",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "an_dt",
+        "attFileSize",
+        "attchmntFile",
+        "attchmntText",
+        "bflag",
+        "csvName",
+        "desc",
+        "difference",
+        "dt",
+        "exchdisstime",
+        "fileSize",
+        "hasXbrl",
+        "old_new",
+        "orgid",
+        "seq_id",
+        "smIndustry",
+        "sm_isin",
+        "sm_name",
+        "sort_date",
+        "symbol"
+      ],
+      "source": "announce",
+      "window": "2026-10-24..2026-10-30"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-announcements?index=equities&from_date=02-06-2025&to_date=06-06-2025",
+      "kind": "json",
+      "status": 200,
+      "bytes": 1468653,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 2097,
+      "date_fields": {
+        "an_dt": {
+          "min": "2025-06-02 00:02:05",
+          "max": "2025-06-06 23:56:43",
+          "has_time": true
+        },
+        "exchdisstime": {
+          "min": "2025-06-02 00:02:06",
+          "max": "2025-06-06 23:56:44",
+          "has_time": true
+        },
+        "sort_date": {
+          "min": "2025-06-02 00:02:05",
+          "max": "2025-06-06 23:56:43",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "an_dt",
+        "attFileSize",
+        "attchmntFile",
+        "attchmntText",
+        "bflag",
+        "csvName",
+        "desc",
+        "difference",
+        "dt",
+        "exchdisstime",
+        "fileSize",
+        "hasXbrl",
+        "old_new",
+        "orgid",
+        "seq_id",
+        "smIndustry",
+        "sm_isin",
+        "sm_name",
+        "sort_date",
+        "symbol"
+      ],
+      "source": "announce",
+      "window": "2025-06-02..2025-06-06"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-announcements?index=equities&from_date=05-06-2023&to_date=09-06-2023",
+      "kind": "json",
+      "status": 200,
+      "bytes": 1391626,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 1996,
+      "date_fields": {
+        "an_dt": {
+          "min": "2023-06-05 07:55:24",
+          "max": "2023-06-09 23:43:56",
+          "has_time": true
+        },
+        "exchdisstime": {
+          "min": "2023-06-05 07:55:28",
+          "max": "2023-06-09 23:44:09",
+          "has_time": true
+        },
+        "sort_date": {
+          "min": "2023-06-05 07:55:24",
+          "max": "2023-06-09 23:43:56",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "an_dt",
+        "attFileSize",
+        "attchmntFile",
+        "attchmntText",
+        "bflag",
+        "csvName",
+        "desc",
+        "difference",
+        "dt",
+        "exchdisstime",
+        "fileSize",
+        "hasXbrl",
+        "old_new",
+        "orgid",
+        "seq_id",
+        "smIndustry",
+        "sm_isin",
+        "sm_name",
+        "sort_date",
+        "symbol"
+      ],
+      "source": "announce",
+      "window": "2023-06-05..2023-06-09"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-announcements?index=equities&from_date=07-06-2021&to_date=11-06-2021",
+      "kind": "json",
+      "status": 200,
+      "bytes": 1357363,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 1889,
+      "date_fields": {
+        "an_dt": {
+          "min": "2021-06-07 08:18:32",
+          "max": "2021-06-11 23:29:59",
+          "has_time": true
+        },
+        "exchdisstime": {
+          "min": "2021-06-07 08:18:39",
+          "max": "2021-06-11 23:30:11",
+          "has_time": true
+        },
+        "sort_date": {
+          "min": "2021-06-07 08:18:32",
+          "max": "2021-06-11 23:29:59",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "an_dt",
+        "attFileSize",
+        "attchmntFile",
+        "attchmntText",
+        "bflag",
+        "csvName",
+        "desc",
+        "difference",
+        "dt",
+        "exchdisstime",
+        "fileSize",
+        "hasXbrl",
+        "old_new",
+        "orgid",
+        "seq_id",
+        "smIndustry",
+        "sm_isin",
+        "sm_name",
+        "sort_date",
+        "symbol"
+      ],
+      "source": "announce",
+      "window": "2021-06-07..2021-06-11"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-announcements?index=equities&from_date=01-06-2020&to_date=05-06-2020",
+      "kind": "json",
+      "status": 200,
+      "bytes": 1573819,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 2174,
+      "date_fields": {
+        "an_dt": {
+          "min": "2020-06-01 07:23:00",
+          "max": "2020-06-05 22:42:00",
+          "has_time": true
+        },
+        "sort_date": {
+          "min": "2020-06-01 07:23:00",
+          "max": "2020-06-05 22:42:00",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "an_dt",
+        "attFileSize",
+        "attchmntFile",
+        "attchmntText",
+        "bflag",
+        "csvName",
+        "desc",
+        "difference",
+        "dt",
+        "exchdisstime",
+        "fileSize",
+        "hasXbrl",
+        "old_new",
+        "orgid",
+        "seq_id",
+        "smIndustry",
+        "sm_isin",
+        "sm_name",
+        "sort_date",
+        "symbol"
+      ],
+      "source": "announce",
+      "window": "2020-06-01..2020-06-05"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-board-meetings?index=equities&from_date=24-10-2026&to_date=30-10-2026",
+      "kind": "json",
+      "status": 200,
+      "bytes": 859179,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 1105,
+      "date_fields": {
+        "bm_date": {
+          "min": "2026-10-24 00:00:00",
+          "max": "2026-10-30 00:00:00",
+          "has_time": false
+        },
+        "bm_timestamp": {
+          "min": "2026-09-24 13:24:28",
+          "max": "2026-10-29 17:43:48",
+          "has_time": true
+        },
+        "sysTime": {
+          "min": "2026-09-24 13:24:31",
+          "max": "2026-10-29 17:43:48",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "bm_symbol",
+        "bm_date",
+        "bm_purpose",
+        "bm_desc",
+        "sm_indusrty",
+        "bm_timestamp",
+        "sm_name",
+        "sm_isin",
+        "diff",
+        "sysTime",
+        "attFileSize",
+        "attachment",
+        "intimationType",
+        "ixbrl",
+        "ixbrlFileSize",
+        "meetingType",
+        "oriiginalMeetingDate",
+        "proposedMeetingDate"
+      ],
+      "source": "boardmeet",
+      "window": "2026-10-24..2026-10-30"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-board-meetings?index=equities&from_date=02-06-2025&to_date=06-06-2025",
+      "kind": "json",
+      "status": 200,
+      "bytes": 32013,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 41,
+      "date_fields": {
+        "bm_date": {
+          "min": "2025-06-02 00:00:00",
+          "max": "2025-06-06 00:00:00",
+          "has_time": false
+        },
+        "bm_timestamp": {
+          "min": "2025-05-26 18:41:39",
+          "max": "2025-06-04 19:46:50",
+          "has_time": true
+        },
+        "sysTime": {
+          "min": "2025-05-26 18:41:39",
+          "max": "2025-06-04 19:46:52",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "bm_symbol",
+        "bm_date",
+        "bm_purpose",
+        "bm_desc",
+        "sm_indusrty",
+        "bm_timestamp",
+        "sm_name",
+        "sm_isin",
+        "diff",
+        "sysTime",
+        "attFileSize",
+        "attachment",
+        "intimationType",
+        "ixbrl",
+        "ixbrlFileSize",
+        "meetingType",
+        "oriiginalMeetingDate",
+        "proposedMeetingDate"
+      ],
+      "source": "boardmeet",
+      "window": "2025-06-02..2025-06-06"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-board-meetings?index=equities&from_date=05-06-2023&to_date=09-06-2023",
+      "kind": "json",
+      "status": 200,
+      "bytes": 35661,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 52,
+      "date_fields": {
+        "bm_date": {
+          "min": "2023-06-05 00:00:00",
+          "max": "2023-06-09 00:00:00",
+          "has_time": false
+        },
+        "bm_timestamp": {
+          "min": "2023-05-22 18:55:50",
+          "max": "2023-06-07 21:11:53",
+          "has_time": true
+        },
+        "sysTime": {
+          "min": "2023-05-22 18:57:01",
+          "max": "2023-06-07 21:13:01",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "bm_symbol",
+        "bm_date",
+        "bm_purpose",
+        "bm_desc",
+        "sm_indusrty",
+        "bm_timestamp",
+        "sm_name",
+        "sm_isin",
+        "diff",
+        "sysTime",
+        "attFileSize",
+        "attachment",
+        "intimationType",
+        "ixbrl",
+        "ixbrlFileSize",
+        "meetingType",
+        "oriiginalMeetingDate",
+        "proposedMeetingDate"
+      ],
+      "source": "boardmeet",
+      "window": "2023-06-05..2023-06-09"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-board-meetings?index=equities&from_date=07-06-2021&to_date=11-06-2021",
+      "kind": "json",
+      "status": 200,
+      "bytes": 101342,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 150,
+      "date_fields": {
+        "bm_date": {
+          "min": "2021-06-07 00:00:00",
+          "max": "2021-06-11 00:00:00",
+          "has_time": false
+        },
+        "bm_timestamp": {
+          "min": "2021-05-19 10:27:00",
+          "max": "2021-06-11 10:54:00",
+          "has_time": true
+        },
+        "sysTime": {
+          "min": "2021-05-19 10:29:01",
+          "max": "2021-06-11 10:56:12",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "bm_symbol",
+        "bm_date",
+        "bm_purpose",
+        "bm_desc",
+        "sm_indusrty",
+        "bm_timestamp",
+        "sm_name",
+        "sm_isin",
+        "diff",
+        "sysTime",
+        "attFileSize",
+        "attachment",
+        "intimationType",
+        "ixbrl",
+        "ixbrlFileSize",
+        "meetingType",
+        "oriiginalMeetingDate",
+        "proposedMeetingDate"
+      ],
+      "source": "boardmeet",
+      "window": "2021-06-07..2021-06-11"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporate-board-meetings?index=equities&from_date=01-06-2020&to_date=05-06-2020",
+      "kind": "json",
+      "status": 200,
+      "bytes": 58989,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 88,
+      "date_fields": {
+        "bm_date": {
+          "min": "2020-06-01 00:00:00",
+          "max": "2020-06-05 00:00:00",
+          "has_time": false
+        },
+        "bm_timestamp": {
+          "min": "2020-05-11 16:59:00",
+          "max": "2020-06-05 16:05:00",
+          "has_time": true
+        },
+        "sysTime": {
+          "min": "2020-05-11 17:00:32",
+          "max": "2020-06-05 16:07:02",
+          "has_time": true
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "bm_symbol",
+        "bm_date",
+        "bm_purpose",
+        "bm_desc",
+        "sm_indusrty",
+        "bm_timestamp",
+        "sm_name",
+        "sm_isin",
+        "diff",
+        "sysTime",
+        "attFileSize",
+        "attachment",
+        "intimationType",
+        "ixbrl",
+        "ixbrlFileSize",
+        "meetingType",
+        "oriiginalMeetingDate",
+        "proposedMeetingDate"
+      ],
+      "source": "boardmeet",
+      "window": "2020-06-01..2020-06-05"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporates-pit?index=equities&from_date=24-10-2026&to_date=30-10-2026",
+      "kind": "json",
+      "status": 200,
+      "bytes": 28,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 0,
+      "date_fields": {},
+      "has_timestamp": false,
+      "warning": "no records in this window",
+      "source": "pit",
+      "window": "2026-10-24..2026-10-30"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporates-pit?index=equities&from_date=02-06-2025&to_date=06-06-2025",
+      "kind": "json",
+      "status": 200,
+      "bytes": 248116,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 299,
+      "date_fields": {
+        "acqfromDt": {
+          "min": "2023-03-13 00:00:00",
+          "max": "2025-06-06 00:00:00",
+          "has_time": false
+        },
+        "acqtoDt": {
+          "min": "2024-09-27 00:00:00",
+          "max": "2025-06-06 00:00:00",
+          "has_time": false
+        },
+        "date": {
+          "min": "2025-06-02 09:59:00",
+          "max": "2025-06-06 22:30:00",
+          "has_time": true
+        },
+        "intimDt": {
+          "min": "2025-05-15 00:00:00",
+          "max": "2026-06-02 00:00:00",
+          "has_time": false
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "acqMode",
+        "acqName",
+        "acqfromDt",
+        "acqtoDt",
+        "afterAcqSharesNo",
+        "afterAcqSharesPer",
+        "anex",
+        "befAcqSharesNo",
+        "befAcqSharesPer",
+        "buyQuantity",
+        "buyValue",
+        "company",
+        "date",
+        "derivativeType",
+        "did",
+        "exchange",
+        "intimDt",
+        "personCategory",
+        "pid",
+        "remarks",
+        "secAcq",
+        "secType",
+        "secVal",
+        "securitiesTypePost",
+        "sellValue",
+        "sellquantity",
+        "symbol",
+        "tdpDerivativeContractType",
+        "tdpTransactionType",
+        "tkdAcqm",
+        "xbrl",
+        "xbrlFileSize"
+      ],
+      "source": "pit",
+      "window": "2025-06-02..2025-06-06"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporates-pit?index=equities&from_date=05-06-2023&to_date=09-06-2023",
+      "kind": "json",
+      "status": 200,
+      "bytes": 465409,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 563,
+      "date_fields": {
+        "acqfromDt": {
+          "min": "2023-03-31 00:00:00",
+          "max": "2023-06-09 00:00:00",
+          "has_time": false
+        },
+        "acqtoDt": {
+          "min": "2023-03-31 00:00:00",
+          "max": "2023-06-09 00:00:00",
+          "has_time": false
+        },
+        "date": {
+          "min": "2023-06-05 10:36:00",
+          "max": "2023-06-09 23:02:00",
+          "has_time": true
+        },
+        "intimDt": {
+          "min": "2023-05-26 00:00:00",
+          "max": "2023-09-08 00:00:00",
+          "has_time": false
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "acqMode",
+        "acqName",
+        "acqfromDt",
+        "acqtoDt",
+        "afterAcqSharesNo",
+        "afterAcqSharesPer",
+        "anex",
+        "befAcqSharesNo",
+        "befAcqSharesPer",
+        "buyQuantity",
+        "buyValue",
+        "company",
+        "date",
+        "derivativeType",
+        "did",
+        "exchange",
+        "intimDt",
+        "personCategory",
+        "pid",
+        "remarks",
+        "secAcq",
+        "secType",
+        "secVal",
+        "securitiesTypePost",
+        "sellValue",
+        "sellquantity",
+        "symbol",
+        "tdpDerivativeContractType",
+        "tdpTransactionType",
+        "tkdAcqm",
+        "xbrl",
+        "xbrlFileSize"
+      ],
+      "source": "pit",
+      "window": "2023-06-05..2023-06-09"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporates-pit?index=equities&from_date=07-06-2021&to_date=11-06-2021",
+      "kind": "json",
+      "status": 200,
+      "bytes": 879629,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 1071,
+      "date_fields": {
+        "acqfromDt": {
+          "min": "2020-11-09 00:00:00",
+          "max": "2021-06-11 00:00:00",
+          "has_time": false
+        },
+        "acqtoDt": {
+          "min": "2020-11-09 00:00:00",
+          "max": "2021-06-11 00:00:00",
+          "has_time": false
+        },
+        "date": {
+          "min": "2021-06-07 08:31:00",
+          "max": "2021-06-11 23:00:00",
+          "has_time": true
+        },
+        "intimDt": {
+          "min": "2021-02-23 00:00:00",
+          "max": "2021-09-06 00:00:00",
+          "has_time": false
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "acqMode",
+        "acqName",
+        "acqfromDt",
+        "acqtoDt",
+        "afterAcqSharesNo",
+        "afterAcqSharesPer",
+        "anex",
+        "befAcqSharesNo",
+        "befAcqSharesPer",
+        "buyQuantity",
+        "buyValue",
+        "company",
+        "date",
+        "derivativeType",
+        "did",
+        "exchange",
+        "intimDt",
+        "personCategory",
+        "pid",
+        "remarks",
+        "secAcq",
+        "secType",
+        "secVal",
+        "securitiesTypePost",
+        "sellValue",
+        "sellquantity",
+        "symbol",
+        "tdpDerivativeContractType",
+        "tdpTransactionType",
+        "tkdAcqm",
+        "xbrl",
+        "xbrlFileSize"
+      ],
+      "source": "pit",
+      "window": "2021-06-07..2021-06-11"
+    },
+    {
+      "url": "https://www.nseindia.com/api/corporates-pit?index=equities&from_date=01-06-2020&to_date=05-06-2020",
+      "kind": "json",
+      "status": 200,
+      "bytes": 383393,
+      "content_type": "application/json; charset=utf-8",
+      "ok": true,
+      "rows": 463,
+      "date_fields": {
+        "acqfromDt": {
+          "min": "2019-05-30 00:00:00",
+          "max": "2020-06-05 00:00:00",
+          "has_time": false
+        },
+        "acqtoDt": {
+          "min": "2019-05-31 00:00:00",
+          "max": "2020-06-05 00:00:00",
+          "has_time": false
+        },
+        "date": {
+          "min": "2020-06-01 11:33:00",
+          "max": "2020-06-05 22:01:00",
+          "has_time": true
+        },
+        "intimDt": {
+          "min": "2019-06-02 00:00:00",
+          "max": "2020-06-05 00:00:00",
+          "has_time": false
+        }
+      },
+      "has_timestamp": true,
+      "columns": [
+        "acqMode",
+        "acqName",
+        "acqfromDt",
+        "acqtoDt",
+        "afterAcqSharesNo",
+        "afterAcqSharesPer",
+        "anex",
+        "befAcqSharesNo",
+        "befAcqSharesPer",
+        "buyQuantity",
+        "buyValue",
+        "company",
+        "date",
+        "derivativeType",
+        "did",
+        "exchange",
+        "intimDt",
+        "personCategory",
+        "pid",
+        "remarks",
+        "secAcq",
+        "secType",
+        "secVal",
+        "securitiesTypePost",
+        "sellValue",
+        "sellquantity",
+        "symbol",
+        "tdpDerivativeContractType",
+        "tdpTransactionType",
+        "tkdAcqm",
+        "xbrl",
+        "xbrlFileSize"
+      ],
+      "source": "pit",
+      "window": "2020-06-01..2020-06-05"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/bulk-deals?from=24-10-2026&to=30-10-2026",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "bulk",
+      "window": "2026-10-24..2026-10-30"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/bulk-deals?from=02-06-2025&to=06-06-2025",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "bulk",
+      "window": "2025-06-02..2025-06-06"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/bulk-deals?from=05-06-2023&to=09-06-2023",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "bulk",
+      "window": "2023-06-05..2023-06-09"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/bulk-deals?from=07-06-2021&to=11-06-2021",
+      "kind": "json",
+      "status": 503,
+      "bytes": 549,
+      "content_type": "text/html; charset=iso-8859-1",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "bulk",
+      "window": "2021-06-07..2021-06-11"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/bulk-deals?from=01-06-2020&to=05-06-2020",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "bulk",
+      "window": "2020-06-01..2020-06-05"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/block-deals?from=24-10-2026&to=30-10-2026",
+      "kind": "json",
+      "status": 503,
+      "bytes": 549,
+      "content_type": "text/html; charset=iso-8859-1",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "block",
+      "window": "2026-10-24..2026-10-30"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/block-deals?from=02-06-2025&to=06-06-2025",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "block",
+      "window": "2025-06-02..2025-06-06"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/block-deals?from=05-06-2023&to=09-06-2023",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "block",
+      "window": "2023-06-05..2023-06-09"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/block-deals?from=07-06-2021&to=11-06-2021",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "block",
+      "window": "2021-06-07..2021-06-11"
+    },
+    {
+      "url": "https://www.nseindia.com/api/historical/block-deals?from=01-06-2020&to=05-06-2020",
+      "kind": "json",
+      "status": 503,
+      "bytes": 18525,
+      "content_type": "text/html",
+      "ok": false,
+      "error": "HTTP 503",
+      "source": "block",
+      "window": "2020-06-01..2020-06-05"
+    }
+  ]
+}
