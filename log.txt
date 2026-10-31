@@ -1,0 +1,88 @@
+pathlab v1.1 run | declaration ff4871f013f642ce (PATHLAB_DECLARATION.json) | output C:\QuantData\pathlab | run PL_20261031_001
+[audit] pathlab v1.1 reading C:\QuantData\cache_daily (read only)
+   libraries: numpy 2.4.1, pandas 2.3.3, pyarrow 21.0.0, scipy 1.16.2
+   calendar (NIFTY 50): 2015-01-01 to 2026-10-30, 2,931 sessions; last window ends 2026-09-22
+   indices: NIFTY50 ok, NIFTYMIDCAP150 ok, NIFTYSMLCAP250 ok, INDIAVIX ok
+   breadth: TRADELAB_OUT: built 2026-10-30T19:09:00 to 2026-10-30; PATHLAB_OUT: none usable (none usable = the build counts it once, a few minutes)
+   panel_oc in the span: 1,476,381 stock-days, 1,436 stocks; by year 2020: 131,862, 2021: 191,916, 2022: 197,968, 2023: 222,587, 2024: 265,798, 2025: 267,718, 2026: 198,532
+   3-minute: 1,408 files; 1,320 of 1,436 universe stocks have one; sample of 12: 12,863 of 13,481 sessions usable; spans 2021-10-01 to 2026-10-09
+   corporate actions (sample of 206 stocks): 206 with a usable ok.json (0 suspect sessions), 0 would use the 35% fallback
+   picks PM_20261017_001: 33,100 in the span (2020-01-16 to 2026-09-15), hash checked
+   TLX export TLX_20261025_001: trades.parquet hash checked
+   warning: no AMFI size lists: market-cap segments are replaced by liquidity tiers (declared)
+[audit] done in 5 s -> C:\QuantData\pathlab\runs\PL_20261031_001\audit\audit.md
+[build] pathlab v1.1: T0 2020-01-01 to 2022-12-31, windows to 2023-01-20 (SEALED)
+   breadth: tradelab's saved copy (C:\QuantData\tradelab), built 2026-10-30T19:09:00
+   cache C:\QuantData\pathlab\cache\3c1a71a88a665921
+   universe: 521,746 panel rows, 1,001 stocks in the span
+   picks: 14,740 (D, ENS, ranks 1-10) from C:\QuantData\cache_daily\research2\pick_meta\PM_20261017_001\predictions.parquet
+   ETFs (kept out of the atlas, own table): 6 by NSE's ETF list C:\QuantData\pathlab\ref\eq_etfseclist.csv (355 names, 6 of them in the panel) plus the name rule (BEES / ETF / IETF endings: ETFs the cache holds under an older name)
+   400 of 1,001 stocks (400 built, 0 already done, 240 s)
+   800 of 1,001 stocks (800 built, 0 already done, 456 s)
+   1,001 of 1,001 stocks (1,001 built, 0 already done, 571 s)
+   rows 521,746; eligible 521,561; complete windows 521,741; all-five-sessions 3-minute 203,062; stocks with a 3-minute file 965
+   integrity vs TLX_20261025_001: 11,824 of 11,824 comparable picks match (100.0000%; 14,911 not built here, 0 with a missing session)
+[build] done in 593 s: 521,746 rows, 521,561 eligible
+[families/daily] pl_families v1.1
+   rows: 519,398 (sealed: 519,398 T0 2020-01-01..2022-12-30; reproduction halves Q1+Q3 259,069 / Q2+Q4 260,329)
+   sample 298,256 discovery / 237,238 confirmation paths (100,002 for the stability refits); 5 components keep 95.6% of the variation
+   k= 4: stability ARI 0.842 (min 0.670), reproduced 3/4 (worst 0.52), worst valley 1.00, explains 71.0%, smallest 5.90% -> no (110 s)
+   k= 5: stability ARI 0.839 (min 0.676), reproduced 3/5 (worst 0.68), worst valley 1.00, explains 75.4%, smallest 3.77% -> no (150 s)
+   k= 6: stability ARI 0.796 (min 0.489), reproduced 4/6 (worst 0.73), worst valley 1.00, explains 78.1%, smallest 2.36% -> no (178 s)
+   k= 7: stability ARI 0.851 (min 0.567), reproduced 4/7 (worst 0.75), worst valley 1.00, explains 79.9%, smallest 1.76% -> no (233 s)
+   k= 8: stability ARI 0.802 (min 0.620), reproduced 3/8 (worst 0.75), worst valley 1.00, explains 81.2%, smallest 1.73% -> no (318 s)
+   k= 9: stability ARI 0.638 (min 0.388), reproduced 1/9 (worst 1.36), worst valley 1.00, explains 82.3%, smallest 1.44% -> no (314 s)
+   k=10: stability ARI 0.686 (min 0.360), reproduced 2/10 (worst 0.85), worst valley 1.00, explains 83.4%, smallest 0.92% -> no (384 s)
+   k=11: stability ARI 0.709 (min 0.297), reproduced 3/11 (worst 0.86), worst valley 1.00, explains 84.3%, smallest 0.87% -> no (381 s)
+   k=12: stability ARI 0.777 (min 0.421), reproduced 6/12 (worst 0.75), worst valley 1.00, explains 85.0%, smallest 0.84% -> no (388 s)
+   k=13: stability ARI 0.575 (min 0.308), reproduced 3/13 (worst 0.77), worst valley 1.00, explains 85.6%, smallest 0.61% -> no (437 s)
+   k=14: stability ARI 0.529 (min 0.310), reproduced 4/14 (worst 1.39), worst valley 1.00, explains 86.2%, smallest 0.58% -> no (444 s)
+   k=15: stability ARI 0.577 (min 0.342), reproduced 4/15 (worst 1.06), worst valley 1.00, explains 86.7%, smallest 0.53% -> no (556 s)
+   k=16: stability ARI 0.559 (min 0.365), reproduced 7/16 (worst 0.97), worst valley 1.00, explains 87.1%, smallest 0.54% -> no (574 s)
+   NO STABLE STRUCTURE: no k from 4 to 16 is both stable (ARI >= 0.75) and reproduced - cells are described by the measures alone
+[families/intraday] pl_families v1.1
+   rows: 202,265 (sealed: 202,265 T0 2021-09-21..2022-12-30; reproduction halves Q1+Q3 83,180 / Q2+Q4 119,085)
+   sample 151,860 discovery / 100,334 confirmation paths (90,772 for the stability refits); 4 components keep 95.5% of the variation
+   k= 4: stability ARI 0.859 (min 0.622), reproduced 4/4 (worst 0.20), worst valley 1.00, explains 71.7%, smallest 6.73% -> regions (59 s)
+   k= 5: stability ARI 0.871 (min 0.541), reproduced 5/5 (worst 0.17), worst valley 1.00, explains 75.8%, smallest 4.30% -> regions (89 s)
+   k= 6: stability ARI 0.734 (min 0.500), reproduced 5/6 (worst 0.51), worst valley 1.00, explains 78.2%, smallest 2.15% -> no (113 s)
+   k= 7: stability ARI 0.843 (min 0.476), reproduced 7/7 (worst 0.27), worst valley 1.00, explains 80.0%, smallest 1.43% -> regions (179 s)
+   k= 8: stability ARI 0.762 (min 0.538), reproduced 7/8 (worst 0.54), worst valley 1.00, explains 81.4%, smallest 1.41% -> no (214 s)
+   k= 9: stability ARI 0.719 (min 0.418), reproduced 9/9 (worst 0.50), worst valley 1.00, explains 82.6%, smallest 1.36% -> no (202 s)
+   k=10: stability ARI 0.571 (min 0.292), reproduced 6/10 (worst 1.21), worst valley 1.00, explains 83.6%, smallest 1.08% -> no (225 s)
+   k=11: stability ARI 0.549 (min 0.278), reproduced 5/11 (worst 0.97), worst valley 1.00, explains 84.5%, smallest 1.17% -> no (221 s)
+   k=12: stability ARI 0.556 (min 0.292), reproduced 12/12 (worst 0.45), worst valley 1.00, explains 85.3%, smallest 0.81% -> no (223 s)
+   k=13: stability ARI 0.725 (min 0.362), reproduced 2/13 (worst 1.20), worst valley 1.00, explains 86.0%, smallest 0.83% -> no (233 s)
+   k=14: stability ARI 0.625 (min 0.351), reproduced 2/14 (worst 1.02), worst valley 1.00, explains 86.5%, smallest 0.78% -> no (288 s)
+   k=15: stability ARI 0.603 (min 0.349), reproduced 2/15 (worst 0.87), worst valley 1.00, explains 87.0%, smallest 0.66% -> no (324 s)
+   k=16: stability ARI 0.528 (min 0.386), reproduced 3/16 (worst 0.91), worst valley 1.00, explains 87.4%, smallest 0.46% -> no (326 s)
+   no k gives separated families; chosen k = 7 as PATH REGIONS (the largest k that is stable and reproduced): a partition of a continuum, not distinct behaviours
+   random-walk paths at k = 7: worst valley 1.00, partition explains 80.5% (real: 80.0%)
+   Gaussian mixture check: ARI 0.180 with k-means; groups matched by the mixture: 3/7
+   J01 26.79%  Quiet consolidation - strongest
+   J02 26.26%  Quiet consolidation - second  [k-means only]
+   J03 17.06%  Gradual drift down  [k-means only]
+   J04 17.05%  Delayed expansion up  [k-means only]
+   J05  6.48%  Immediate expansion and continuation - second  [k-means only]
+   J06  4.93%  Persistent decline
+   J07  1.43%  Immediate expansion and continuation - strongest
+[families/intraday] done in 2856 s
+[atlas] pl_atlas v1.1
+   daily: 521,561 atlas rows (of 521,746 built; eligible, a cell state and a known regime)
+   daily: 2,158 ETF rows kept apart (own table); 519,403 equity rows in the atlas
+   daily/discovery: 519,403 rows, 748 dates; 55 of 60 groups supported (49 s)
+   daily: real paths against their random-walk versions written (6,060 rows)
+   daily/discovery mutual information with 5-day close quintile (r5_a, discovery cut points [-0.969, -0.268, 0.331, 1.162]): state 0.00138 bits (shuffled within dates 0.00072, z 13.4); regime 0.00233 (shifted 0.00479, z -1.0)
+   overlap check (every 5th T0 per stock): the main estimate sits inside the non-overlapping sample's interval for 99.7% of 702 supported group x measure pairs (declared minimum 90%) -> PASS
+   delay curve: 495 tests (own false-discovery family), 0 pass; labels {'inconclusive': 495, 'insufficient': 45}
+   event pages: 145 of 330 pages supported; 816 tests (own false-discovery family), 17 pass; labels {'insufficient': 1104, 'inconclusive': 799, 'candidate': 17}
+   intraday: 521,561 atlas rows (of 521,746 built; eligible, a cell state and a known regime)
+   intraday: 2,158 ETF rows kept apart (own table); 519,403 equity rows in the atlas
+   intraday/discovery: 254,207 rows, 319 dates; 54 of 60 groups supported (29 s)
+   intraday: real paths against their random-walk versions written (3,240 rows)
+   intraday/discovery mutual information with the 7 frozen intraday families: state 0.00364 bits (shuffled within dates 0.00192, z 13.2); regime 0.00787 (shifted 0.00899, z -0.3)
+   false-discovery control (5%): discovery: 30 of 4,537 tests pass, about 1.5 of those expected false
+   labels: inconclusive 4,507, insufficient 533, candidate 29, unstable 1
+[atlas] done in 361 s
+[report] C:\QuantData\pathlab\runs\PL_20261031_001\ATLAS.html and ATLAS.md written; outputs.sha256 covers the run folder
+pathlab v1.1 run PL_20261031_001 finished in 139.5 min: open C:\QuantData\pathlab\runs\PL_20261031_001\ATLAS.html
