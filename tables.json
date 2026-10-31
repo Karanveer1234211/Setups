@@ -1,0 +1,788 @@
+{
+ "declaration_sha256": "634b0fcd5ec972a521b85366769ff9ccf2c4f6b8b4534794718dffb84c596766",
+ "run": "discover_20261031_210635",
+ "tables": {
+  "D": {
+   "A2": {
+    "eligible": {
+     "bear|down|bear_mkt": false,
+     "bear|down|bull_mkt": false,
+     "bear|down|mixed": false,
+     "bear|none|bear_mkt": true,
+     "bear|none|bull_mkt": true,
+     "bear|none|mixed": true,
+     "bear|up|bear_mkt": true,
+     "bear|up|bull_mkt": false,
+     "bear|up|mixed": true,
+     "bull|down|bear_mkt": true,
+     "bull|down|bull_mkt": false,
+     "bull|down|mixed": true,
+     "bull|none|bear_mkt": true,
+     "bull|none|bull_mkt": true,
+     "bull|none|mixed": true,
+     "bull|up|bear_mkt": false,
+     "bull|up|bull_mkt": false,
+     "bull|up|mixed": false,
+     "other|down|bear_mkt": true,
+     "other|down|bull_mkt": false,
+     "other|down|mixed": true,
+     "other|none|bear_mkt": true,
+     "other|none|bull_mkt": true,
+     "other|none|mixed": true,
+     "other|up|bear_mkt": true,
+     "other|up|bull_mkt": true,
+     "other|up|mixed": true,
+     "turn_flat|down|bear_mkt": true,
+     "turn_flat|down|bull_mkt": true,
+     "turn_flat|down|mixed": true,
+     "turn_flat|none|bear_mkt": true,
+     "turn_flat|none|bull_mkt": false,
+     "turn_flat|none|mixed": true,
+     "turn_flat|up|bear_mkt": true,
+     "turn_flat|up|bull_mkt": true,
+     "turn_flat|up|mixed": true
+    },
+    "f_train": 0.729594163246694,
+    "groups": {
+     "bear|down|bear_mkt": {
+      "eligible": false,
+      "lift": 9.4828506406867e-06,
+      "n": 269,
+      "pooled": -0.0005957994697626246,
+      "se": 0.006486043681431538
+     },
+     "bear|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.017182578607572732,
+      "n": 313,
+      "pooled": -0.014882244510632246,
+      "se": 0.003473993244825078
+     },
+     "bear|down|mixed": {
+      "eligible": false,
+      "lift": -0.007145059407500283,
+      "n": 106,
+      "pooled": -0.00546242153410994,
+      "se": 0.005509043392554837
+     },
+     "bear|none|bear_mkt": {
+      "eligible": true,
+      "lift": -0.014798111917714999,
+      "n": 9,
+      "pooled": -0.005595702504817888,
+      "se": 0.012666821600303902
+     },
+     "bear|none|bull_mkt": {
+      "eligible": true,
+      "lift": -0.01868511357245625,
+      "n": 15,
+      "pooled": -0.004831292327870902,
+      "se": 0.017281890194592787
+     },
+     "bear|none|mixed": {
+      "eligible": true,
+      "lift": -0.027513338461228904,
+      "n": 3,
+      "pooled": -0.007758126260083707,
+      "se": 0.01495057951460188
+     },
+     "bear|up|bear_mkt": {
+      "eligible": true,
+      "lift": 0.024932689446664973,
+      "n": 21,
+      "pooled": 0.006259117449368649,
+      "se": 0.012869469790760707
+     },
+     "bear|up|bull_mkt": {
+      "eligible": false,
+      "lift": 0.0018263706019358659,
+      "n": 30,
+      "pooled": -0.00012620284108125614,
+      "se": 0.009613789428409349
+     },
+     "bear|up|mixed": {
+      "eligible": true,
+      "lift": -0.012150198667692442,
+      "n": 14,
+      "pooled": -0.0027121900433166495,
+      "se": 0.024302858687404248
+     },
+     "bull|down|bear_mkt": {
+      "eligible": true,
+      "lift": 0.011213356875751913,
+      "n": 21,
+      "pooled": 0.005322829080949826,
+      "se": 0.007701487837665962
+     },
+     "bull|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.010905968026408513,
+      "n": 88,
+      "pooled": -0.007300228907144573,
+      "se": 0.006638780587805237
+     },
+     "bull|down|mixed": {
+      "eligible": true,
+      "lift": 0.012625144307577154,
+      "n": 14,
+      "pooled": 0.0029135245197465486,
+      "se": 0.012247624576630825
+     },
+     "bull|none|bear_mkt": {
+      "eligible": true,
+      "lift": -0.002228618579084481,
+      "n": 13,
+      "pooled": -0.0016489498946295682,
+      "se": 0.028306584021576365
+     },
+     "bull|none|bull_mkt": {
+      "eligible": true,
+      "lift": 0.006127730343112794,
+      "n": 150,
+      "pooled": 0.004169686413918974,
+      "se": 0.004863888992156293
+     },
+     "bull|none|mixed": {
+      "eligible": true,
+      "lift": 0.020651518696761868,
+      "n": 22,
+      "pooled": 0.003936029253073124,
+      "se": 0.01450812331144537
+     },
+     "bull|up|bear_mkt": {
+      "eligible": false,
+      "lift": -0.009782993264421763,
+      "n": 31,
+      "pooled": -0.004478285292299238,
+      "se": 0.011330427538090633
+     },
+     "bull|up|bull_mkt": {
+      "eligible": false,
+      "lift": -0.00043193246112997177,
+      "n": 321,
+      "pooled": -0.0006599779732043306,
+      "se": 0.004115044771766923
+     },
+     "bull|up|mixed": {
+      "eligible": false,
+      "lift": -0.006775864807486816,
+      "n": 35,
+      "pooled": -0.0036368936238495315,
+      "se": 0.010359677169344697
+     },
+     "other|down|bear_mkt": {
+      "eligible": true,
+      "lift": 0.009082267800893823,
+      "n": 60,
+      "pooled": 0.0030486622542988057,
+      "se": 0.00951231751414421
+     },
+     "other|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.003099750737803261,
+      "n": 79,
+      "pooled": -0.0023671972040478135,
+      "se": 0.00814974669205493
+     },
+     "other|down|mixed": {
+      "eligible": true,
+      "lift": -0.011368376149184288,
+      "n": 19,
+      "pooled": -0.008051727692280906,
+      "se": 0.005984881210421782
+     },
+     "other|none|bear_mkt": {
+      "eligible": true,
+      "lift": -0.008800057056899312,
+      "n": 17,
+      "pooled": -0.003615876631567029,
+      "se": 0.0133826826483484
+     },
+     "other|none|bull_mkt": {
+      "eligible": true,
+      "lift": 0.003805245673415976,
+      "n": 114,
+      "pooled": 0.0022855221567617072,
+      "se": 0.005221952957461822
+     },
+     "other|none|mixed": {
+      "eligible": true,
+      "lift": 0.02407323833710494,
+      "n": 25,
+      "pooled": 0.0034723831345734426,
+      "se": 0.016826459516129388
+     },
+     "other|up|bear_mkt": {
+      "eligible": true,
+      "lift": 0.008088675743191965,
+      "n": 30,
+      "pooled": 0.0031252002063651817,
+      "se": 0.008557434864638053
+     },
+     "other|up|bull_mkt": {
+      "eligible": true,
+      "lift": 0.002391499919705778,
+      "n": 162,
+      "pooled": 0.001350705424802348,
+      "se": 0.004959306392964338
+     },
+     "other|up|mixed": {
+      "eligible": true,
+      "lift": 0.013430654553293942,
+      "n": 45,
+      "pooled": 0.003437542651105266,
+      "se": 0.011759736410357484
+     },
+     "turn_flat|down|bear_mkt": {
+      "eligible": true,
+      "lift": 0.056192080158485015,
+      "n": 6,
+      "pooled": 0.0007057951090414442,
+      "se": 0.04096510678192798
+     },
+     "turn_flat|down|bull_mkt": {
+      "eligible": true,
+      "lift": 0.011382980672500598,
+      "n": 22,
+      "pooled": 0.002973776764291112,
+      "se": 0.011321473688750763
+     },
+     "turn_flat|down|mixed": {
+      "eligible": true,
+      "lift": -0.0005766338340641858,
+      "n": 1,
+      "pooled": null,
+      "se": null
+     },
+     "turn_flat|none|bear_mkt": {
+      "eligible": true,
+      "lift": -0.005249318475438411,
+      "n": 6,
+      "pooled": -0.0022949306011216734,
+      "se": 0.01719482759127469
+     },
+     "turn_flat|none|bull_mkt": {
+      "eligible": false,
+      "lift": -2.5483568654544043e-05,
+      "n": 60,
+      "pooled": -0.0008289537428763547,
+      "se": 0.008530057594932604
+     },
+     "turn_flat|none|mixed": {
+      "eligible": true,
+      "lift": -0.011430376875700157,
+      "n": 14,
+      "pooled": -0.0052408854219562866,
+      "se": 0.01088252449548421
+     },
+     "turn_flat|up|bear_mkt": {
+      "eligible": true,
+      "lift": 0.026081659720002412,
+      "n": 3,
+      "pooled": 0.007743155619897766,
+      "se": 0.011696678667575159
+     },
+     "turn_flat|up|bull_mkt": {
+      "eligible": true,
+      "lift": -0.00018807856569543063,
+      "n": 20,
+      "pooled": -0.0009535853300929557,
+      "se": 0.009095071858840145
+     },
+     "turn_flat|up|mixed": {
+      "eligible": true,
+      "lift": -0.011019966052894316,
+      "n": 2,
+      "pooled": -0.011018788049594391,
+      "se": 9.335447474374666e-05
+     }
+    },
+    "risk": {
+     "bear|down|bear_mkt": 1.288532880224345,
+     "bear|down|bull_mkt": 1.0925193616296145,
+     "bear|down|mixed": 1.1145943175050281,
+     "bull|down|bull_mkt": 0.9392012944267926,
+     "bull|none|bull_mkt": 0.75,
+     "bull|up|bull_mkt": 1.0848485702405248,
+     "bull|up|mixed": 0.9072895108542464,
+     "other|down|bear_mkt": 1.045544108075645,
+     "other|down|bull_mkt": 0.8854852267891965,
+     "other|none|bull_mkt": 0.75,
+     "other|up|bull_mkt": 0.9216469605515134,
+     "other|up|mixed": 1.0953617379696372,
+     "turn_flat|none|bull_mkt": 0.75
+    }
+   },
+   "A3": {
+    "cells_base": 10,
+    "overrides": {},
+    "tested": [
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "broad_bullish"
+      ],
+      "diff": 0.0008390593087017756,
+      "family": "T1-3",
+      "kept": false,
+      "p_maxt": 1.0,
+      "t": 0.12529669442087718
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "high_stress"
+      ],
+      "diff": 0.021995573094704922,
+      "family": "T1-3",
+      "kept": false,
+      "p_maxt": 0.1838161838161838,
+      "t": 2.027405039902365
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "narrow_bullish"
+      ],
+      "diff": 0.0026151342142596255,
+      "family": "T1-3",
+      "kept": false,
+      "p_maxt": 0.978021978021978,
+      "t": 0.5930181525717606
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "broad_bearish"
+      ],
+      "diff": 0.012005011735123135,
+      "family": "T1-2",
+      "kept": false,
+      "p_maxt": 0.7552447552447552,
+      "t": 1.137868080745669
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "mixed"
+      ],
+      "diff": 0.0020117462299514563,
+      "family": "T1-2",
+      "kept": false,
+      "p_maxt": 1.0,
+      "t": 0.16123281571787296
+     }
+    ]
+   },
+   "fill_rates": {
+    "T1-0": 0.729594163246694,
+    "T1-2": 0.9749447310243183,
+    "T1-3": 0.6457446808510638,
+    "T1-4": 0.5541022592152199,
+    "T1-5a": 0.7109243697478992,
+    "T1-5b": 0.45482866043613707,
+    "T1-7": 0.8801431127012522
+   }
+  },
+  "ENS": {
+   "A2": {
+    "eligible": {
+     "bear|down|bear_mkt": true,
+     "bear|down|bull_mkt": false,
+     "bear|down|mixed": false,
+     "bear|none|bear_mkt": true,
+     "bear|none|bull_mkt": true,
+     "bear|none|mixed": true,
+     "bear|up|bear_mkt": true,
+     "bear|up|bull_mkt": true,
+     "bear|up|mixed": true,
+     "bull|down|bear_mkt": true,
+     "bull|down|bull_mkt": false,
+     "bull|down|mixed": true,
+     "bull|none|bear_mkt": true,
+     "bull|none|bull_mkt": true,
+     "bull|none|mixed": true,
+     "bull|up|bear_mkt": true,
+     "bull|up|bull_mkt": true,
+     "bull|up|mixed": true,
+     "other|down|bear_mkt": false,
+     "other|down|bull_mkt": false,
+     "other|down|mixed": true,
+     "other|none|bear_mkt": true,
+     "other|none|bull_mkt": false,
+     "other|none|mixed": true,
+     "other|up|bear_mkt": true,
+     "other|up|bull_mkt": false,
+     "other|up|mixed": true,
+     "turn_flat|down|bear_mkt": true,
+     "turn_flat|down|bull_mkt": true,
+     "turn_flat|down|mixed": true,
+     "turn_flat|none|bear_mkt": true,
+     "turn_flat|none|bull_mkt": false,
+     "turn_flat|none|mixed": true,
+     "turn_flat|up|bear_mkt": true,
+     "turn_flat|up|bull_mkt": true,
+     "turn_flat|up|mixed": true
+    },
+    "f_train": 0.7360544217687075,
+    "groups": {
+     "bear|down|bear_mkt": {
+      "eligible": true,
+      "lift": 0.0022783747513583207,
+      "n": 275,
+      "pooled": 0.0006920248953023922,
+      "se": 0.004883289740739118
+     },
+     "bear|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.009925829258730146,
+      "n": 258,
+      "pooled": -0.006338447801048094,
+      "se": 0.003697607585912082
+     },
+     "bear|down|mixed": {
+      "eligible": false,
+      "lift": -0.012608548606987515,
+      "n": 96,
+      "pooled": -0.005423628670658886,
+      "se": 0.005720176925869562
+     },
+     "bear|none|bear_mkt": {
+      "eligible": true,
+      "lift": -0.04112873297992782,
+      "n": 5,
+      "pooled": -0.003445470399992252,
+      "se": 0.01722273988823965
+     },
+     "bear|none|bull_mkt": {
+      "eligible": true,
+      "lift": 0.006680935827655266,
+      "n": 26,
+      "pooled": 0.0007141854406865245,
+      "se": 0.00939775022333249
+     },
+     "bear|none|mixed": {
+      "eligible": true,
+      "lift": -0.018371911320433327,
+      "n": 3,
+      "pooled": -0.001930971407434421,
+      "se": 0.0171056881815782
+     },
+     "bear|up|bear_mkt": {
+      "eligible": true,
+      "lift": 0.022404481180158673,
+      "n": 28,
+      "pooled": 0.00047668534104475756,
+      "se": 0.019709198343042578
+     },
+     "bear|up|bull_mkt": {
+      "eligible": true,
+      "lift": 0.012738415663879716,
+      "n": 15,
+      "pooled": 0.0026372733225855584,
+      "se": 0.008007677458576752
+     },
+     "bear|up|mixed": {
+      "eligible": true,
+      "lift": -0.02955641712090399,
+      "n": 14,
+      "pooled": -0.0023314435025106233,
+      "se": 0.019062269733978492
+     },
+     "bull|down|bear_mkt": {
+      "eligible": true,
+      "lift": -0.013016823412126134,
+      "n": 24,
+      "pooled": -0.0024494261455233124,
+      "se": 0.011461450537433205
+     },
+     "bull|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.005191879896296968,
+      "n": 143,
+      "pooled": -0.002398770649564546,
+      "se": 0.005981260265958354
+     },
+     "bull|down|mixed": {
+      "eligible": true,
+      "lift": -0.028175974445060967,
+      "n": 21,
+      "pooled": -0.007172658384882041,
+      "se": 0.00834766686166094
+     },
+     "bull|none|bear_mkt": {
+      "eligible": true,
+      "lift": 0.00400391666904824,
+      "n": 16,
+      "pooled": -0.00046365384266427523,
+      "se": 0.01893759745494565
+     },
+     "bull|none|bull_mkt": {
+      "eligible": true,
+      "lift": 0.0011013763190018135,
+      "n": 203,
+      "pooled": 0.0003246122129213731,
+      "se": 0.003967970713841557
+     },
+     "bull|none|mixed": {
+      "eligible": true,
+      "lift": 0.02295341666232777,
+      "n": 31,
+      "pooled": 0.005459884309403695,
+      "se": 0.007772414793115117
+     },
+     "bull|up|bear_mkt": {
+      "eligible": true,
+      "lift": 0.011080774556773353,
+      "n": 22,
+      "pooled": -0.00029203247709336076,
+      "se": 0.023561514089829247
+     },
+     "bull|up|bull_mkt": {
+      "eligible": true,
+      "lift": 0.009178375173825188,
+      "n": 248,
+      "pooled": 0.0018884242107028459,
+      "se": 0.007714434303698733
+     },
+     "bull|up|mixed": {
+      "eligible": true,
+      "lift": 0.014860258324856506,
+      "n": 34,
+      "pooled": 0.00029161737956986283,
+      "se": 0.017459673784470248
+     },
+     "other|down|bear_mkt": {
+      "eligible": false,
+      "lift": -0.006251212206287538,
+      "n": 64,
+      "pooled": -0.002672879441804965,
+      "se": 0.006274307075397601
+     },
+     "other|down|bull_mkt": {
+      "eligible": false,
+      "lift": -0.003147905601275464,
+      "n": 101,
+      "pooled": -0.0011612624653677527,
+      "se": 0.00992225469070112
+     },
+     "other|down|mixed": {
+      "eligible": true,
+      "lift": -0.008004937456448192,
+      "n": 27,
+      "pooled": -0.0016010282526449818,
+      "se": 0.012535604861745004
+     },
+     "other|none|bear_mkt": {
+      "eligible": true,
+      "lift": 0.032825150493086756,
+      "n": 20,
+      "pooled": -0.0002788874864733017,
+      "se": 0.039608405898016195
+     },
+     "other|none|bull_mkt": {
+      "eligible": false,
+      "lift": -0.003516482855539026,
+      "n": 149,
+      "pooled": -0.0025224399281155658,
+      "se": 0.0034429280812505294
+     },
+     "other|none|mixed": {
+      "eligible": true,
+      "lift": -0.009376137680893798,
+      "n": 29,
+      "pooled": -0.0017030340728032192,
+      "se": 0.012982614001785565
+     },
+     "other|up|bear_mkt": {
+      "eligible": true,
+      "lift": -0.01565291648618977,
+      "n": 18,
+      "pooled": -0.002598779416434108,
+      "se": 0.012219208941550106
+     },
+     "other|up|bull_mkt": {
+      "eligible": false,
+      "lift": -0.00725785653934105,
+      "n": 149,
+      "pooled": -0.003405542501037951,
+      "se": 0.005547602855182808
+     },
+     "other|up|mixed": {
+      "eligible": true,
+      "lift": 0.021516133426196106,
+      "n": 37,
+      "pooled": 0.0027352571333936087,
+      "se": 0.010763427208474763
+     },
+     "turn_flat|down|bear_mkt": {
+      "eligible": true,
+      "lift": 0.08767092126819387,
+      "n": 2,
+      "pooled": -0.0005596559043526735,
+      "se": 0.10524225956045068
+     },
+     "turn_flat|down|bull_mkt": {
+      "eligible": true,
+      "lift": -0.0004917932471455065,
+      "n": 16,
+      "pooled": -0.0006245997107268814,
+      "se": 0.005191431726753865
+     },
+     "turn_flat|down|mixed": {
+      "eligible": true,
+      "lift": -0.022000112566370616,
+      "n": 1,
+      "pooled": null,
+      "se": null
+     },
+     "turn_flat|none|bear_mkt": {
+      "eligible": true,
+      "lift": 0.048921170059650756,
+      "n": 10,
+      "pooled": 0.00017102463411074968,
+      "se": 0.03400888020610985
+     },
+     "turn_flat|none|bull_mkt": {
+      "eligible": false,
+      "lift": -0.002710554495178188,
+      "n": 59,
+      "pooled": -0.001500063594533892,
+      "se": 0.005796342541220717
+     },
+     "turn_flat|none|mixed": {
+      "eligible": true,
+      "lift": -0.014177316518384553,
+      "n": 5,
+      "pooled": -0.0016166707912254955,
+      "se": 0.01740058776425445
+     },
+     "turn_flat|up|bear_mkt": {
+      "eligible": true,
+      "lift": -0.004667212587337855,
+      "n": 3,
+      "pooled": -0.0014699659405534961,
+      "se": 0.009609880494480747
+     },
+     "turn_flat|up|bull_mkt": {
+      "eligible": true,
+      "lift": 0.0021126234279345373,
+      "n": 20,
+      "pooled": -0.00042967460676972497,
+      "se": 0.013453126310472702
+     },
+     "turn_flat|up|mixed": {
+      "eligible": true,
+      "lift": 0.02478609218055989,
+      "n": 2,
+      "pooled": 0.016983231113921797,
+      "se": 0.0030685623009033066
+     }
+    },
+    "risk": {
+     "bear|down|bear_mkt": 1.347121401552907,
+     "bear|down|bull_mkt": 0.9957477996663976,
+     "bear|down|mixed": 1.139496991131457,
+     "bull|down|bull_mkt": 0.9593522476778584,
+     "bull|none|bull_mkt": 0.75,
+     "bull|up|bull_mkt": 0.9702127198582701,
+     "other|down|bear_mkt": 1.1066745168273349,
+     "other|down|bull_mkt": 0.8755108293324073,
+     "other|none|bull_mkt": 0.75,
+     "other|up|bull_mkt": 1.0162977213839162,
+     "turn_flat|none|bull_mkt": 0.8377958694587296
+    }
+   },
+   "A3": {
+    "cells_base": 9,
+    "overrides": {},
+    "tested": [
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "mixed"
+      ],
+      "diff": 0.004583958707238215,
+      "family": "T1-3",
+      "kept": false,
+      "p_maxt": 0.996003996003996,
+      "t": 0.4330341142610176
+     },
+     {
+      "cell": [
+       "UNKNOWN",
+       "BREAKOUT:NEW",
+       "0-2",
+       "broad_bullish"
+      ],
+      "diff": 0.020028372168916113,
+      "family": "T1-7",
+      "kept": false,
+      "p_maxt": 0.14185814185814186,
+      "t": 2.1525991539760954
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "high_stress"
+      ],
+      "diff": 0.003351392702615804,
+      "family": "T1-3",
+      "kept": false,
+      "p_maxt": 0.999000999000999,
+      "t": 0.30555807809771507
+     },
+     {
+      "cell": [
+       "UNKNOWN",
+       "none",
+       "none",
+       "broad_bullish"
+      ],
+      "diff": 0.0013460925963590942,
+      "family": "T1-7",
+      "kept": false,
+      "p_maxt": 1.0,
+      "t": 0.1643809285735242
+     },
+     {
+      "cell": [
+       "S09",
+       "BREAKDOWN:NEW",
+       "0-2",
+       "broad_bearish"
+      ],
+      "diff": 0.02817050087584902,
+      "family": "T1-2",
+      "kept": false,
+      "p_maxt": 0.4305694305694306,
+      "t": 1.580354323608446
+     }
+    ]
+   },
+   "fill_rates": {
+    "T1-0": 0.7360544217687075,
+    "T1-2": 0.9772727272727273,
+    "T1-3": 0.6536885245901639,
+    "T1-4": 0.5639599555061179,
+    "T1-5a": 0.6749116607773852,
+    "T1-5b": 0.4053030303030303,
+    "T1-7": 0.88486646884273
+   }
+  }
+ }
+}

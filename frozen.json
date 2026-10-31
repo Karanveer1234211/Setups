@@ -1,0 +1,24 @@
+{
+ "code": {
+  "v2_arch.py": "e2ea7e5d0060ba8a55e03afb93186babdb142749a40e87c2c3e2ddaaa69e5062",
+  "v2_book2.py": "ba16d01c70718c1abe6f18aeafd7925fb560ea55f2e9c4402dd1383f08b710f6",
+  "v2_core.py": "530938838f6de093188c2df9ecbc7784324877a67b96590c2354d608f2ca5b91",
+  "v2_ctx.py": "9d1e31b9fed9a8462992f6734cd39e66ea5470f4b3b89810ee85bd9bb76f0949",
+  "v2_data.py": "35ce964e2be90041d9d4bd9ff421599eeaa0172a82f4098d05c461010de4b0ac",
+  "v2_eval.py": "4b5eb0da21afd0e95b85f03f2eeb66b6960d0b7a5ebffc5d11ce7dd463841dc1",
+  "v2_families.py": "17bd56a032bfc063ed9f914479e9e585b8d00b5bc93030fe8716513ddb36d97a",
+  "v2_lab.py": "ea4b833e095d7b9e435f3a58b5fc0435d7bcefeb74c63148163639fae416ed93",
+  "v2_learn.py": "5d62a87c83da3501483b9cbab02559ae6f73648673327eecf3832e3adaf6bbbe",
+  "v2_money.py": "0882effbff43bc773167239ba928a8d638772588fdd6ceced8efef8fe332c742",
+  "v2_report.py": "d5e50ebcfcec0d1d92b4a7275ed99361b4ed18c7c1c812fefdda32fdaa391d49",
+  "v2_research.py": "b9eaeed81a02749deaf568f47ebc88343c676801dff6bd73dc9867f0db7b62e9",
+  "v2_run.py": "ed7be04c19beb1b094afd53d1cceeb8f5be695e47fa71372b524023a9c3090ff",
+  "v2_stats.py": "bd517d03283e2b254d75e15915549c9ede19d06effc091687d102df770d424dd",
+  "v2engine.py": "fa59e29986bddb04601a9d8be228adca60530c2c6b19dae81a1785a57f5545fe"
+ },
+ "declaration_sha256": "634b0fcd5ec972a521b85366769ff9ccf2c4f6b8b4534794718dffb84c596766",
+ "discovery_sha256": "cab397b5ea96d7fd283a1fc14e5799e9410f03d51af46eff4423c8f51e5d13d9",
+ "frozen_at": "2026-10-31T21:09:34",
+ "tables_sha256": "10729292d19029b3e3df0eab589ade73f3214fd0a58e486c7739c81407483234",
+ "version": "v2engine 0.3 (drop 3)"
+}
