@@ -1,0 +1,240 @@
+//@version=6
+indicator("igMove Daily State + Event Classifier", overlay=true, max_labels_count=500, max_lines_count=50, max_boxes_count=50)
+
+// --- 1. ATR & MAs ---
+atrLen  = input.int(14, "ATR Length", minval=1, group="1. ATR & MAs")
+emaLen20  = input.int(20,  "EMA 20",  minval=1, group="1. ATR & MAs")
+emaLen50  = input.int(50,  "EMA 50",  minval=1, group="1. ATR & MAs")
+emaLen100 = input.int(100, "EMA 100", minval=1, group="1. ATR & MAs")
+emaLen200 = input.int(200, "EMA 200", minval=1, group="1. ATR & MAs")
+
+// --- 2. Structure ---
+pivotLeft   = input.int(3, "Pivot Left Bars", minval=1, group="2. Structure")
+pivotRight  = input.int(3, "Pivot Right Bars", minval=1, group="2. Structure")
+structureAtrThresh = input.float(0.25, "Structure ATR Threshold", minval=0.0, step=0.05, group="2. Structure")
+pivotScanLookback = input.int(50, "Swing Scan Lookback", minval=10, group="2. Structure")
+
+// --- 3. State thresholds ---
+effWindow      = input.int(20, "Efficiency Window", minval=2, group="3. State thresholds")
+s03RangeAtr    = input.float(3.5, "S03 Range Cap (ATR)", minval=0.1, step=0.1, group="3. State thresholds")
+s03EffCap      = input.float(0.30, "S03 Efficiency Cap", minval=0.0, step=0.05, group="3. State thresholds")
+s07EffBand     = input.float(0.20, "S07 Efficiency Band", minval=0.0, step=0.05, group="3. State thresholds")
+s07EmaChangeAtr = input.float(0.5, "S07 EMA50 Change (ATR)", minval=0.0, step=0.1, group="3. State thresholds")
+s12VolRatio    = input.float(1.8, "S12 10/60 Vol Ratio", minval=0.1, step=0.1, group="3. State thresholds")
+s12AtrPctRank  = input.float(95.0, "S12 ATR Percentile", minval=50.0, maxval=100.0, step=0.5, group="3. State thresholds")
+s12RevCount    = input.int(3, "S12 Major Reversal Count", minval=1, group="3. State thresholds")
+s12GapCount    = input.int(4, "S12 Large Gap Count", minval=1, group="3. State thresholds")
+s12EffCap      = input.float(0.25, "S12 Efficiency Cap", minval=0.0, step=0.05, group="3. State thresholds")
+prevTrendLookback = input.int(30, "Prev Lookback", minval=1, group="3. State thresholds")
+
+// --- 4. Events ---
+trapAtrThresh  = input.float(0.25, "Trap Threshold (ATR)", minval=0.0, step=0.05, group="4. Events")
+trapWindow     = input.int(5, "Trap Window (Bars)", minval=1, group="4. Events")
+overextAtr1    = input.float(3.0, "S05 EMA20 + ATR Mult", minval=0.0, step=0.5, group="4. Events")
+overextAtr2    = input.float(6.0, "S05 EMA50 + ATR Mult", minval=0.0, step=0.5, group="4. Events")
+overextRiseAtr = input.float(6.0, "S05 10-bar Rise (ATR)", minval=0.0, step=0.5, group="4. Events")
+confirmBars    = input.int(3, "Event Confirmation Bars", minval=1, group="4. Events")
+visibilityBars = input.int(10, "Visibility Bars", minval=1, group="4. Events")
+
+// --- 5. Display ---
+showBgTint     = input.bool(true, "Background Tint", group="5. Display")
+showStatusTbl  = input.bool(true, "Show Status Table", group="5. Display")
+debugPlots     = input.bool(false, "Show Debug Plots", group="5. Display")
+
+// --- 6. State markers ---
+showStateDot   = input.bool(true,  "Show state dot on every bar", group="6. State markers")
+showStateText  = input.bool(false, "Show state text on every bar (cluttered)", group="6. State markers")
+showTransLabel = input.bool(true,  "Show label on state change", group="6. State markers")
+
+stateFamilyColor(_st) =>
+    _st == "S01" or _st == "S02" or _st == "S03" or _st == "S06" ? color.green : _st == "S08" or _st == "S09" ? color.red : _st == "S07" ? color.gray : _st == "S12" ? color.orange : na
+
+// ---------------- CORE ----------------
+atr = ta.atr(atrLen)
+ema20 = ta.ema(close, emaLen20)
+ema50 = ta.ema(close, emaLen50)
+ema100 = ta.ema(close, emaLen100)
+ema200 = ta.ema(close, emaLen200)
+rsi14 = ta.rsi(close, 14)
+
+closeDiffSum = math.sum(math.abs(close - close[1]), effWindow)
+efficiency = (not na(close[effWindow]) and not na(closeDiffSum) and closeDiffSum != 0.0) ? (close - close[effWindow]) / closeDiffSum : na
+
+ret = (not na(close[1]) and close[1] != 0.0) ? (close - close[1]) / close[1] : na
+retStdev10 = ta.stdev(ret, 10)
+retStdev60 = ta.stdev(ret, 60)
+volRatio10_60 = (not na(retStdev10) and not na(retStdev60) and retStdev60 != 0.0) ? retStdev10 / retStdev60 : na
+atrPct = close != 0.0 and not na(atr) ? (atr / close) * 100.0 : na
+atrPctRank = ta.percentrank(atrPct, 250)
+
+volSma5 = ta.sma(volume, 5)
+volSma50 = ta.sma(volume, 50)
+volFlowRatio = (not na(volSma5) and not na(volSma50) and volSma50 != 0.0) ? volSma5 / volSma50 : na
+
+ph = ta.pivothigh(high, pivotLeft, pivotRight)
+pl = ta.pivotlow(low, pivotLeft, pivotRight)
+
+var float lastPivotHigh1 = na
+var float lastPivotHigh2 = na
+var float lastPivotLow1 = na
+var float lastPivotLow2 = na
+var int   lastPivotLowBar1 = na
+
+if not na(ph)
+    lastPivotHigh2 := lastPivotHigh1
+    lastPivotHigh1 := ph
+if not na(pl)
+    lastPivotLow2 := lastPivotLow1
+    lastPivotLow1 := pl
+    lastPivotLowBar1 := bar_index - pivotRight
+
+hhClass = na(lastPivotHigh1) or na(lastPivotHigh2) or na(atr) ? "NA" : math.abs(lastPivotHigh1 - lastPivotHigh2) < structureAtrThresh * atr ? "EQ" : lastPivotHigh1 > lastPivotHigh2 ? "HH" : "LH"
+llClass = na(lastPivotLow1) or na(lastPivotLow2) or na(atr) ? "NA" : math.abs(lastPivotLow1 - lastPivotLow2) < structureAtrThresh * atr ? "EQ" : lastPivotLow1 > lastPivotLow2 ? "HL" : "LL"
+
+isHH = hhClass == "HH"
+isLH = hhClass == "LH"
+isHL = llClass == "HL"
+isLL = llClass == "LL"
+
+ema50Rising = not na(ema50[10]) and ema50 > ema50[1] and ema50 > ema50[10]
+ema50Falling = not na(ema50[10]) and ema50 < ema50[1] and ema50 < ema50[10]
+
+noFreshLL10 = math.sum(isLL ? 1 : 0, 10) == 0
+range15 = ta.highest(high, 15) - ta.lowest(low, 15)
+recentHL = not na(lastPivotLowBar1) and (bar_index - lastPivotLowBar1) <= 10 and llClass == "HL"
+rsiReversal = ta.lowest(rsi14, 15) < 30 and rsi14 > 45
+
+hi10 = ta.highest(high, 10)
+lo10 = ta.lowest(low, 10)
+range10 = hi10 - lo10
+closeTop33 = range10 > 0 ? close >= lo10 + 0.67 * range10 : false
+reversal5 = closeTop33 and volFlowRatio >= 1.2
+
+lowest5 = ta.lowest(low, 5)
+lowest25 = ta.lowest(low, 25)
+noFresh25Low = not na(lowest25[5]) ? lowest5 > lowest25[5] : false
+
+threeBarDir = close - close[3]
+threeBarDirPrev = close[1] - close[4]
+dirSignChange = not na(threeBarDirPrev) and math.sign(threeBarDir) != math.sign(threeBarDirPrev)
+majorReversalBar = dirSignChange and math.abs(threeBarDir) > 0.75 * atr
+majorReversalCount20 = math.sum(majorReversalBar ? 1 : 0, 20)
+
+openGap = not na(close[1]) ? math.abs(open - close[1]) : na
+largeGapBar = not na(openGap) and openGap >= 0.5 * atr
+largeGapCount10 = math.sum(largeGapBar ? 1 : 0, 10)
+atrPctExtreme = not na(atrPctRank) and atrPctRank >= s12AtrPctRank
+
+// ---------------- STATES (order matters) ----------------
+s01 = not na(atr) and not na(efficiency) and isHH and isHL and close > ema50 and ema50Rising and close > ema200
+s02 = not na(atr) and close > ema50 and ema50Rising and not s01
+s08 = not na(atr) and isLH and isLL and close < ema50 and ema50Falling and close < ema200
+s09 = not na(atr) and close < ema50 and ema50Falling and not s08
+
+prevBullishRecent = math.sum((s01[1] or s02[1]) ? 1 : 0, prevTrendLookback) > 0
+prevBearishRecent = math.sum((s08[1] or s09[1]) ? 1 : 0, prevTrendLookback) > 0
+
+s03 = not na(atr) and prevBullishRecent and range15 <= s03RangeAtr * atr and math.abs(efficiency) < s03EffCap and close > ema100 and noFreshLL10
+s07 = not na(atr) and not na(efficiency) and efficiency >= -s07EffBand and efficiency <= s07EffBand and math.abs(ema50 - ema50[10]) < s07EmaChangeAtr * atr
+s12 = not na(atr) and not na(volRatio10_60) and (volRatio10_60 >= s12VolRatio or atrPctExtreme) and (majorReversalCount20 >= s12RevCount or largeGapCount10 >= s12GapCount) and math.abs(efficiency) < s12EffCap
+
+aboveEma20 = close > ema20
+heldEma20Two = aboveEma20 and aboveEma20[1]
+wasBelowEma20 = not aboveEma20[3] or not aboveEma20[4] or not aboveEma20[5] or not aboveEma20[6] or not aboveEma20[7]
+rev1 = heldEma20Two and wasBelowEma20
+rev4raw = math.sum((close > ema50) ? 1 : 0, 10)
+rev4 = close > ema50 and rev4raw == 1
+revSignCount = (rev1 ? 1 : 0) + (recentHL ? 1 : 0) + (rsiReversal ? 1 : 0) + (rev4 ? 1 : 0) + (reversal5 ? 1 : 0)
+s06 = not na(atr) and prevBearishRecent and revSignCount >= 2 and noFresh25Low
+
+// ---------------- PRECEDENCE + CONFIRMATION ----------------
+primaryCandidate = s12 ? "S12" : s06 ? "S06" : s01 ? "S01" : s08 ? "S08" : s03 ? "S03" : s07 ? "S07" : s02 ? "S02" : s09 ? "S09" : "INIT"
+
+var string pendingState = "INIT"
+var int pendingCount = 0
+var string confirmedState = "INIT"
+var string prevConfirmedState = "INIT"
+var int stateStartBar = na
+
+if s12
+    pendingState := "S12"
+    pendingCount := 1
+    if confirmedState != "S12"
+        prevConfirmedState := confirmedState
+        confirmedState := "S12"
+        stateStartBar := bar_index
+else
+    if primaryCandidate == pendingState
+        pendingCount += 1
+    else
+        pendingState := primaryCandidate
+        pendingCount := 1
+    if pendingCount >= 2 and confirmedState != pendingState
+        prevConfirmedState := confirmedState
+        confirmedState := pendingState
+        stateStartBar := bar_index
+
+insufficientData = bar_index < math.max(emaLen200, math.max(effWindow, 60)) or na(atr) or na(efficiency) or na(volRatio10_60)
+confirmedStateForDisplay = insufficientData ? "INIT" : confirmedState
+daysInState = not na(stateStartBar) ? (bar_index - stateStartBar) : na
+
+// ---------------- EVENTS ----------------
+rh55 = ta.highest(high[1], 55)
+rl55 = ta.lowest(low[1], 55)
+rh20 = ta.highest(high[1], 20)
+rl20 = ta.lowest(low[1], 20)
+breakLevel = na(rh55) ? rh20 : rh55
+breakDnLevel = na(rl55) ? rl20 : rl55
+
+s04raw = ta.crossover(close, breakLevel)
+s10raw = ta.crossunder(close, breakDnLevel)
+s04Fire = not na(breakLevel) and s04raw
+s10Fire = not na(breakDnLevel) and s10raw
+
+var float lastS04Level = na
+var float lastS10Level = na
+var int lastS04Bar = na
+var int lastS10Bar = na
+
+if s04Fire
+    lastS04Level := breakLevel
+    lastS04Bar := bar_index
+if s10Fire
+    lastS10Level := breakDnLevel
+    lastS10Bar := bar_index
+
+bullTrapNow = not na(lastS04Bar) and (bar_index - lastS04Bar) <= trapWindow and not na(lastS04Level) and close < lastS04Level - trapAtrThresh * atr
+bearTrapNow = not na(lastS10Bar) and (bar_index - lastS10Bar) <= trapWindow and not na(lastS10Level) and close > lastS10Level + trapAtrThresh * atr
+s05Now = not na(atr) and (close >= ema20 + overextAtr1 * atr or close >= ema50 + overextAtr2 * atr or (not na(close[10]) and close - close[10] >= overextRiseAtr * atr))
+
+// ---------------- PLOTS ----------------
+bgColorVal = showBgTint ? (s12 ? color.new(color.orange, 92) : s01 or s02 or s03 or s06 ? color.new(color.teal, 94) : s08 or s09 ? color.new(color.maroon, 94) : s07 ? color.new(color.blue, 95) : na) : na
+bgcolor(bgColorVal)
+
+plotshape(showStateDot and (s01 or s02 or s03 or s06), "Dot bull", shape.circle, location.belowbar, color.green, size=size.tiny)
+plotshape(showStateDot and (s08 or s09), "Dot bear", shape.circle, location.belowbar, color.red, size=size.tiny)
+plotshape(showStateDot and s07, "Dot range", shape.circle, location.belowbar, color.gray, size=size.tiny)
+plotshape(showStateDot and s12, "Dot disorder", shape.circle, location.belowbar, color.orange, size=size.tiny)
+
+plotshape(s04Fire, "S04", shape.triangleup, location.belowbar, color.green, size=size.tiny)
+plotshape(s10Fire, "S10", shape.triangledown, location.abovebar, color.red, size=size.tiny)
+plotshape(bullTrapNow, "S11", shape.xcross, location.abovebar, color.orange, size=size.tiny)
+plotshape(bearTrapNow, "Trap", shape.xcross, location.belowbar, color.lime, size=size.tiny)
+plotshape(s05Now, "S05", shape.circle, location.abovebar, color.yellow, size=size.tiny)
+
+plot(debugPlots ? efficiency : na, "Efficiency", color.aqua, display=display.pane)
+plot(debugPlots ? atrPct : na, "ATR%", color.fuchsia, display=display.pane)
+plot(debugPlots ? volRatio10_60 : na, "10/60", color.orange, display=display.pane)
+
+if showStateText and confirmedStateForDisplay != "INIT"
+    label.new(bar_index, high, confirmedStateForDisplay, style=label.style_none, color=stateFamilyColor(confirmedStateForDisplay), textcolor=stateFamilyColor(confirmedStateForDisplay), size=size.tiny, yloc=yloc.abovebar)
+
+if showTransLabel and confirmedState != prevConfirmedState and confirmedState != "INIT" and not insufficientData
+    label.new(bar_index, high, prevConfirmedState + "→" + confirmedState, style=label.style_label_left, color=stateFamilyColor(confirmedState), textcolor=color.white, size=size.small, yloc=yloc.abovebar)
+
+alertcondition(confirmedState != prevConfirmedState and confirmedState != "INIT", title="State change", message="igMove state change")
+alertcondition(s04Fire, title="S04 breakout", message="S04 breakout")
+alertcondition(s10Fire, title="S10 breakdown", message="S10 breakdown")
+alertcondition(bullTrapNow, title="S11 bull trap", message="S11 bull trap")
+alertcondition(bearTrapNow, title="Bear trap", message="Bear trap")
+alertcondition(s05Now, title="S05 overextension", message="S05 overextension")
