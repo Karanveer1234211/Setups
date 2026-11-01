@@ -1,0 +1,45 @@
+{
+ "version": "execlab v1.1",
+ "when": "2026-11-01 15:34",
+ "t_from": "2020-01-01",
+ "t_to": "2022-12-31",
+ "panel": "panel_oc",
+ "features": 241,
+ "dropped": {
+  "identifier": 3,
+  "label_or_forward": 49,
+  "not_a_feature (panel_build)": 0,
+  "raw_level": 29,
+  "not_numeric": 0,
+  "rule": "panel_build.panel_feature_columns + tradelab rules"
+ },
+ "controls_per_day": 40,
+ "picks_file": "C:\\QuantData\\cache_daily\\research2\\pick_meta\\PM_20261017_001\\predictions.parquet",
+ "key": {
+  "decl": "c5709fdac075a289",
+  "code": {
+   "execlab.py": "610106183700fc11",
+   "xl_common.py": "5894964c7e5d0868",
+   "xl_data.py": "069c8c0f88676c22",
+   "xl_feat.py": "349fb172449158ac",
+   "xl_sim.py": "b6663731bd00fda8",
+   "xl_learn.py": "28d8cc1bb2d33bdc",
+   "xl_ledger.py": "cc5b33940ddedd3d",
+   "xl_eval.py": "4eb00d596c844395",
+   "xl_cards.py": "547698d571f62bda",
+   "xl_report.py": "8605724df5591cc8",
+   "xl_why.py": "7bfc1f3ecc54e498"
+  },
+  "pm_run": "PM_20261017_001",
+  "engines": [
+   "D",
+   "ENS"
+  ],
+  "from": "2020-01-01",
+  "to": "2022-12-31",
+  "root": "C:\\QuantData\\cache_daily",
+  "panel": "panel_oc"
+ },
+ "seconds": 360.2,
+ "memory": "memory n/a"
+}
