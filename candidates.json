@@ -1,0 +1,169 @@
+{
+ "run": "disc_040beb8a3918f5bc",
+ "decl_fingerprint": "c5709fdac075a289",
+ "overrides": {},
+ "ranks": [
+  1,
+  2,
+  3
+ ],
+ "models_sha16": "5213f58b697efbbd",
+ "code": {
+  "execlab.py": "610106183700fc11",
+  "xl_common.py": "5894964c7e5d0868",
+  "xl_data.py": "069c8c0f88676c22",
+  "xl_feat.py": "349fb172449158ac",
+  "xl_sim.py": "b6663731bd00fda8",
+  "xl_learn.py": "28d8cc1bb2d33bdc",
+  "xl_ledger.py": "cc5b33940ddedd3d",
+  "xl_eval.py": "4eb00d596c844395",
+  "xl_cards.py": "547698d571f62bda",
+  "xl_report.py": "8605724df5591cc8",
+  "xl_why.py": "7bfc1f3ecc54e498"
+ },
+ "versions": {
+  "python": "3.13.12",
+  "numpy": "2.4.1",
+  "pandas": "2.3.3",
+  "sklearn": "1.5.2"
+ },
+ "rule": "per engine, the configurations (variant x hurdle) whose discovery portfolio beats OPEN_SB on mean daily return with a Romano-Wolf adjusted p-value under 0.20 across the engine's configurations, whose own CAGR and net per selection are above 0, best first, at most 5; none passes = nothing is frozen for that engine",
+ "engines_requested": [
+  "D",
+  "ENS"
+ ],
+ "engines_done": [
+  "D",
+  "ENS"
+ ],
+ "candidates": {
+  "D": [],
+  "ENS": []
+ },
+ "rw": {
+  "D": {
+   "general/0bp": {
+    "mean": -0.0007263549678122003,
+    "t": -1.20249237905981,
+    "p_adj": 0.977
+   },
+   "general/25bp": {
+    "mean": -0.0014485340868817425,
+    "t": -2.489275460659676,
+    "p_adj": 0.9935
+   },
+   "general/50bp": {
+    "mean": -0.0011839408770999876,
+    "t": -2.2107225465488693,
+    "p_adj": 0.9935
+   },
+   "general/100bp": {
+    "mean": -0.0005506094481174252,
+    "t": -1.0310766672714025,
+    "p_adj": 0.9755
+   },
+   "state/0bp": {
+    "mean": -0.0007461326141317712,
+    "t": -1.2671720113427505,
+    "p_adj": 0.977
+   },
+   "state/25bp": {
+    "mean": -0.0006094382433836421,
+    "t": -1.0602759791194984,
+    "p_adj": 0.976
+   },
+   "state/50bp": {
+    "mean": -0.000901115264120888,
+    "t": -1.554915972975483,
+    "p_adj": 0.9855
+   },
+   "state/100bp": {
+    "mean": -0.0006842613245423324,
+    "t": -1.1749290127067962,
+    "p_adj": 0.977
+   },
+   "state_event/0bp": {
+    "mean": -0.000657500066562786,
+    "t": -1.0640706996295908,
+    "p_adj": 0.976
+   },
+   "state_event/25bp": {
+    "mean": -0.0012542979765696426,
+    "t": -1.9771461044822385,
+    "p_adj": 0.99
+   },
+   "state_event/50bp": {
+    "mean": -0.0006731349145073958,
+    "t": -1.1161991494279662,
+    "p_adj": 0.976
+   },
+   "state_event/100bp": {
+    "mean": -0.0009297224390503019,
+    "t": -1.589442368364194,
+    "p_adj": 0.9855
+   }
+  },
+  "ENS": {
+   "general/0bp": {
+    "mean": -0.0006198702844880325,
+    "t": -1.2708273190519712,
+    "p_adj": 0.989
+   },
+   "general/25bp": {
+    "mean": -0.00018629780123773836,
+    "t": -0.395271827509333,
+    "p_adj": 0.9385
+   },
+   "general/50bp": {
+    "mean": -0.00028549484782581207,
+    "t": -0.5959420841658238,
+    "p_adj": 0.9605
+   },
+   "general/100bp": {
+    "mean": -0.0006632034095129555,
+    "t": -1.2131630284186743,
+    "p_adj": 0.989
+   },
+   "state/0bp": {
+    "mean": -0.0007232912244070076,
+    "t": -1.4867963839886604,
+    "p_adj": 0.989
+   },
+   "state/25bp": {
+    "mean": -0.0007412520935497834,
+    "t": -1.3859371246248169,
+    "p_adj": 0.989
+   },
+   "state/50bp": {
+    "mean": -0.0011296585494615713,
+    "t": -2.185666749233052,
+    "p_adj": 0.989
+   },
+   "state/100bp": {
+    "mean": -0.0007454811658464517,
+    "t": -1.4205846107887083,
+    "p_adj": 0.989
+   },
+   "state_event/0bp": {
+    "mean": -0.00044632624761903756,
+    "t": -0.8277559659426319,
+    "p_adj": 0.973
+   },
+   "state_event/25bp": {
+    "mean": -0.0006144597782129518,
+    "t": -1.2089347607788026,
+    "p_adj": 0.989
+   },
+   "state_event/50bp": {
+    "mean": -0.00048300445640716254,
+    "t": -0.8802883401754377,
+    "p_adj": 0.9755
+   },
+   "state_event/100bp": {
+    "mean": -0.0007611863096032461,
+    "t": -1.2958316700466093,
+    "p_adj": 0.989
+   }
+  }
+ }
+}
