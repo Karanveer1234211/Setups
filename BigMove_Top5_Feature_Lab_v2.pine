@@ -1,0 +1,275 @@
+//@version=6
+indicator("BigMove | Top 5 Feature Lab v2", shorttitle="BM Top5 v2", overlay=false, precision=2)
+
+// BigMove DAILY features on DAILY and INTRADAY charts.
+// RESEARCH ONLY: not Engine D, not a buy/sell system, and not validated crossovers.
+// LIVE = an unfinished DAILY candle preview; it can repaint until the daily close.
+// Confirmed = yesterday's completed daily readings, never today's unfinished values.
+// Intraday historical plots are NOT a reconstruction of each intraday moment.
+// Definitions translated from frozenupdated/features_daily.py (daily source, 2015 anchor).
+
+// ── Display ─────────────────────────────────────────────────────────────────
+int normLen = input.int(126, "Z-score window (DAILY sessions)", minval=30, maxval=504, group="Display")
+string dataMode = input.string("Live preview", "Values to display", options=["Live preview", "Confirmed only"], group="Display", tooltip="Live preview changes with today's developing DAILY OHLCV. Confirmed only displays the most recent COMPLETED daily bar and is deliberately one daily session behind.")
+bool showTracks = input.bool(true, "Show five separated feature tracks", group="Display")
+bool showDash = input.bool(true, "Show feature dashboard", group="Display")
+bool showPrior = input.bool(true, "Show previous confirmed composite", group="Display")
+bool showMarkers = input.bool(false, "Show provisional composite zero crosses", group="Display")
+float flatTolerance = input.float(0.05, "Improvement dead band (Z)", minval=0.0, maxval=0.5, step=0.01, group="Display")
+
+if not (timeframe.isintraday or (timeframe.isdaily and timeframe.multiplier == 1))
+    runtime.error("BigMove Top5 supports 1D and intraday timeframes. Use 1D, 60m, 15m, 5m or 3m.")
+
+int anchor = timestamp("Asia/Kolkata", 2015, 1, 1, 0, 0)
+
+// ── Source-matched helpers ──────────────────────────────────────────────────
+// Pandas expanding(min_periods=60).rank(pct=True), average ties.
+// On each new DAILY bar: commit the PREVIOUS day's input to a sorted history.
+// The current day's value is ranked WITHOUT inserting it into the history.
+// This is essential for a developing daily candle: provisional values can change.
+f_rankWithPreview(float x) =>
+    var array<float> sorted = array.new_float()
+    var int lastDailyBar = na
+    if na(lastDailyBar) or bar_index != lastDailyBar
+        if bar_index > 0 and time[1] >= anchor and not na(x[1])
+            float old = x[1]
+            int leftOld = 0
+            int highOld = array.size(sorted)
+            while leftOld < highOld
+                int mid = int(math.floor((leftOld + highOld) / 2.0))
+                if array.get(sorted, mid) < old
+                    leftOld := mid + 1
+                else
+                    highOld := mid
+            array.insert(sorted, leftOld, old)
+        lastDailyBar := bar_index
+    float pct = na
+    if time >= anchor and not na(x)
+        int n = array.size(sorted)
+        int lo = 0
+        int hi = n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) < x
+                lo := mid + 1
+            else
+                hi := mid
+        int below = lo
+        hi := n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) <= x
+                lo := mid + 1
+            else
+                hi := mid
+        int tied = lo - below
+        pct := n + 1 >= 60 ? (below + (tied + 2) / 2.0) / (n + 1) : na
+    pct
+
+// Pandas ewm(alpha=1/period, adjust=False, min_periods=period):
+// starts at the first valid observation, unlike Pine's ta.rma() SMA seed.
+f_wilderEwm(float x, int period) =>
+    var float state = na
+    var int count = 0
+    if not na(x)
+        state := na(state) ? x : state + (x - state) / period
+        count := count + 1
+    count >= period ? state : na
+
+f_z(float x, int n) =>
+    float avg = ta.sma(x, n)
+    float sd = ta.stdev(x, n)
+    not na(sd) and sd > 0 ? (x - avg) / sd : na
+
+// These calculations execute in TradingView's 1D context, not at 3m/5m
+// frequency. In realtime, the active DAILY bar's OHLCV updates continuously.
+f_daily() =>
+    bool anchored = time >= anchor
+
+    // 1: D_WQ_44 = -corr(high, expanding percentile rank(volume), 5).
+    float volPct = f_rankWithPreview(anchored ? volume : na)
+    float wq44 = -ta.correlation(high, volPct, 5)
+
+    // 2: D_mdi14_diff1 = daily -DI(14) minus previous daily -DI(14).
+    float up = high - high[1]
+    float dn = low[1] - low
+    float minusDm = anchored and anchored[1] and not na(up) and not na(dn) and dn > up and dn > 0 ? dn : 0.0
+    float tr = na(close[1]) or not anchored[1] ? high - low : math.max(high - low, math.max(math.abs(high - close[1]), math.abs(low - close[1])))
+    float smTr = f_wilderEwm(anchored ? tr : na, 14)
+    float smMinusDm = f_wilderEwm(anchored ? minusDm : na, 14)
+    float mdi = not na(smTr) and smTr > 0 ? 100.0 * smMinusDm / smTr : na
+    float mdiDiff = mdi - mdi[1]
+
+    // 3: D_WQ_33 = expanding percentile rank(open / close - 1).
+    float intraWeak = close != 0 ? open / close - 1.0 : na
+    float wq33 = f_rankWithPreview(anchored ? intraWeak : na)
+
+    // 4: D_rsi14_obv_x = pandas RSI14 × [sign(daily close change) × daily volume].
+    float change = close - close[1]
+    float gain = anchored and anchored[1] and not na(change) ? math.max(change, 0.0) : na
+    float loss = anchored and anchored[1] and not na(change) ? math.max(-change, 0.0) : na
+    float avgGain = f_wilderEwm(gain, 14)
+    float avgLoss = f_wilderEwm(loss, 14)
+    float rsi = na
+    if not na(avgGain) and not na(avgLoss)
+        rsi := avgLoss == 0 ? (avgGain == 0 ? 50.0 : 100.0) : (avgGain == 0 ? 0.0 : 100.0 - 100.0 / (1 + avgGain / avgLoss))
+    float obvDelta = anchored and anchored[1] and not na(volume) and not na(change) ? math.sign(change) * volume : na
+    float rsiObv = rsi * obvDelta
+
+    // 5: D_WQ_12 = sign(volume - volume[1]) * (close[1] - close).
+    float wq12 = anchored and anchored[1] and not na(volume) and not na(volume[1]) ? math.sign(volume - volume[1]) * (close[1] - close) : na
+
+    // Higher was favoured by Stage B for 44, MDI, 33, 12; LOWER for RSI×OBV.
+    float z44 = f_z(wq44, normLen)
+    float zMdi = f_z(mdiDiff, normLen)
+    float z33 = f_z(wq33, normLen)
+    float zRsi = -f_z(rsiObv, normLen)
+    float z12 = f_z(wq12, normLen)
+    bool ready = not na(z44) and not na(zMdi) and not na(z33) and not na(zRsi) and not na(z12)
+    float composite = ready ? (z44 + zMdi + z33 + zRsi + z12) / 5.0 : na
+    float positiveCount = ready ? (z44 > 0 ? 1 : 0) + (zMdi > 0 ? 1 : 0) + (z33 > 0 ? 1 : 0) + (zRsi > 0 ? 1 : 0) + (z12 > 0 ? 1 : 0) : na
+    [wq44, mdiDiff, wq33, rsiObv, wq12, z44, zMdi, z33, zRsi, z12, composite, positiveCount]
+
+// Request fully confirmed DAILY values with a one-day offset and lookahead_on.
+// This is safe for historical intraday charts and for today's live comparison.
+f_prior() =>
+    [r44, rM, r33, rR, r12, z44, zM, z33, zR, z12, comp, count] = f_daily()
+    [r44[1], rM[1], r33[1], rR[1], r12[1], z44[1], zM[1], z33[1], zR[1], z12[1], comp[1], comp[2], count[1], z44[2], zM[2], z33[2], zR[2], z12[2]]
+
+string dailySymbol = ticker.standard(syminfo.tickerid)
+// Today's developing 1D candle (in realtime), fully confirmed daily bar historically.
+[r44L, rML, r33L, rRL, r12L, z44L, zML, z33L, zRL, z12L, compL, countL] = request.security(dailySymbol, "1D", f_daily(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+// Yesterday's FINAL readings: available from today's first intraday bar.
+[r44P, rMP, r33P, rRP, r12P, z44P, zMP, z33P, zRP, z12P, compP, compPP, countP, z44PP, zMPP, z33PP, zRPP, z12PP] = request.security(dailySymbol, "1D", f_prior(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+
+bool usePreview = dataMode == "Live preview"
+float r44 = usePreview ? r44L : r44P
+float rM = usePreview ? rML : rMP
+float r33 = usePreview ? r33L : r33P
+float rR = usePreview ? rRL : rRP
+float r12 = usePreview ? r12L : r12P
+float z44 = usePreview ? z44L : z44P
+float zM = usePreview ? zML : zMP
+float z33 = usePreview ? z33L : z33P
+float zR = usePreview ? zRL : zRP
+float z12 = usePreview ? z12L : z12P
+float comp = usePreview ? compL : compP
+float countFav = usePreview ? countL : countP
+float ref44 = usePreview ? z44P : z44PP
+float refM = usePreview ? zMP : zMPP
+float ref33 = usePreview ? z33P : z33PP
+float refR = usePreview ? zRP : zRPP
+float ref12 = usePreview ? z12P : z12PP
+float refComp = usePreview ? compP : compPP
+
+// ── Visual composition: large primary oscillator + FIVE separate lanes ────
+// Five tracks are NOT on a shared y-axis: each is centered on its own lane.
+// The track displacement is only for display, not part of any alpha formula.
+f_cap(float v, float limit) =>
+    na(v) ? na : math.max(-limit, math.min(limit, v))
+
+color c44 = color.rgb(21, 200, 217)
+color cM = color.rgb(237, 157, 50)
+color c33 = color.rgb(81, 188, 88)
+color cR = color.rgb(209, 89, 191)
+color c12 = color.rgb(140, 102, 209)
+color cPositive = color.rgb(13, 179, 155)
+color cNegative = color.rgb(228, 89, 92)
+color cComp = na(comp) ? color.gray : comp >= 0 ? cPositive : cNegative
+
+// Composite: main plot from roughly -2.5 to +2.5.
+hline(0, "Composite zero", color=color.new(color.gray, 48), linestyle=hline.style_solid)
+hline(1, "Composite +1", color=color.new(cPositive, 78), linestyle=hline.style_dotted)
+hline(-1, "Composite -1", color=color.new(cNegative, 78), linestyle=hline.style_dotted)
+compZero = plot(0, title="Composite baseline", color=color.new(color.gray, 100), editable=false)
+compMain = plot(f_cap(comp, 2.5), title="COMPOSITE (equal-weight, NOT Engine D)", color=cComp, linewidth=4)
+fill(compMain, compZero, color=na(comp) ? na : color.new(cComp, 90), title="Composite area")
+plot(showPrior ? f_cap(refComp, 2.5) : na, title="Previous comparison composite (confirmed)", color=color.new(color.silver, 50), linewidth=1)
+
+// Separate, aligned mini-oscillators below the primary composite.
+// -4, -6.5, -9, -11.5, -14: no line overlap between components.
+plot(showTracks ? -4.0 : na, "WQ44 center", color=color.new(c44, 82), linewidth=1)
+plot(showTracks ? -6.5 : na, "MDI diff center", color=color.new(cM, 82), linewidth=1)
+plot(showTracks ? -9.0 : na, "WQ33 center", color=color.new(c33, 82), linewidth=1)
+plot(showTracks ? -11.5 : na, "RSI x OBV center", color=color.new(cR, 82), linewidth=1)
+plot(showTracks ? -14.0 : na, "WQ12 center", color=color.new(c12, 82), linewidth=1)
+plot(showTracks ? -4.0 + 0.72 * f_cap(z44, 1.2) : na, title="WQ44 separate track (center -4)", color=c44, linewidth=2)
+plot(showTracks ? -6.5 + 0.72 * f_cap(zM, 1.2) : na, title="MDI Δ1 separate track (center -6.5)", color=cM, linewidth=2)
+plot(showTracks ? -9.0 + 0.72 * f_cap(z33, 1.2) : na, title="WQ33 separate track (center -9)", color=c33, linewidth=2)
+plot(showTracks ? -11.5 + 0.72 * f_cap(zR, 1.2) : na, title="RSI×OBV separate track (center -11.5)", color=cR, linewidth=2)
+plot(showTracks ? -14.0 + 0.72 * f_cap(z12, 1.2) : na, title="WQ12 separate track (center -14)", color=c12, linewidth=2)
+
+bool crossedUp = ta.crossover(compL, 0)
+bool crossedDown = ta.crossunder(compL, 0)
+plotshape(showMarkers and usePreview and crossedUp ? 0 : na, title="PREVIEW crossed positive (not validated)", location=location.absolute, style=shape.triangleup, color=cPositive, size=size.tiny)
+plotshape(showMarkers and usePreview and crossedDown ? 0 : na, title="PREVIEW crossed negative (not validated)", location=location.absolute, style=shape.triangledown, color=cNegative, size=size.tiny)
+alertcondition(crossedUp, title="BM Top5 live preview: cross above zero", message="BigMove Top5 DAILY preview crossed above zero on {{ticker}}. Provisional and NOT a trading signal.")
+alertcondition(crossedDown, title="BM Top5 live preview: cross below zero", message="BigMove Top5 DAILY preview crossed below zero on {{ticker}}. Provisional and NOT a trading signal.")
+alertcondition(timeframe.change("D") and not na(compPP) and compP > 0 and compPP <= 0, title="BM Top5 CONFIRMED cross above zero", message="BigMove Top5 prior COMPLETED daily bar crossed above zero on {{ticker}}. NOT a trading signal.")
+alertcondition(timeframe.change("D") and not na(compPP) and compP < 0 and compPP >= 0, title="BM Top5 CONFIRMED cross below zero", message="BigMove Top5 prior COMPLETED daily bar crossed below zero on {{ticker}}. NOT a trading signal.")
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+f_raw(float v) =>
+    if na(v)
+        "—"
+    else if math.abs(v) >= 1000000000
+        str.tostring(v / 1000000000, "#.##") + "B"
+    else if math.abs(v) >= 1000000
+        str.tostring(v / 1000000, "#.##") + "M"
+    else if math.abs(v) >= 1000
+        str.tostring(v / 1000, "#.##") + "K"
+    else
+        str.tostring(v, "#.####")
+
+f_small(float v) =>
+    na(v) ? "—" : (v > 0 ? "+" : "") + str.tostring(v, "#.##")
+
+f_direction(float val, float prior) =>
+    float delta = val - prior
+    na(delta) ? "—" : delta > flatTolerance ? "↑ Improving" : delta < -flatTolerance ? "↓ Weakening" : "→ Stable"
+
+f_dirColor(float val, float prior) =>
+    float delta = val - prior
+    na(delta) ? color.gray : delta > flatTolerance ? cPositive : delta < -flatTolerance ? cNegative : chart.fg_color
+
+f_row(table tab, int rowNo, string name, color hue, float raw, float z, float priorZ) =>
+    color bg = rowNo % 2 == 0 ? color.new(color.gray, 91) : color.new(color.gray, 95)
+    table.cell(tab, 0, rowNo, name, text_color=hue, bgcolor=bg, text_halign=text.align_left)
+    table.cell(tab, 1, rowNo, f_raw(raw), text_color=chart.fg_color, bgcolor=bg)
+    table.cell(tab, 2, rowNo, f_small(z), text_color=na(z) ? color.gray : z >= 0 ? cPositive : cNegative, bgcolor=bg)
+    table.cell(tab, 3, rowNo, f_small(z - priorZ), text_color=f_dirColor(z, priorZ), bgcolor=bg)
+    table.cell(tab, 4, rowNo, f_direction(z, priorZ), text_color=f_dirColor(z, priorZ), bgcolor=bg)
+
+var table dash = table.new(position.top_right, 5, 9, border_width=1, border_color=color.new(color.gray, 82))
+if barstate.islast
+    if showDash
+        color head = color.new(color.blue, 62)
+        table.cell(dash, 0, 0, "FEATURE", text_color=color.white, bgcolor=head)
+        table.cell(dash, 1, 0, "RAW", text_color=color.white, bgcolor=head)
+        table.cell(dash, 2, 0, "FAV Z", text_color=color.white, bgcolor=head)
+        table.cell(dash, 3, 0, "Δ vs prev", text_color=color.white, bgcolor=head)
+        table.cell(dash, 4, 0, "DIRECTION", text_color=color.white, bgcolor=head)
+        f_row(dash, 1, "WQ44", c44, r44, z44, ref44)
+        f_row(dash, 2, "−DI Δ1", cM, rM, zM, refM)
+        f_row(dash, 3, "WQ33", c33, r33, z33, ref33)
+        f_row(dash, 4, "RSI × OBV", cR, rR, zR, refR)
+        f_row(dash, 5, "WQ12", c12, r12, z12, ref12)
+        color sumBg = color.new(color.blue, 84)
+        table.cell(dash, 0, 6, "COMPOSITE", text_color=cComp, bgcolor=sumBg)
+        table.cell(dash, 1, 6, na(countFav) ? "—" : str.tostring(countFav, "#") + "/5 +Z", text_color=chart.fg_color, bgcolor=sumBg)
+        table.cell(dash, 2, 6, f_small(comp), text_color=cComp, bgcolor=sumBg)
+        table.cell(dash, 3, 6, f_small(comp - refComp), text_color=f_dirColor(comp, refComp), bgcolor=sumBg)
+        table.cell(dash, 4, 6, f_direction(comp, refComp), text_color=f_dirColor(comp, refComp), bgcolor=sumBg)
+        string status = usePreview ? (barstate.isrealtime ? "LIVE 1D PREVIEW • can change" : "1D values • historical display") : "PREVIOUS COMPLETED 1D • fixed"
+        table.cell(dash, 0, 7, "SOURCE", text_color=chart.fg_color, bgcolor=color.new(color.gray, 89))
+        table.cell(dash, 1, 7, "DAILY", text_color=chart.fg_color, bgcolor=color.new(color.gray, 89))
+        table.cell(dash, 2, 7, usePreview ? "Preview" : "Final", text_color=chart.fg_color, bgcolor=color.new(color.gray, 89))
+        table.cell(dash, 3, 7, "vs prior final", text_color=chart.fg_color, bgcolor=color.new(color.gray, 89))
+        table.cell(dash, 4, 7, status, text_color=chart.fg_color, bgcolor=color.new(color.gray, 89))
+        table.cell(dash, 0, 8, "Research only", text_color=color.silver, bgcolor=color.new(color.gray, 85))
+        table.cell(dash, 1, 8, "Not D", text_color=color.silver, bgcolor=color.new(color.gray, 85))
+        table.cell(dash, 2, 8, "No entries", text_color=color.silver, bgcolor=color.new(color.gray, 85))
+        table.cell(dash, 3, 8, "No TP/SL", text_color=color.silver, bgcolor=color.new(color.gray, 85))
+        table.cell(dash, 4, 8, "5 signals ≠ model probability", text_color=color.silver, bgcolor=color.new(color.gray, 85))
+    else
+        table.clear(dash, 0, 0, 4, 8)
