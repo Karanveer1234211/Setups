@@ -1,0 +1,334 @@
+//@version=6
+indicator("BigMove | Context Pro", shorttitle="BM Context Pro", overlay=false, precision=3)
+// FIVE FEATURES. THREE INTERACTIONS. NO RSI. Research display, not a calibrated forecast.
+// Raw daily changes drive all condition labels. Z scores only normalize line views.
+// All selected features / Custom pair use the five original slow features.
+// Preset pairs use current Donchian position or current CMF for their fast component.
+// Weekly return is from completed weeks and part of the selected daily snapshot.
+// Confirmed mode deliberately uses yesterday's snapshot, including weekly context.
+// Live mode changes with unfinished daily data. Historical intraday previews cannot
+// be reconstructed using this daily request. Use standard time-based candle charts.
+// Source formulas: frozenupdated/features_daily.py. Cross-sectional WHY ranks and
+// engine predictions are not reproduced. Feed/history differences can change values.
+// Tolerances are user-configurable display settings, not optimized trading rules.
+string mode = input.string("Confirmed daily", "Data", options=["Confirmed daily", "Live daily preview"], group="View", tooltip="Confirmed shows the prior completed daily snapshot throughout the current session. Live preview updates the developing daily candle; historical intraday bars cannot reconstruct earlier previews.")
+string layout = input.string("Interaction timeline", "Chart view", options=["Interaction timeline", "All selected features", "Pair focus", "Fast vs slow"], group="View")
+string fastView = input.string("Donchian position", "Fast vs slow feature", options=["Donchian position", "CMF"], group="View")
+string pairPreset = input.string("EMA + weekly context", "Interaction focus", options=["EMA + weekly context", "Position + volatility", "EMA + flow", "Custom pair"], group="Pairs")
+string dashMode = input.string("Compact", "Dashboard", options=["Compact", "Detailed", "Hidden"], group="View")
+string fontChoice = input.string("Small", "Dashboard text", options=["Tiny", "Small", "Normal"], group="View")
+bool showTransitions = input.bool(true, "Mark interaction changes", group="View")
+float angleTol = input.float(0.001, "EMA angle change tolerance (degrees)", minval=0, step=0.001, group="Interpretation")
+float positionTol = input.float(0.005, "Donchian position change tolerance", minval=0, step=0.005, group="Interpretation")
+float widthTol = input.float(0.01, "BandWidth change tolerance (percentage points)", minval=0, step=0.01, group="Interpretation")
+float flowTol = input.float(0.005, "CMF change tolerance", minval=0, step=0.005, group="Interpretation")
+int zLen = input.int(126, "Daily normalization window", minval=30, maxval=504, group="View")
+bool onE = input.bool(true, "1 · EMA20 slope", group="Features")
+bool onD = input.bool(true, "2 · Donchian50 position mean50", group="Features")
+bool onB = input.bool(true, "3 · Bollinger BandWidth20", group="Features")
+bool onW = input.bool(true, "4 · Completed-week 13-week return", group="Features")
+bool onC = input.bool(true, "5 · CMF20 mean50", group="Features")
+string pairA = input.string("Donchian position", "Pair A", options=["EMA slope", "Donchian position", "BandWidth", "13-week return", "CMF"], group="Pairs")
+string pairB = input.string("BandWidth", "Pair B", options=["EMA slope", "Donchian position", "BandWidth", "13-week return", "CMF"], group="Pairs")
+bool showPairs = input.bool(false, "Show all enabled pairs", group="Pairs", tooltip="Feature toggles govern the all-pairs table. Pair focus independently shows the two selected features.")
+bool shadePair = input.bool(true, "Shade pair-focus quadrants", group="Pairs")
+bool showDash = input.bool(true, "Show dashboard", group="View")
+int anchor = input.time(timestamp("01 Jan 2015 00:00 +0530"), "Daily history start", group="Calculation")
+if not (timeframe.isintraday or (timeframe.isdaily and timeframe.multiplier == 1))
+    runtime.error("Use a standard daily or intraday chart.")
+if layout == "Pair focus" and pairPreset == "Custom pair" and pairA == pairB
+    runtime.error("Choose two different features for pair focus.")
+
+// Calendar-window mean, skipping missing values, with pandas-style min_periods.
+f_mean(float x, int n, int minN) =>
+    float countCum = ta.cum(not na(x) ? 1.0 : 0.0)
+    float totalCum = ta.cum(nz(x, 0.0))
+    float count = countCum - nz(countCum[n], 0.0)
+    float total = totalCum - nz(totalCum[n], 0.0)
+    count >= minN ? total / count : na
+f_z(float x) =>
+    float valid = math.sum(not na(x) ? 1.0 : 0.0, zLen)
+    float avg = ta.sma(x, zLen)
+    float sd = ta.stdev(x, zLen, true)
+    valid == zLen and sd > 0 ? (x - avg) / sd : na
+f_daily() =>
+    bool active = time >= anchor
+    float px = active ? close : na
+    // pandas ewm span20 adjust=False min_periods20: first-observation seed.
+    var float ema = na
+    var int n = 0
+    if active and not na(px)
+        ema := na(ema) ? px : ema + 2.0 / 21.0 * (px - ema)
+        n += 1
+    float readyEma = n >= 20 ? ema : na
+    float angle = not na(readyEma[1]) and readyEma[1] != 0 ? math.atan(readyEma / readyEma[1] - 1) * 180 / math.pi : na
+    float hi50 = ta.highest(active ? high[1] : na, 50)
+    float lo50 = ta.lowest(active ? low[1] : na, 50)
+    float pos = n > 50 and hi50 > lo50 ? math.max(-1, math.min(2, (close - lo50) / (hi50 - lo50))) : na
+    float donch = f_mean(pos, 50, 12)
+    float avg = ta.sma(px, 20)
+    // pandas rolling.std uses sample SD (ddof=1).
+    float sd = ta.stdev(px, 20, false)
+    float bbw = n >= 20 and avg != 0 ? 4 * sd / avg : na
+    float mf = active and high > low and not na(volume) ? ((2 * close - low - high) / (high - low)) * volume : na
+    float mfCount = math.sum(not na(mf) ? 1.0 : 0.0, 20)
+    float volSum = math.sum(active ? volume : na, 20)
+    float mfSum = math.sum(nz(mf), 20)
+    float cmf20 = mfCount == 20 and volSum > 0 ? mfSum / volSum : na
+    float cmf = f_mean(cmf20, 50, 12)
+    // Keep completed weekly closes. The current week's return is never used.
+    var array<float> weeks = array.new_float()
+    bool newWeek = timeframe.change("1W")
+    if newWeek and active and active[1] and not na(close[1])
+        array.push(weeks, close[1])
+        if array.size(weeks) > 14
+            array.shift(weeks)
+    float weekly = array.size(weeks) == 14 and array.get(weeks, 0) != 0 ? 100 * (array.get(weeks, 13) / array.get(weeks, 0) - 1) : na
+    float eZ = f_z(angle)
+    float dZ = f_z(donch)
+    float bZ = f_z(bbw)
+    float wZ = f_z(weekly)
+    float cZ = f_z(cmf)
+    [angle, donch, bbw, weekly, cmf, eZ, dZ, bZ, wZ, cZ, pos, cmf20, time]
+f_fast_z() =>
+    [e,d,b,w,c,ez,dz,bz,wz,cz,p,m,t] = f_daily()
+    float pz = f_z(p)
+    float mz = f_z(m)
+    [pz,mz,pz[1],mz[1]]
+f_fast_prior() =>
+    [pz,mz,pp,mp] = f_fast_z()
+    [pp,mp]
+f_prior() =>
+    [e,d,b,w,c,ez,dz,bz,wz,cz,p,m,t] = f_daily()
+    [e[1],d[1],b[1],w[1],c[1],ez[1],dz[1],bz[1],wz[1],cz[1],ez[2],dz[2],bz[2],wz[2],cz[2],p[1],m[1],t[1],e[2],d[2],b[2],w[2],c[2],p[2],m[2]]
+string sym = ticker.standard(syminfo.tickerid)
+[eL,dL,bL,wL,cL,ezL,dzL,bzL,wzL,czL,posL,mfL,tL] = request.security(sym,"1D",f_daily(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_off)
+[eP,dP,bP,wP,cP,ezP,dzP,bzP,wzP,czP,ezPP,dzPP,bzPP,wzPP,czPP,posP,mfP,tP,ePP,dPP,bPP,wPP,cPP,posPP,mfPP] = request.security(sym,"1D",f_prior(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_on)
+bool live = mode == "Live daily preview"
+float e = live ? eL : eP
+float d = live ? dL : dP
+float b = live ? bL : bP
+float w = live ? wL : wP
+float c = live ? cL : cP
+float ez = live ? ezL : ezP
+float dz = live ? dzL : dzP
+float bz = live ? bzL : bzP
+float wz = live ? wzL : wzP
+float cz = live ? czL : czP
+array<float> vals = array.from(e,d,b,w,c)
+array<float> zs = array.from(ez,dz,bz,wz,cz)
+array<float> refs = array.from(live ? ezP : ezPP,live ? dzP : dzPP,live ? bzP : bzPP,live ? wzP : wzPP,live ? czP : czPP)
+array<bool> enabled = array.from(onE,onD,onB,onW,onC)
+array<string> names = array.from("EMA slope","Donchian position","BandWidth","13-week return","CMF")
+array<color> colors = array.from(color.aqua,color.orange,color.purple,color.blue,color.fuchsia)
+// Raw values drive interpretation; Z scores are a separate visual scale.
+float ePrev = live ? eP : ePP
+float dPrev = live ? dP : dPP
+float bPrev = live ? bP : bPP
+float wPrev = live ? wP : wPP
+float cPrev = live ? cP : cPP
+float pos = live ? posL : posP
+float posPrev = live ? posP : posPP
+float mf = live ? mfL : mfP
+float mfPrev = live ? mfP : mfPP
+array<float> rawRefs = array.from(ePrev,dPrev,bPrev,wPrev,cPrev)
+array<float> tolerances = array.from(angleTol,positionTol,widthTol/100,0.001,flowTol)
+f_move(float x,float prev,float tolerance) =>
+    na(x) or na(prev) ? 0 : x-prev > tolerance ? 1 : x-prev < -tolerance ? -1 : 0
+int em = f_move(e,ePrev,angleTol)
+int pm = f_move(pos,posPrev,positionTol)
+int bm = f_move(b,bPrev,widthTol/100)
+int fm = f_move(mf,mfPrev,flowTol)
+bool emaReady = not na(e) and not na(ePrev)
+// EMA categories retain the distinction between negative and positive raw slopes.
+int emaState = not emaReady ? 0 : e > 0 and ePrev <= 0 ? 1 : e < 0 and ePrev >= 0 ? 2 : e < 0 and em > 0 ? 3 : e < 0 and em < 0 ? 4 : e > 0 and em > 0 ? 5 : e > 0 and em < 0 ? 6 : 7
+string emaText = switch emaState
+    1 => "EMA turned upward"
+    2 => "EMA turned downward"
+    3 => "EMA falling more slowly"
+    4 => "EMA decline accelerating"
+    5 => "EMA rise accelerating"
+    6 => "EMA rise slowing"
+    7 => "EMA slope steady"
+    => "EMA history unavailable"
+// Codes are descriptive categories, not probabilities or stock states S01-S12.
+int trendCode = not emaReady or na(w) ? 0 : em > 0 and w > 0 ? 1 : em > 0 and w <= 0 ? 2 : em < 0 and w > 0 ? 3 : em < 0 and w <= 0 ? 4 : 5
+string trendText = switch trendCode
+    1 => "Slope improving / positive 13W return"
+    2 => "Slope improving / nonpositive 13W return"
+    3 => "Slope weakening / positive 13W return"
+    4 => "Slope weakening / nonpositive 13W return"
+    5 => "Slope steady / see weekly return"
+    => "Waiting for slope + weekly history"
+int rangeCode = na(pos) or na(posPrev) or na(b) or na(bPrev) ? 0 : bm > 0 and pm > 0 ? 1 : bm > 0 and pm < 0 ? 2 : bm < 0 and pm >= 0 ? 3 : bm < 0 and pm < 0 ? 4 : 5
+string rangeText = switch rangeCode
+    1 => "Expanding / range position improving"
+    2 => "Expanding / range position worsening"
+    3 => "Contracting / position holding or improving"
+    4 => "Contracting / range position worsening"
+    5 => "Mixed or within change tolerances"
+    => "Waiting for position + width history"
+int flowCode = not emaReady or na(mf) or na(mfPrev) or na(c) ? 0 : em > 0 and fm > 0 ? 1 : em > 0 and fm < 0 ? 2 : em < 0 and fm > 0 ? 3 : em < 0 and fm < 0 ? 4 : 5
+string flowText = switch flowCode
+    1 => "EMA slope + current CMF improving"
+    2 => "EMA slope improving / current CMF weakening"
+    3 => "EMA slope weakening / current CMF improving"
+    4 => "EMA slope + current CMF weakening"
+    5 => "Mixed or within change tolerances"
+    => "Waiting for slope + CMF history"
+color ink = chart.fg_color
+color rise = color.rgb(40,190,172)
+color fall = color.rgb(234,111,111)
+color caution = color.rgb(235,174,64)
+color quiet = color.rgb(134,150,172)
+color trendColor = trendCode == 0 ? color.gray : trendCode == 1 ? rise : trendCode == 4 ? fall : trendCode == 5 ? quiet : caution
+color rangeColor = rangeCode == 0 ? color.gray : rangeCode == 1 ? rise : rangeCode == 2 ? fall : rangeCode == 5 ? quiet : caution
+color flowColor = flowCode == 0 ? color.gray : flowCode == 1 ? rise : flowCode == 4 ? fall : flowCode == 5 ? quiet : caution
+bool timeline = layout == "Interaction timeline"
+bool overview = layout == "All selected features"
+bool focus = layout == "Pair focus"
+bool fast = layout == "Fast vs slow"
+int ai = pairPreset == "EMA + weekly context" ? 0 : pairPreset == "Position + volatility" ? 1 : pairPreset == "EMA + flow" ? 0 : array.indexof(names,pairA)
+int bi = pairPreset == "EMA + weekly context" ? 3 : pairPreset == "Position + volatility" ? 2 : pairPreset == "EMA + flow" ? 4 : array.indexof(names,pairB)
+// For presets use fast current position/CMF, each on its own Z scale.
+// Compute normalization INSIDE daily context, never on repeated intraday values.
+[posZL,mfZL,posZP,mfZP] = request.security(sym,"1D",f_fast_z(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_off)
+[posZConfirmed,mfZConfirmed] = request.security(sym,"1D",f_fast_prior(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_on)
+float posZ = live ? posZL : posZConfirmed
+float mfZ = live ? mfZL : mfZConfirmed
+float a = pairPreset == "Position + volatility" ? posZ : array.get(zs,ai)
+float bb = pairPreset == "EMA + flow" ? mfZ : array.get(zs,bi)
+plot(overview and onE ? ez : na,"EMA slope Z",color.aqua,2)
+plot(overview and onD ? dz : na,"Donchian mean Z",color.orange,2)
+plot(overview and onB ? bz : na,"BandWidth Z",color.purple,2)
+plot(overview and onW ? wz : na,"13-week return Z",color.blue,2)
+plot(overview and onC ? cz : na,"CMF mean Z",color.fuchsia,2)
+plot(focus ? a : na,"Pair A Z - cyan",color.aqua,3)
+plot(focus ? bb : na,"Pair B Z - orange",color.orange,3)
+plot(overview or focus ? 0 : na,"Z mean",color.new(color.gray,40))
+plot(overview or focus ? 1 : na,"Z +1",color.new(color.gray,80))
+plot(overview or focus ? -1 : na,"Z -1",color.new(color.gray,80))
+plot(fast ? (fastView == "Donchian position" ? pos : mf) : na,"Fast raw feature",color.aqua,2)
+plot(fast ? (fastView == "Donchian position" ? d : c) : na,"Slow raw mean50",color.orange,3)
+plot(fast ? (fastView == "Donchian position" ? 0.5 : 0) : na,"Raw reference",color.new(color.gray,55))
+plot(timeline and onE and onW ? 3 : na,"Trend context lane",trendColor,8,plot.style_circles)
+plot(timeline and onD and onB ? 2 : na,"Position / volatility lane",rangeColor,8,plot.style_circles)
+plot(timeline and onE and onC ? 1 : na,"Price / flow lane",flowColor,8,plot.style_circles)
+int selectedCode = pairPreset == "EMA + weekly context" ? trendCode : pairPreset == "Position + volatility" ? rangeCode : pairPreset == "EMA + flow" ? flowCode : 0
+color selectedColor = pairPreset == "EMA + weekly context" ? trendColor : pairPreset == "Position + volatility" ? rangeColor : flowColor
+bgcolor(focus and shadePair and pairPreset != "Custom pair" ? color.new(selectedColor,92) : na,title="Focused interaction condition")
+bool trendChanged = trendCode != 0 and trendCode[1] != 0 and trendCode != trendCode[1]
+bool rangeChanged = rangeCode != 0 and rangeCode[1] != 0 and rangeCode != rangeCode[1]
+bool flowChanged = flowCode != 0 and flowCode[1] != 0 and flowCode != flowCode[1]
+plotshape(timeline and showTransitions and onE and onW and trendChanged ? 3 : na,"Trend transition",shape.diamond,location.absolute,chart.fg_color,size=size.tiny)
+plotshape(timeline and showTransitions and onD and onB and rangeChanged ? 2 : na,"Range transition",shape.diamond,location.absolute,chart.fg_color,size=size.tiny)
+plotshape(timeline and showTransitions and onE and onC and flowChanged ? 1 : na,"Flow transition",shape.diamond,location.absolute,chart.fg_color,size=size.tiny)
+plot(e,"Raw EMA angle degrees",display=display.data_window)
+plot(d,"Raw Donchian mean",display=display.data_window)
+plot(b*100,"Raw BandWidth percent",display=display.data_window)
+plot(w,"Raw completed 13W return percent",display=display.data_window)
+plot(c,"Raw CMF mean",display=display.data_window)
+plot(pos,"Raw current Donchian position",display=display.data_window)
+plot(mf,"Raw current CMF20",display=display.data_window)
+plot(emaState,"EMA condition code (see guide)",display=display.data_window)
+plot(trendCode,"Trend interaction code",display=display.data_window)
+plot(rangeCode,"Range interaction code",display=display.data_window)
+plot(flowCode,"Flow interaction code",display=display.data_window)
+f_num(float x) =>
+    na(x) ? "NA" : str.tostring(x,"#.###")
+f_zone(float x) =>
+    na(x) ? "NA" : x >= 0 ? "Above avg" : "Below avg"
+string textSize = fontChoice == "Tiny" ? size.tiny : fontChoice == "Normal" ? size.normal : size.small
+color panel = color.new(chart.bg_color,5)
+color header = color.new(color.blue,75)
+f_cell(table t,int col,int row,string txt,color hue,color bg) =>
+    table.cell(t,col,row,txt,text_color=hue,bgcolor=bg,text_size=textSize,text_halign=text.align_left)
+f_rawdir(float x,float old,float tol) =>
+    na(x) or na(old) ? "NA" : x-old > tol ? "Rising" : x-old < -tol ? "Falling" : "Steady"
+var table dash = table.new(position.top_left,4,14,border_width=1,border_color=color.new(color.gray,80))
+var table pairs = table.new(position.top_right,3,11,border_width=1,border_color=color.new(color.gray,80))
+if barstate.islast
+    table.clear(dash,0,0,3,13)
+    table.clear(pairs,0,0,2,10)
+    if showDash and dashMode != "Hidden"
+        f_cell(dash,0,0,"BIGMOVE CONTEXT PRO",ink,header)
+        f_cell(dash,1,0,live ? "DEVELOPING DAILY" : "PRIOR DAILY SNAPSHOT",live ? caution : ink,header)
+        if dashMode == "Detailed"
+            f_cell(dash,2,0,str.format_time(live ? tL : tP,"yyyy-MM-dd",syminfo.timezone),ink,header)
+        if dashMode == "Detailed"
+            f_cell(dash,3,0,layout,ink,header)
+        f_cell(dash,0,1,"3  TREND",trendColor,panel)
+        f_cell(dash,1,1,onE and onW ? (dashMode == "Compact" ? emaText+"\n13W return "+f_num(w)+"%" : trendText) : "Disabled by feature switches",ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,2,1,emaText,ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,3,1,"13W "+f_num(w)+"%",ink,panel)
+        f_cell(dash,0,2,"2  POSITION / WIDTH",rangeColor,panel)
+        f_cell(dash,1,2,onD and onB ? rangeText : "Disabled by feature switches",ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,2,2,"Position "+f_num(pos)+" / mean "+f_num(d),ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,3,2,"Width "+f_num(b*100)+"%",ink,panel)
+        f_cell(dash,0,3,"1  PRICE / FLOW",flowColor,panel)
+        f_cell(dash,1,3,onE and onC ? flowText : "Disabled by feature switches",ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,2,3,"CMF "+f_num(mf)+" / mean "+f_num(c),ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,3,3,na(c) ? "Flow context NA" : c > 0 ? "Mean CMF positive" : c < 0 ? "Mean CMF negative" : "Mean CMF zero",ink,panel)
+        f_cell(dash,0,4,"Descriptive conditions",quiet,panel)
+        f_cell(dash,1,4,"Teal improving / Coral worsening\nAmber mixed / Gray unavailable",ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,2,4,"No forecast / no stock-state classification",quiet,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,3,4,"Weekly uses completed weeks",quiet,panel)
+        f_cell(dash,0,5,live ? "Preview can repaint" : "Updates next daily session",live ? caution : quiet,panel)
+        f_cell(dash,1,5,live ? "Historical intraday preview is not reconstructed" : "Intraday steps are intentional",quiet,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,2,5,focus ? "A cyan / B orange" : fast ? "Fast cyan / slow orange" : "Raw changes drive labels",ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,3,5,pairPreset,ink,panel)
+        if dashMode == "Detailed"
+            f_cell(dash,0,6,"FEATURE",ink,header)
+            f_cell(dash,1,6,"RAW",ink,header)
+            f_cell(dash,2,6,"RAW DAILY CHANGE",ink,header)
+            f_cell(dash,3,6,"Z vs own history",ink,header)
+            for i=0 to 4
+                if array.get(enabled,i)
+                    float raw = array.get(vals,i)
+                    f_cell(dash,0,i+7,array.get(names,i),array.get(colors,i),panel)
+                    f_cell(dash,1,i+7,i == 2 ? f_num(raw*100)+"%" : i == 3 ? f_num(raw)+"%" : f_num(raw),ink,panel)
+                    f_cell(dash,2,i+7,f_rawdir(raw,array.get(rawRefs,i),array.get(tolerances,i)),ink,panel)
+                    f_cell(dash,3,i+7,f_num(array.get(zs,i)),ink,panel)
+            f_cell(dash,0,12,"NA is unavailable",quiet,panel)
+            f_cell(dash,1,12,"History, missing data or constant normalization",quiet,panel)
+    if showPairs
+        f_cell(pairs,0,0,"ALL ENABLED PAIRS",ink,header)
+        f_cell(pairs,1,0,"RAW DIRECTION A / B",ink,header)
+        f_cell(pairs,2,0,"Z LEVEL A / B",ink,header)
+        int row=1
+        for i=0 to 3
+            for j=i+1 to 4
+                if array.get(enabled,i) and array.get(enabled,j)
+                    f_cell(pairs,0,row,array.get(names,i)+" + "+array.get(names,j),ink,panel)
+                    f_cell(pairs,1,row,f_rawdir(array.get(vals,i),array.get(rawRefs,i),array.get(tolerances,i))+" / "+f_rawdir(array.get(vals,j),array.get(rawRefs,j),array.get(tolerances,j)),ink,panel)
+                    f_cell(pairs,2,row,f_zone(array.get(zs,i))+" / "+f_zone(array.get(zs,j)),ink,panel)
+                    row+=1
+bool alertClock = live ? barstate.isrealtime and barstate.isconfirmed : timeframe.change("1D")
+alertcondition(alertClock and onE and onW and trendChanged,"Trend-context condition changed","BigMove trend-context condition changed on {{ticker}}. Check confirmed/preview mode. Descriptive, not an entry signal.")
+alertcondition(alertClock and onD and onB and rangeChanged,"Position-volatility condition changed","BigMove position/volatility condition changed on {{ticker}}. Check confirmed/preview mode.")
+alertcondition(alertClock and onE and onC and flowChanged,"Price-flow condition changed","BigMove price/flow condition changed on {{ticker}}. Check confirmed/preview mode.")
+
+// DATA WINDOW CONDITION KEY (0 always means unavailable):
+// EMA: 1 turned up; 2 turned down; 3 falling slower; 4 falling faster;
+// 5 rising faster; 6 rising slower; 7 steady/zero within configured change tolerance.
+// Trend: 1 slope improves + W13 positive; 2 improves + W13 nonpositive;
+// 3 slope weakens + W13 positive; 4 weakens + W13 nonpositive; 5 slope steady.
+// Range: 1 width expands + position improves; 2 expands + position worsens;
+// 3 width contracts + position holds/improves; 4 contracts + worsens; 5 mixed/steady.
+// Flow: 1 slope and CMF improve; 2 slope improves/CMF weakens;
+// 3 slope weakens/CMF improves; 4 both weaken; 5 mixed/steady.
+// OVERVIEW setup: five switches choose any/all. TIMELINE requires both members
+// enabled for each lane. PAIR FOCUS and FAST VS SLOW are explicit independent views.
+// Alerts snapshot settings when created; recreate an alert after changing settings.
+// Calculations/code reviewed, but Pine compilation and TradingView rendering have
+// not been verified in this environment. No backtest or prediction validation implied.
