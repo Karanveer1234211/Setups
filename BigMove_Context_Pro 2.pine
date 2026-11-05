@@ -1,0 +1,376 @@
+//@version=6
+indicator("BigMove | Feature Lens 1.0", shorttitle="BM Lens", overlay=false, precision=3)
+// Ten DAILY features. Price overlays illustrate source price structures, not feature units.
+// No confluence score, prediction probability or entry/exit rules.
+// Confirmed = prior completed daily snapshot; live preview can repaint.
+// On intraday charts these remain DAILY features, not native intraday indicators.
+// Historical intraday previews cannot reconstruct developing daily values.
+string mode = input.string("Confirmed daily", "Daily data", options=["Confirmed daily", "Live daily preview"], group="1. View", display=display.none)
+string view = input.string("Focus", "Pane view", options=["Focus", "Compare", "Overview", "All selected (advanced)"], group="1. View", display=display.none)
+string units = input.string("Raw", "Focus units", options=["Z-score", "Raw"], group="1. View", display=display.none)
+string readGroup = input.string("Price-volume", "Readings group", options=["Context", "Price-volume"], group="1. View", display=display.none)
+string fontChoice = input.string("Normal", "Table text", options=["Small", "Normal", "Large"], group="1. View", display=display.none)
+int zLen = input.int(126,"Daily Z-score history",minval=30,maxval=504,group="Calculation",display=display.none)
+int anchor = input.time(timestamp("01 Jan 2015 00:00 +0530"),"Daily history start",group="Calculation",display=display.none)
+bool invertRsiObv = input.bool(false,"Legacy inversion of RSI x OBV Z only",group="Calculation",tooltip="Off preserves mathematical direction. On matches the old lab's inverted Z display; raw values never change. Neither direction is a proven trading edge.",display=display.none)
+string overlayMode = input.string("EMA20","Price overlay",options=["EMA20","Donchian","Bollinger Bands","None","Custom"],group="2. Price chart",display=display.none)
+bool overlayE = input.bool(true,"EMA20 — colour by slope",group="2. Price chart",display=display.none)
+bool overlayD = input.bool(false,"Prior 50-session high / low",group="2. Price chart",display=display.none)
+bool overlayB = input.bool(false,"Bollinger Bands (20, sample SD, 2 sigma)",group="2. Price chart",display=display.none)
+bool chartReadings = input.bool(false,"Small weekly return / CMF readout",group="2. Price chart",display=display.none)
+if not (timeframe.isintraday or (timeframe.isdaily and timeframe.multiplier == 1))
+    runtime.error("Use standard daily or intraday candles.")
+bool on0 = input.bool(true,"EMA slope",group="3. Context features",display=display.none)
+bool on1 = input.bool(true,"Donchian mean",group="3. Context features",display=display.none)
+bool on2 = input.bool(true,"BandWidth",group="3. Context features",display=display.none)
+bool on3 = input.bool(true,"13-week return",group="3. Context features",display=display.none)
+bool on4 = input.bool(true,"CMF mean",group="3. Context features",display=display.none)
+bool on5 = input.bool(true,"WQ44",group="4. Price-volume features",display=display.none)
+bool on6 = input.bool(true,"DI-minus change",group="4. Price-volume features",display=display.none)
+bool on7 = input.bool(true,"WQ33",group="4. Price-volume features",display=display.none)
+bool on8 = input.bool(true,"RSI x OBV change",group="4. Price-volume features",display=display.none)
+bool on9 = input.bool(true,"WQ12",group="4. Price-volume features",display=display.none)
+string single = input.string("EMA slope","Focus feature",options=["EMA slope","Donchian mean","BandWidth","13-week return","CMF mean","WQ44","DI-minus change","WQ33","RSI x OBV change","WQ12"],group="5. Feature selection",display=display.none)
+string pairA = input.string("WQ44","Pair A",options=["EMA slope","Donchian mean","BandWidth","13-week return","CMF mean","WQ44","DI-minus change","WQ33","RSI x OBV change","WQ12"],group="5. Feature selection",display=display.none)
+string pairB = input.string("WQ33","Pair B",options=["EMA slope","Donchian mean","BandWidth","13-week return","CMF mean","WQ44","DI-minus change","WQ33","RSI x OBV change","WQ12"],group="5. Feature selection",display=display.none)
+if view == "Compare" and pairA == pairB
+    runtime.error("Select two different features for a pair.")
+
+// Calendar-window mean, skipping missing values, with pandas-style min_periods.
+f_mean(float x, int n, int minN) =>
+    float countCum = ta.cum(not na(x) ? 1.0 : 0.0)
+    float totalCum = ta.cum(nz(x, 0.0))
+    float count = countCum - nz(countCum[n], 0.0)
+    float total = totalCum - nz(totalCum[n], 0.0)
+    count >= minN ? total / count : na
+f_z(float x) =>
+    float valid = math.sum(not na(x) ? 1.0 : 0.0, zLen)
+    float avg = ta.sma(x, zLen)
+    float sd = ta.stdev(x, zLen, true)
+    valid == zLen and sd > 0 ? (x - avg) / sd : na
+f_daily() =>
+    bool active = time >= anchor
+    float px = active ? close : na
+    // pandas ewm span20 adjust=False min_periods20: first-observation seed.
+    var float ema = na
+    var int n = 0
+    if active and not na(px)
+        ema := na(ema) ? px : ema + 2.0 / 21.0 * (px - ema)
+        n += 1
+    float readyEma = n >= 20 ? ema : na
+    float angle = not na(readyEma[1]) and readyEma[1] != 0 ? math.atan(readyEma / readyEma[1] - 1) * 180 / math.pi : na
+    float hi50 = ta.highest(active ? high[1] : na, 50)
+    float lo50 = ta.lowest(active ? low[1] : na, 50)
+    float pos = n > 50 and hi50 > lo50 ? math.max(-1, math.min(2, (close - lo50) / (hi50 - lo50))) : na
+    float donch = f_mean(pos, 50, 12)
+    float avg = ta.sma(px, 20)
+    // pandas rolling.std uses sample SD (ddof=1).
+    float sd = ta.stdev(px, 20, false)
+    float bbw = n >= 20 and avg != 0 ? 4 * sd / avg : na
+    float mf = active and high > low and not na(volume) ? ((2 * close - low - high) / (high - low)) * volume : na
+    float mfCount = math.sum(not na(mf) ? 1.0 : 0.0, 20)
+    float volSum = math.sum(active ? volume : na, 20)
+    float mfSum = math.sum(nz(mf), 20)
+    float cmf20 = mfCount == 20 and volSum > 0 ? mfSum / volSum : na
+    float cmf = f_mean(cmf20, 50, 12)
+    // Keep completed weekly closes. The current week's return is never used.
+    var array<float> weeks = array.new_float()
+    bool newWeek = timeframe.change("1W")
+    if newWeek and active and active[1] and not na(close[1])
+        array.push(weeks, close[1])
+        if array.size(weeks) > 14
+            array.shift(weeks)
+    float weekly = array.size(weeks) == 14 and array.get(weeks, 0) != 0 ? 100 * (array.get(weeks, 13) / array.get(weeks, 0) - 1) : na
+    float eZ = f_z(angle)
+    float dZ = f_z(donch)
+    float bZ = f_z(bbw)
+    float wZ = f_z(weekly)
+    float cZ = f_z(cmf)
+    [angle, donch, bbw, weekly, cmf, eZ, dZ, bZ, wZ, cZ, readyEma, n > 50 ? hi50 : na, n > 50 ? lo50 : na, n >= 20 ? avg : na, n >= 20 ? avg + 2*sd : na, n >= 20 ? avg - 2*sd : na, time]
+f_context_prior() =>
+    [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,t] = f_daily()
+    [a[1],b[1],c[1],d[1],e[1],f[1],g[1],h[1],i[1],j[1],k[1],l[1],m[1],n[1],o[1],p[1],t[1],a[2],b[2],c[2],d[2],e[2]]
+
+// Pandas expanding(min_periods=60).rank(pct=True), average ties.
+// On each new DAILY bar: commit the PREVIOUS day's input to a sorted history.
+// The current day's value is ranked WITHOUT inserting it into the history.
+// This is essential for a developing daily candle: provisional values can change.
+f_rankWithPreview(float x) =>
+    var array<float> sorted = array.new_float()
+    var int lastDailyBar = na
+    if na(lastDailyBar) or bar_index != lastDailyBar
+        if bar_index > 0 and time[1] >= anchor and not na(x[1])
+            float old = x[1]
+            int leftOld = 0
+            int highOld = array.size(sorted)
+            while leftOld < highOld
+                int mid = int(math.floor((leftOld + highOld) / 2.0))
+                if array.get(sorted, mid) < old
+                    leftOld := mid + 1
+                else
+                    highOld := mid
+            array.insert(sorted, leftOld, old)
+        lastDailyBar := bar_index
+    float pct = na
+    if time >= anchor and not na(x)
+        int n = array.size(sorted)
+        int lo = 0
+        int hi = n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) < x
+                lo := mid + 1
+            else
+                hi := mid
+        int below = lo
+        hi := n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) <= x
+                lo := mid + 1
+            else
+                hi := mid
+        int tied = lo - below
+        pct := n + 1 >= 60 ? (below + (tied + 2) / 2.0) / (n + 1) : na
+    pct
+
+// Pandas ewm(alpha=1/period, adjust=False, min_periods=period):
+// starts at the first valid observation, unlike Pine's ta.rma() SMA seed.
+f_wilderEwm(float x, int period) =>
+    var float state = na
+    var int count = 0
+    if not na(x)
+        state := na(state) ? x : state + (x - state) / period
+        count := count + 1
+    count >= period ? state : na
+
+f_pv_z(float x, int n) =>
+    float avg = ta.sma(x, n)
+    float sd = ta.stdev(x, n)
+    // Pine rolling functions skip NA. Require a contiguous valid window explicitly.
+    float validShare = ta.sma(not na(x) ? 1.0 : 0.0, n)
+    validShare == 1 and not na(sd) and sd > 0 ? (x - avg) / sd : na
+
+// These calculations execute in TradingView's 1D context, not at 3m/5m
+// frequency. In realtime, the active DAILY bar's OHLCV updates continuously.
+f_pv_daily() =>
+    bool anchored = time >= anchor
+
+    // 1: D_WQ_44 = -corr(high, expanding percentile rank(volume), 5).
+    float volPct = f_rankWithPreview(anchored ? volume : na)
+    float wq44 = -ta.correlation(high, volPct, 5)
+
+    // 2: D_mdi14_diff1 = daily -DI(14) minus previous daily -DI(14).
+    float up = high - high[1]
+    float dn = low[1] - low
+    float minusDm = anchored and anchored[1] and not na(up) and not na(dn) and dn > up and dn > 0 ? dn : 0.0
+    float tr = na(close[1]) or not anchored[1] ? high - low : math.max(high - low, math.max(math.abs(high - close[1]), math.abs(low - close[1])))
+    float smTr = f_wilderEwm(anchored ? tr : na, 14)
+    float smMinusDm = f_wilderEwm(anchored ? minusDm : na, 14)
+    float mdi = not na(smTr) and smTr > 0 ? 100.0 * smMinusDm / smTr : na
+    float mdiDiff = mdi - mdi[1]
+
+    // 3: D_WQ_33 = expanding percentile rank(open / close - 1).
+    float intraWeak = close != 0 ? open / close - 1.0 : na
+    float wq33 = f_rankWithPreview(anchored ? intraWeak : na)
+
+    // 4: D_rsi14_obv_x = pandas RSI14 × [sign(daily close change) × daily volume].
+    float change = close - close[1]
+    float gain = anchored and anchored[1] and not na(change) ? math.max(change, 0.0) : na
+    float loss = anchored and anchored[1] and not na(change) ? math.max(-change, 0.0) : na
+    float avgGain = f_wilderEwm(gain, 14)
+    float avgLoss = f_wilderEwm(loss, 14)
+    float rsi = na
+    if not na(avgGain) and not na(avgLoss)
+        rsi := avgLoss == 0 ? (avgGain == 0 ? 50.0 : 100.0) : (avgGain == 0 ? 0.0 : 100.0 - 100.0 / (1 + avgGain / avgLoss))
+    float obvDelta = anchored and anchored[1] and not na(volume) and not na(change) ? math.sign(change) * volume : na
+    float rsiObv = rsi * obvDelta
+
+    // 5: D_WQ_12 = sign(volume - volume[1]) * (close[1] - close).
+    float wq12 = anchored and anchored[1] and not na(volume) and not na(volume[1]) ? math.sign(volume - volume[1]) * (close[1] - close) : na
+
+    // Raw formula direction is preserved; optional legacy inversion is labelled in the UI.
+    float z44 = f_pv_z(wq44, zLen)
+    float zMdi = f_pv_z(mdiDiff, zLen)
+    float z33 = f_pv_z(wq33, zLen)
+    float zRsi = (invertRsiObv ? -1.0 : 1.0) * f_pv_z(rsiObv, zLen)
+    float z12 = f_pv_z(wq12, zLen)
+    [wq44,mdiDiff,wq33,rsiObv,wq12,z44,zMdi,z33,zRsi,z12,change,volume-volume[1]]
+f_pv_prior() =>
+    [a,b,c,d,e,f,g,h,i,j,pc,vc] = f_pv_daily()
+    [a[1],b[1],c[1],d[1],e[1],f[1],g[1],h[1],i[1],j[1],pc[1],vc[1],a[2],b[2],c[2],d[2],e[2]]
+
+string sym = ticker.standard(syminfo.tickerid)
+[eL,dL,bL,wL,cL,ezL,dzL,bzL,wzL,czL,emaL,hiL,loL,midL,upL,downL,tL] = request.security(sym,"1D",f_daily(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_off)
+[eP,dP,bP,wP,cP,ezP,dzP,bzP,wzP,czP,emaP,hiP,loP,midP,upP,downP,tP,ePP,dPP,bPP,wPP,cPP] = request.security(sym,"1D",f_context_prior(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_on)
+[r44L,rML,r33L,rRL,r12L,z44L,zML,z33L,zRL,z12L,pcL,vcL] = request.security(sym,"1D",f_pv_daily(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_off)
+[r44P,rMP,r33P,rRP,r12P,z44P,zMP,z33P,zRP,z12P,pcP,vcP,r44PP,rMPP,r33PP,rRPP,r12PP] = request.security(sym,"1D",f_pv_prior(),gaps=barmerge.gaps_off,lookahead=barmerge.lookahead_on)
+bool live = mode == "Live daily preview"
+float e = live ? eL : eP
+float d = live ? dL : dP
+float b = live ? bL : bP
+float w = live ? wL : wP
+float c = live ? cL : cP
+float ez = live ? ezL : ezP
+float dz = live ? dzL : dzP
+float bz = live ? bzL : bzP
+float wz = live ? wzL : wzP
+float cz = live ? czL : czP
+float ema = live ? emaL : emaP
+float hi = live ? hiL : hiP
+float lo = live ? loL : loP
+float mid = live ? midL : midP
+float up = live ? upL : upP
+float down = live ? downL : downP
+float r44 = live ? r44L : r44P
+float rM = live ? rML : rMP
+float r33 = live ? r33L : r33P
+float rR = live ? rRL : rRP
+float r12 = live ? r12L : r12P
+float z44 = live ? z44L : z44P
+float zM = live ? zML : zMP
+float z33 = live ? z33L : z33P
+float zR = live ? zRL : zRP
+float z12 = live ? z12L : z12P
+array<string> names = array.from("EMA slope","Donchian mean","BandWidth","13-week return","CMF mean","WQ44","DI-minus change","WQ33","RSI x OBV change","WQ12")
+array<float> raws = array.from(e,d,b*100,w,c,r44,rM,r33,rR,r12)
+array<float> previous = array.from(live ? eP : ePP,live ? dP : dPP,100*(live ? bP : bPP),live ? wP : wPP,live ? cP : cPP,live ? r44P : r44PP,live ? rMP : rMPP,live ? r33P : r33PP,live ? rRP : rRPP,live ? r12P : r12PP)
+array<float> zs = array.from(ez,dz,bz,wz,cz,z44,zM,z33,zR,z12)
+array<bool> enabled = array.from(on0,on1,on2,on3,on4,on5,on6,on7,on8,on9)
+bool anyEnabled = on0 or on1 or on2 or on3 or on4 or on5 or on6 or on7 or on8 or on9
+array<color> hues = array.from(color.aqua,color.orange,color.purple,color.blue,color.fuchsia,color.teal,color.yellow,color.lime,color.red,color.silver)
+bool contextView = view == "All selected (advanced)"
+bool pvView = view == "All selected (advanced)"
+bool lineView = contextView or pvView or view == "Compare" or (view == "Focus" and units == "Z-score")
+plot(contextView and on0 ? ez : na,"EMA slope Z",color.aqua,2,display=display.pane+display.data_window)
+plot(contextView and on1 ? dz : na,"Donchian mean Z",color.orange,2,display=display.pane+display.data_window)
+plot(contextView and on2 ? bz : na,"BandWidth Z",color.purple,2,display=display.pane+display.data_window)
+plot(contextView and on3 ? wz : na,"13-week return Z",color.blue,2,display=display.pane+display.data_window)
+plot(contextView and on4 ? cz : na,"CMF mean Z",color.fuchsia,2,display=display.pane+display.data_window)
+plot(pvView and on5 ? z44 : na,"WQ44 Z",color.teal,2,display=display.pane+display.data_window)
+plot(pvView and on6 ? zM : na,"DI-minus change Z",color.yellow,2,display=display.pane+display.data_window)
+plot(pvView and on7 ? z33 : na,"WQ33 Z",color.lime,2,display=display.pane+display.data_window)
+plot(pvView and on8 ? zR : na,"RSI x OBV change Z",color.red,2,display=display.pane+display.data_window)
+plot(pvView and on9 ? z12 : na,"WQ12 Z",color.silver,2,display=display.pane+display.data_window)
+int si = array.indexof(names,single)
+int ai = array.indexof(names,pairA)
+int bi = array.indexof(names,pairB)
+plot(view == "Focus" and array.get(enabled,si) ? array.get(units == "Raw" ? raws : zs,si) : na,"Focus",color.aqua,2,display=display.pane+display.data_window)
+plot(view == "Compare" and array.get(enabled,ai) ? array.get(zs,ai) : na,"Pair A — cyan Z",color.aqua,2,display=display.pane+display.data_window)
+plot(view == "Compare" and array.get(enabled,bi) ? array.get(zs,bi) : na,"Pair B — orange Z",color.orange,2,display=display.pane+display.data_window)
+plot(lineView ? 0 : view == "Focus" and units == "Raw" and array.get(enabled,si) ? (si == 1 or si == 7 ? 0.5 : 0) : na,"Reference: Z zero / raw zero or rank midpoint",color.new(color.gray,35),display=display.pane)
+plot(lineView ? 1 : na,"Z +1",color.new(color.gray,80),display=display.pane)
+plot(lineView ? -1 : na,"Z -1",color.new(color.gray,80),display=display.pane)
+// These six outputs alone use the instrument's price scale.
+color emaHue = na(e) ? color.gray : e > 0 ? color.teal : e < 0 ? color.red : color.gray
+plot((overlayMode == "EMA20" or overlayMode == "Custom" and overlayE) and on0 ? ema : na,"Daily EMA20 price",emaHue,2,display=display.pane,force_overlay=true)
+plot((overlayMode == "Donchian" or overlayMode == "Custom" and overlayD) and on1 ? hi : na,"Prior 50D high price",color.orange,1,display=display.pane,force_overlay=true)
+plot((overlayMode == "Donchian" or overlayMode == "Custom" and overlayD) and on1 ? lo : na,"Prior 50D low price",color.orange,1,display=display.pane,force_overlay=true)
+plot((overlayMode == "Bollinger Bands" or overlayMode == "Custom" and overlayB) and on2 ? mid : na,"Daily BB basis price",color.new(color.purple,50),1,display=display.pane,force_overlay=true)
+plot((overlayMode == "Bollinger Bands" or overlayMode == "Custom" and overlayB) and on2 ? up : na,"Daily BB upper price",color.purple,1,display=display.pane,force_overlay=true)
+plot((overlayMode == "Bollinger Bands" or overlayMode == "Custom" and overlayB) and on2 ? down : na,"Daily BB lower price",color.purple,1,display=display.pane,force_overlay=true)
+plot(array.get(raws,0),"RAW EMA slope",display=display.data_window)
+plot(array.get(raws,1),"RAW Donchian mean",display=display.data_window)
+plot(array.get(raws,2),"RAW BandWidth",display=display.data_window)
+plot(array.get(raws,3),"RAW 13-week return",display=display.data_window)
+plot(array.get(raws,4),"RAW CMF mean",display=display.data_window)
+plot(array.get(raws,5),"RAW WQ44",display=display.data_window)
+plot(array.get(raws,6),"RAW DI-minus change",display=display.data_window)
+plot(array.get(raws,7),"RAW WQ33",display=display.data_window)
+plot(array.get(raws,8),"RAW RSI x OBV change",display=display.data_window)
+plot(array.get(raws,9),"RAW WQ12",display=display.data_window)
+f_num(float x) =>
+    na(x) ? "NA" : math.abs(x) >= 1e9 ? str.tostring(x/1e9,"#.##")+"B" : math.abs(x) >= 1e6 ? str.tostring(x/1e6,"#.##")+"M" : math.abs(x) >= 1e3 ? str.tostring(x/1e3,"#.##")+"K" : str.tostring(x,"#.###")
+f_value(int i,float x) =>
+    f_num(x)+(i == 2 or i == 3 ? "%" : i == 0 ? " deg" : "")
+string textSize = fontChoice == "Small" ? size.small : fontChoice == "Large" ? size.large : size.normal
+color panel = chart.bg_color
+color ink = chart.fg_color
+string stamp = str.format_time(live ? tL : tP,"dd MMM yy",syminfo.timezone)
+// Descriptions use RAW levels and daily changes; never interpret +Z as bullish.
+f_direction(float x) =>
+    na(x) ? "NA" : x > 0 ? "up" : x < 0 ? "down" : "unchanged"
+f_meaning(int i,float x,float prev) =>
+    float delta = x-prev
+    string move = f_direction(delta)
+    string result = switch i
+        0 => x > 0 ? "EMA rising / slope "+move : x < 0 ? "EMA falling / slope "+move : "EMA flat"
+        1 => "Average range position "+move
+        2 => na(delta) ? "Change unavailable" : delta > 0 ? "Bands expanding; no direction" : delta < 0 ? "Bands contracting; no direction" : "Band width unchanged"
+        3 => x > 0 ? "Positive completed-week return" : x < 0 ? "Negative completed-week return" : "Completed-week return zero"
+        4 => (x > 0 ? "Positive CMF" : x < 0 ? "Negative CMF" : "CMF zero")+" / "+move
+        5 => x > 0 ? "High vs volume-rank correlation negative" : x < 0 ? "High vs volume-rank correlation positive" : "High vs volume-rank correlation zero"
+        6 => x > 0 ? "Minus-DI increased" : x < 0 ? "Minus-DI decreased" : "Minus-DI unchanged"
+        7 => x > 0.5 ? "Open/close weakness rank >50%" : x < 0.5 ? "Open/close weakness rank <50%" : "Open/close weakness rank 50%"
+        8 => x > 0 ? "Positive RSI-weighted signed volume" : x < 0 ? "Negative RSI-weighted signed volume" : "RSI-weighted signed volume zero"
+        => "Price "+f_direction(live ? pcL : pcP)+" / volume "+f_direction(live ? vcL : vcP)
+    na(x) ? "Unavailable: history / missing data" : result
+f_delta(int i,float x,float prev) =>
+    float change = x-prev
+    (not na(change) and change > 0 ? "+" : "")+f_num(change)+(i == 2 or i == 3 or i == 6 ? " pp" : i == 0 ? " deg" : "")
+var table readings = table.new(position.middle_center,4,7,border_width=1,border_color=color.new(color.gray,70))
+var table priceInfo = table.new(position.top_right,2,3,force_overlay=true)
+var table legend = table.new(position.top_left,1,3)
+if barstate.islast
+    table.clear(readings,0,0,3,6)
+    table.clear(priceInfo,0,0,1,2)
+    table.clear(legend,0,0,0,2)
+    if chartReadings and (on3 or on4)
+        table.cell(priceInfo,0,0,live ? "DAILY PREVIEW" : "PRIOR DAILY",text_color=ink,bgcolor=panel,text_size=size.small)
+        table.cell(priceInfo,1,0,stamp,text_color=ink,bgcolor=panel,text_size=size.small)
+        if on3
+            table.cell(priceInfo,0,1,"13W return",text_color=ink,bgcolor=panel,text_size=size.small)
+            table.cell(priceInfo,1,1,f_value(3,w),text_color=ink,bgcolor=panel,text_size=size.small)
+        if on4
+            table.cell(priceInfo,0,2,"CMF mean50",text_color=ink,bgcolor=panel,text_size=size.small)
+            table.cell(priceInfo,1,2,f_num(c),text_color=ink,bgcolor=panel,text_size=size.small)
+    string status = (live ? "LIVE DAILY (can repaint)" : "PRIOR DAILY")+" | "+stamp
+    if view == "Overview"
+        table.cell(readings,0,0,"FEATURE",text_color=ink,bgcolor=panel,text_size=textSize)
+        table.cell(readings,1,0,"RAW",text_color=ink,bgcolor=panel,text_size=textSize)
+        table.cell(readings,2,0,"DAILY CHANGE",text_color=ink,bgcolor=panel,text_size=textSize)
+        table.cell(readings,3,0,"MEANING",text_color=ink,bgcolor=panel,text_size=textSize)
+        int start = readGroup == "Context" ? 0 : 5
+        for row=1 to 5
+            int i = start+row-1
+            if array.get(enabled,i)
+                float raw = array.get(raws,i)
+                float prior = array.get(previous,i)
+                table.cell(readings,0,row,array.get(names,i),text_color=ink,bgcolor=panel,text_size=textSize)
+                table.cell(readings,1,row,f_value(i,raw),text_color=ink,bgcolor=panel,text_size=textSize)
+                table.cell(readings,2,row,f_delta(i,raw,prior),text_color=ink,bgcolor=panel,text_size=textSize)
+                table.cell(readings,3,row,f_meaning(i,raw,prior),text_color=ink,bgcolor=panel,text_size=textSize)
+        table.cell(readings,0,6,not anyEnabled ? "All features disabled" : status,text_color=ink,bgcolor=panel,text_size=size.small)
+    else
+        string caption = view == "Focus" ? single+" | "+units : view == "Compare" ? "Cyan: "+pairA+" / Orange: "+pairB : "Selected features | own-history Z"
+        table.cell(legend,0,0,not anyEnabled ? "All features disabled" : caption,text_color=ink,bgcolor=panel,text_size=textSize)
+        if view == "Focus"
+            float raw = array.get(raws,si)
+            float prior = array.get(previous,si)
+            string detail = array.get(enabled,si) ? "Raw "+f_value(si,raw)+" | daily change "+f_delta(si,raw,prior)+"\n"+f_meaning(si,raw,prior) : "Feature disabled — enable its switch"
+            if units == "Z-score" and array.get(enabled,si)
+                detail += na(array.get(zs,si)) ? "\nZ unavailable: history / constant values" : " | Z "+f_num(array.get(zs,si))
+            table.cell(legend,0,1,detail,text_color=ink,bgcolor=panel,text_size=size.small)
+        if view == "Compare"
+            table.cell(legend,0,1,not array.get(enabled,ai) or not array.get(enabled,bi) ? "Enable both selected feature switches" : na(array.get(zs,ai)) or na(array.get(zs,bi)) ? "Z unavailable: history / constant values" : "Z measures unusualness, not bullishness",text_color=ink,bgcolor=panel,text_size=size.small)
+        table.cell(legend,0,2,status+(invertRsiObv ? " | RSI x OBV Z inverted" : ""),text_color=ink,bgcolor=panel,text_size=size.small)
+// Formula notes:
+// WQ44 = -corr(high, expanding percentile rank(volume), 5).
+// DI-minus change = minus-DI14 today minus minus-DI14 yesterday (not negation).
+// WQ33 = expanding percentile rank(open/close - 1), minimum 60 observations.
+// RSI x OBV change = RSI14 * sign(close-close[1]) * volume, NOT cumulative OBV.
+// WQ12 = sign(volume-volume[1]) * (close[1]-close).
+// Context: EMA20 angle; mean50 Donchian50 position (min12); sample-SD BBwidth20;
+// completed-week 13-week return; mean50 CMF20 (min12).
+// Z scores use own-symbol history, not model cross-sectional ranks or probabilities.
+// A higher feature value is not automatically bullish. No equal-weight composite.
+// Ten switches apply to Focus, Compare, Overview, advanced curves and corresponding overlays.
+// Focus defaults to raw EMA slope. Compare uses own-history Z. Overview is table-only.
+// Daily changes are calculated using daily snapshots, including two-day offsets in confirmed mode.
+// Minus-DI is itself a daily difference: its DAILY CHANGE column is change in that difference.
+// Tables show latest values, not the crosshair date. Use Data Window for historical readings.
+// Confirmed overlays also use prior-day snapshots, including prior-day Donchian boundaries.
+// No alerts, confluence scores or entry/exit rules are included in this release.
+// Data Window retains exact numeric raw values; tables abbreviate large numbers.
+// Remove previous BM Top5/BM Clean instances before adding BM Lens.
+// Calculations reviewed locally; TradingView compilation/rendering not verified here.
