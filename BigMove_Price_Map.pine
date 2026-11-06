@@ -1,0 +1,251 @@
+//@version=6
+indicator("BigMove | Price Map 1.0", "BM Price Map", overlay=true, max_lines_count=100, max_labels_count=100)
+// Research overlay, not an execution strategy. Use standard time-based candles.
+// A/B/C use ONLY the previous completed DAILY feature changes.
+// WQ44 ranks depend on available TradingView history and the anchor; panel parity is not certified.
+string gs = "1. Daily setups"
+bool useA = input.bool(true, "A: BB width rising + weekly return falling", group=gs)
+bool useB = input.bool(true, "B: EMA angle falling + weekly return falling", group=gs)
+bool useC = input.bool(true, "C: EMA angle falling + WQ44 rising", group=gs)
+bool tint = input.bool(false, "Tint active setup sessions", group=gs)
+bool dashboard = input.bool(true, "Compact status box", group=gs)
+int anchor = input.time(timestamp("01 Jan 2015 00:00 +0530"), "Feature history start", group=gs, tooltip="Match your source history where possible. Missing earlier TradingView bars can change expanding ranks and EMA seeds.")
+string gw = "2. Optional model watch window"
+bool watch = input.bool(false, "Use one model nomination date", group=gw)
+int nomination = input.time(timestamp("01 Nov 2026 00:00 +0530"), "Signal date (D0)", group=gw)
+string exitMode = input.string("Original D5", "Reference exit", options=["Original D5", "Five sessions from entry"], group=gw)
+bool entryLevel = input.bool(true, "Show reference entry level in watch mode", group=gw)
+string ge = "3. Moving averages"
+bool ema5On = input.bool(false, "EMA 5", group=ge)
+bool ema9On = input.bool(false, "EMA 9", group=ge)
+bool ema20On = input.bool(true, "EMA 20", group=ge)
+string emaMode = input.string("Chart timeframe", "EMA source", options=["Chart timeframe", "Confirmed daily"], group=ge)
+bool emaLevels = input.bool(true, "Dotted current EMA levels + left labels", group=ge)
+string gl = "4. Price levels"
+bool pivotOn = input.bool(true, "Confirmed daily pivot high / low", group=gl)
+int pivotLeft = input.int(3, "Pivot left daily bars", minval=1, maxval=20, group=gl)
+int pivotRight = input.int(3, "Pivot confirmation daily bars", minval=1, maxval=20, group=gl)
+bool priorOn = input.bool(false, "Previous-day high / low", group=gl)
+bool priorCloseOn = input.bool(false, "Previous-day close", group=gl)
+bool openOn = input.bool(false, "Session open", group=gl)
+bool levelLabels = input.bool(true, "Left-side level names + prices", group=gl)
+float labelGap = input.float(0.18, "Minimum label spacing (chart ATR)", minval=0, maxval=2, step=0.02, group=gl)
+string gb = "5. BB squeeze"
+bool squeezeOn = input.bool(true, "Shade confirmed daily squeeze", group=gb)
+bool releaseOn = input.bool(true, "Mark confirmed squeeze release", group=gb)
+bool bandsOn = input.bool(false, "Show confirmed daily BB bands", group=gb)
+int squeezeLen = input.int(126, "Prior daily widths for threshold", minval=30, maxval=504, group=gb)
+float squeezePct = input.float(20, "Low-width percentile threshold", minval=1, maxval=50, group=gb)
+
+if timeframe.in_seconds() > timeframe.in_seconds("1D")
+    runtime.error("Use a daily or intraday time-based chart.")
+f_rankWithPreview(float x) =>
+    var array<float> sorted = array.new_float()
+    var int lastDailyBar = na
+    if na(lastDailyBar) or bar_index != lastDailyBar
+        if bar_index > 0 and time[1] >= anchor and not na(x[1])
+            float old = x[1]
+            int leftOld = 0
+            int highOld = array.size(sorted)
+            while leftOld < highOld
+                int mid = int(math.floor((leftOld + highOld) / 2.0))
+                if array.get(sorted, mid) < old
+                    leftOld := mid + 1
+                else
+                    highOld := mid
+            array.insert(sorted, leftOld, old)
+        lastDailyBar := bar_index
+    float pct = na
+    if time >= anchor and not na(x)
+        int n = array.size(sorted)
+        int lo = 0
+        int hi = n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) < x
+                lo := mid + 1
+            else
+                hi := mid
+        int below = lo
+        hi := n
+        while lo < hi
+            int mid = int(math.floor((lo + hi) / 2.0))
+            if array.get(sorted, mid) <= x
+                lo := mid + 1
+            else
+                hi := mid
+        int tied = lo - below
+        pct := n + 1 >= 60 ? (below + (tied + 2) / 2.0) / (n + 1) : na
+    pct
+
+
+f_daily() =>
+    bool active = time >= anchor
+    var float e = na
+    var int count = 0
+    if active and not na(close)
+        e := na(e) ? close : e + 2.0 / 21.0 * (close - e)
+        count += 1
+    float angle = count >= 21 and e[1] != 0 ? math.atan(e / e[1] - 1) * 180 / math.pi : na
+    float basis = ta.sma(active ? close : na, 20)
+    float sd = ta.stdev(active ? close : na, 20, false)
+    float width = count >= 20 and basis != 0 ? 4 * sd / basis : na
+    var array<float> weeks = array.new_float()
+    if timeframe.change("1W") and active and active[1] and not na(close[1])
+        array.push(weeks, close[1])
+        if array.size(weeks) > 14
+            array.shift(weeks)
+    float weekly = array.size(weeks) == 14 and array.get(weeks, 0) != 0 ? array.get(weeks, 13) / array.get(weeks, 0) - 1 : na
+    float vp = f_rankWithPreview(active ? volume : na)
+    float wq = -ta.correlation(high, vp, 5)
+    float da = angle - angle[1]
+    float db = width - width[1]
+    float dw = weekly - weekly[1]
+    float dq = wq - wq[1]
+    // Threshold excludes the width being classified.
+    float threshold = ta.percentile_nearest_rank(width[1], squeezeLen, squeezePct)
+    bool sqReady = not na(width) and not na(threshold)
+    bool sq = sqReady and width <= threshold
+    float ph = ta.pivothigh(high, pivotLeft, pivotRight)
+    float pl = ta.pivotlow(low, pivotLeft, pivotRight)
+    float lastPH = ta.valuewhen(not na(ph), ph, 0)
+    float lastPL = ta.valuewhen(not na(pl), pl, 0)
+    int phKnown = ta.valuewhen(not na(ph), time_close, 0)
+    int plKnown = ta.valuewhen(not na(pl), time_close, 0)
+    float e5 = ta.ema(close, 5)
+    float e9 = ta.ema(close, 9)
+    float e20 = ta.ema(close, 20)
+    int signalDate = timestamp(syminfo.timezone, year(nomination), month(nomination), dayofmonth(nomination), 0, 0)
+    int dayIndex = ta.barssince(time == signalDate or (time >= signalDate and time[1] < signalDate))
+    // All closing values are offset inside the DAILY context.
+    [da[1], db[1], dw[1], dq[1], sq[1], sqReady[1], sq[2], sqReady[2], lastPH[1], lastPL[1], phKnown[1], plKnown[1], high[1], low[1], close[1], e5[1], e9[1], e20[1], basis[1] + 2*sd[1], basis[1] - 2*sd[1], dayIndex[1]]
+
+[angleChange, widthChange, weekChange, wqChange, squeeze, squeezeReady, wasSqueeze, wasReady, pivotHigh, pivotLow, pivotHighKnown, pivotLowKnown, prevHigh, prevLow, prevClose, dailyE5, dailyE9, dailyE20, bbUpper, bbLower, priorWatchDay] = request.security(syminfo.tickerid, "1D", f_daily(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+// The day's OPEN is known from the first bar; no daily close/high/low leak.
+float dayOpen = request.security(syminfo.tickerid, "1D", open, gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+bool newDay = timeframe.change("1D")
+int watchDay = na(priorWatchDay) ? na : priorWatchDay + 1
+bool inWindow = not watch or (not na(watchDay) and watchDay >= 1 and watchDay <= 5)
+bool readyA = not na(widthChange) and not na(weekChange)
+bool readyB = not na(angleChange) and not na(weekChange)
+bool readyC = not na(angleChange) and not na(wqChange)
+bool a = useA and readyA and widthChange > 0 and weekChange < 0
+bool b = useB and readyB and angleChange < 0 and weekChange < 0
+bool c = useC and readyC and angleChange < 0 and wqChange > 0
+int code = (a ? 1 : 0) + (b ? 2 : 0) + (c ? 4 : 0)
+var bool triggered = false
+var float referenceEntry = na
+var int entryWatchDay = na
+if watch and not na(watchDay) and watchDay <= 0
+    triggered := false
+    referenceEntry := na
+    entryWatchDay := na
+bool mark = newDay and inWindow and code > 0 and (not watch or not triggered)
+if mark and watch
+    triggered := true
+    referenceEntry := dayOpen
+    entryWatchDay := watchDay
+int targetDay = exitMode == "Original D5" ? 5 : entryWatchDay + 4
+bool exitSession = watch and triggered and newDay and watchDay == targetDay
+// One combined marker per session. Never backdated to the signal day's close.
+plotshape(mark and code == 1, "A", shape.labelup, location.belowbar, color.new(color.teal, 15), text="A", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 2, "B", shape.labelup, location.belowbar, color.new(color.blue, 15), text="B", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 3, "A+B", shape.labelup, location.belowbar, color.new(color.blue, 15), text="A+B", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 4, "C", shape.labelup, location.belowbar, color.new(color.purple, 15), text="C", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 5, "A+C", shape.labelup, location.belowbar, color.new(color.purple, 15), text="A+C", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 6, "B+C", shape.labelup, location.belowbar, color.new(color.blue, 15), text="B+C", textcolor=color.white, size=size.tiny)
+plotshape(mark and code == 7, "A+B+C", shape.labelup, location.belowbar, color.new(color.blue, 15), text="A+B+C", textcolor=color.white, size=size.tiny)
+plotshape(exitSession, "Reference exit session", shape.flag, location.abovebar, color.gray, text="Exit\nclose", textcolor=color.white, size=size.tiny)
+bool release = newDay and squeezeReady and wasReady and wasSqueeze and not squeeze
+plotshape(releaseOn and release, "Confirmed daily squeeze release", shape.diamond, location.abovebar, color.orange, text="SQ release", textcolor=color.orange, size=size.tiny)
+bgcolor(squeezeOn and squeezeReady and squeeze ? color.new(color.orange, 91) : tint and inWindow and code > 0 ? color.new(color.blue, 94) : na, title="Daily context shading")
+float e5 = emaMode == "Chart timeframe" ? ta.ema(close, 5) : dailyE5
+float e9 = emaMode == "Chart timeframe" ? ta.ema(close, 9) : dailyE9
+float e20 = emaMode == "Chart timeframe" ? ta.ema(close, 20) : dailyE20
+plot(ema5On ? e5 : na, "EMA 5", color.aqua, 1)
+plot(ema9On ? e9 : na, "EMA 9", color.yellow, 1)
+plot(ema20On ? e20 : na, "EMA 20", color.blue, 2)
+plot(bandsOn ? bbUpper : na, "Confirmed daily BB upper", color.new(color.gray, 55), 1, plot.style_stepline)
+plot(bandsOn ? bbLower : na, "Confirmed daily BB lower", color.new(color.gray, 55), 1, plot.style_stepline)
+
+// Level drawings show the snapshot at the right edge of the visible chart.
+// Names are placed just inside the left edge. Staggered labels keep the true price in text.
+var array<line> levelLines = array.new_line()
+var array<label> levelNames = array.new_label()
+f_add(array<float> values, array<string> names, array<color> colors, array<int> known, bool enabled, float value, string name, color col, int since) =>
+    if enabled and not na(value)
+        array.push(values, value)
+        array.push(names, name)
+        array.push(colors, col)
+        array.push(known, since)
+float chartAtr = ta.atr(14)
+var table status = table.new(position.top_right, 2, 6, bgcolor=color.new(color.black, 25), border_width=0)
+f_state(bool enabled, bool ready, bool active) =>
+    not enabled ? "OFF" : not ready ? "WARM-UP / MISSING" : active ? "ACTIVE" : "—"
+if time == chart.right_visible_bar_time
+    for ln in levelLines
+        line.delete(ln)
+    for lb in levelNames
+        label.delete(lb)
+    array.clear(levelLines)
+    array.clear(levelNames)
+    array<float> values = array.new_float()
+    array<string> names = array.new_string()
+    array<color> colors = array.new_color()
+    array<int> known = array.new_int()
+    string emaTag = emaMode == "Chart timeframe" ? " (chart)" : " (D confirmed)"
+    int left = chart.left_visible_bar_time
+    int right = time_close
+    f_add(values, names, colors, known, pivotOn, pivotHigh, "D pivot high", color.red, pivotHighKnown)
+    f_add(values, names, colors, known, pivotOn, pivotLow, "D pivot low", color.lime, pivotLowKnown)
+    f_add(values, names, colors, known, priorOn, prevHigh, "Previous D high", color.new(color.red, 30), time("1D"))
+    f_add(values, names, colors, known, priorOn, prevLow, "Previous D low", color.new(color.lime, 30), time("1D"))
+    f_add(values, names, colors, known, priorCloseOn, prevClose, "Previous D close", color.silver, time("1D"))
+    f_add(values, names, colors, known, openOn, dayOpen, "Session open", color.orange, time("1D"))
+    // EMA dotted levels are snapshots, not historical support/resistance.
+    f_add(values, names, colors, known, emaLevels and ema5On, e5, "EMA5" + emaTag, color.aqua, time)
+    f_add(values, names, colors, known, emaLevels and ema9On, e9, "EMA9" + emaTag, color.yellow, time)
+    f_add(values, names, colors, known, emaLevels and ema20On, e20, "EMA20" + emaTag, color.blue, time)
+    f_add(values, names, colors, known, watch and entryLevel and triggered and watchDay <= targetDay, referenceEntry, "Reference entry", color.white, time("1D"))
+    array<int> sortedIndices = array.sort_indices(values, order.ascending)
+    float lastY = na
+    int labelX = left + int((time - left) * 0.015)
+    if array.size(sortedIndices) > 0
+        for k = 0 to array.size(sortedIndices) - 1
+            int idx = array.get(sortedIndices, k)
+            float price = array.get(values, idx)
+            float y = na(lastY) ? price : math.max(price, lastY + nz(chartAtr, syminfo.mintick * 100) * labelGap)
+            lastY := y
+            color col = array.get(colors, idx)
+            int since = array.get(known, idx)
+            // Dotted cross-chart snapshot; not a historical trade signal.
+            array.push(levelLines, line.new(array.get(names, idx) == "D pivot high" or array.get(names, idx) == "D pivot low" ? math.max(left, nz(since, left)) : left, price, right, price, xloc=xloc.bar_time, color=color.new(col, 35), style=line.style_dotted, width=1))
+            if levelLabels
+                array.push(levelNames, label.new(labelX, y, array.get(names, idx) + " · " + str.tostring(price, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(color.black, 15), textcolor=col, size=size.small, textalign=text.align_left, tooltip="Snapshot at visible right edge; not a level historically known across this whole line."))
+                if y != price
+                    array.push(levelLines, line.new(labelX, y, labelX, price, xloc=xloc.bar_time, color=color.new(col, 55), style=line.style_dotted))
+    if dashboard
+        table.cell(status, 0, 0, "DAILY SETUPS", text_color=color.white, text_size=size.small)
+        table.cell(status, 1, 0, "Prior close", text_color=color.silver, text_size=size.small)
+        table.cell(status, 0, 1, "A · BB / weekly", text_color=color.teal, text_size=size.small)
+        table.cell(status, 1, 1, f_state(useA, readyA, a), text_color=a ? color.lime : color.silver, text_size=size.small)
+        table.cell(status, 0, 2, "B · EMA / weekly", text_color=color.aqua, text_size=size.small)
+        table.cell(status, 1, 2, f_state(useB, readyB, b), text_color=b ? color.lime : color.silver, text_size=size.small)
+        table.cell(status, 0, 3, "C · EMA / WQ44", text_color=color.fuchsia, text_size=size.small)
+        table.cell(status, 1, 3, f_state(useC, readyC, c), text_color=c ? color.lime : color.silver, text_size=size.small)
+        table.cell(status, 0, 4, "Daily squeeze", text_color=color.orange, text_size=size.small)
+        table.cell(status, 1, 4, not squeezeReady ? "WARM-UP" : squeeze ? "ON" : "OFF", text_color=color.silver, text_size=size.small)
+        table.cell(status, 0, 5, watch ? "Watch day" : "Display", text_color=color.white, text_size=size.small)
+        table.cell(status, 1, 5, watch ? (na(watchDay) ? "Before D0" : "D" + str.tostring(watchDay)) : "All occurrences", text_color=color.silver, text_size=size.small)
+alertcondition(mark and a, "BigMove A active", "BigMove A: prior daily BB width rising and weekly-return reading falling.")
+alertcondition(mark and b, "BigMove B active", "BigMove B: prior daily EMA angle falling and weekly-return reading falling.")
+alertcondition(mark and c, "BigMove C active", "BigMove C: prior daily EMA angle falling and WQ44 rising.")
+alertcondition(release, "BigMove squeeze released", "Prior completed daily candle exited its low-bandwidth state. Direction is unspecified.")
+// INSTALL: Pine Editor -> paste -> Save -> Add to chart. Hide/remove earlier BM pane scripts.
+// Use ordinary daily/intraday candles, regular-session data. A/B/C are daily even on 5m charts.
+// Watch mode tracks the FIRST occurrence of ANY enabled setup for ONE manual D0 nomination.
+// Toggle only one setup to reproduce that rule's independent first-trigger path.
+// Snapshot lines/labels are visibility aids, not tested stop/target rules. Pivot lines start no earlier than confirmation; other horizontal snapshots are not historical levels.
+// Chart-timeframe EMAs develop live. Daily features/pivots/squeeze use completed daily candles.
+// BB squeeze is an added descriptive overlay, NOT a tested entry filter.
+// Reviewed against source formulas and TradingView documentation; not TradingView-compiled here.
