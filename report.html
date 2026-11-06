@@ -1,0 +1,386 @@
+<html><meta charset="utf-8"><style>body{font:15px system-ui;margin:36px;color:#123}table{border-collapse:collapse}td,th{padding:8px;border:1px solid #ccd}th{background:#e9f2fa}</style><h1>BigMove daily behaviour journal</h1><p>4,965 selections · 24,825 trade-days · ten features · 45 pairs</p><p>Every daily return included. Before = information at prior close. During = response observed at current close. Missing values are excluded only from affected pattern denominators; inspect coverage. Baselines matched by signal state, year and holding day. Patterns are descriptive, with no multiple-testing-adjusted predictive claims.</p><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>total_days</th>
+      <th>current_values</th>
+      <th>previous_values</th>
+      <th>prior_changes</th>
+      <th>prior_accelerations</th>
+    </tr>
+    <tr>
+      <th>feature</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>D_WQ_12</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_WQ_33</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_WQ_44</th>
+      <td>24825</td>
+      <td>24602</td>
+      <td>24639</td>
+      <td>24611</td>
+      <td>24570</td>
+    </tr>
+    <tr>
+      <th>D_bb_bw_20</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_cmf20_rmean50</th>
+      <td>24825</td>
+      <td>23835</td>
+      <td>23885</td>
+      <td>23851</td>
+      <td>23805</td>
+    </tr>
+    <tr>
+      <th>D_donch_pos_50_rmean50</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_ema20_angle_deg</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_mdi14_diff1</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>D_rsi14_obv_x</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+    <tr>
+      <th>W_ret_13w</th>
+      <td>24825</td>
+      <td>24687</td>
+      <td>24726</td>
+      <td>24708</td>
+      <td>24674</td>
+    </tr>
+  </tbody>
+</table><h2>Exploratory prior-close patterns (not validated signals)</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>features</th>
+      <th>pattern</th>
+      <th>n</th>
+      <th>positive_rate</th>
+      <th>matched_baseline_positive_rate</th>
+      <th>positive_lift_pp</th>
+      <th>mean_return</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>D_bb_bw_20 + W_ret_13w</td>
+      <td>rising | falling</td>
+      <td>1862</td>
+      <td>0.483888</td>
+      <td>0.431686</td>
+      <td>5.220186</td>
+      <td>0.004709</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_WQ_33</td>
+      <td>falling | falling</td>
+      <td>1640</td>
+      <td>0.480488</td>
+      <td>0.429309</td>
+      <td>5.117918</td>
+      <td>0.004163</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + W_ret_13w</td>
+      <td>falling | falling</td>
+      <td>1727</td>
+      <td>0.477707</td>
+      <td>0.429820</td>
+      <td>4.788681</td>
+      <td>0.004655</td>
+    </tr>
+    <tr>
+      <td>D_donch_pos_50_rmean50 + W_ret_13w</td>
+      <td>falling | falling</td>
+      <td>2336</td>
+      <td>0.473459</td>
+      <td>0.430490</td>
+      <td>4.296914</td>
+      <td>0.004321</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_rsi14_obv_x</td>
+      <td>falling | rising</td>
+      <td>1837</td>
+      <td>0.463255</td>
+      <td>0.426867</td>
+      <td>3.638787</td>
+      <td>0.003804</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_WQ_44</td>
+      <td>falling | rising</td>
+      <td>1484</td>
+      <td>0.466307</td>
+      <td>0.430673</td>
+      <td>3.563419</td>
+      <td>0.003014</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_cmf20_rmean50</td>
+      <td>falling | falling</td>
+      <td>2001</td>
+      <td>0.466267</td>
+      <td>0.431702</td>
+      <td>3.456456</td>
+      <td>0.003028</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_WQ_12</td>
+      <td>falling | falling</td>
+      <td>1629</td>
+      <td>0.457336</td>
+      <td>0.426809</td>
+      <td>3.052721</td>
+      <td>0.003108</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_WQ_12</td>
+      <td>falling | rising</td>
+      <td>1548</td>
+      <td>0.459948</td>
+      <td>0.430057</td>
+      <td>2.989166</td>
+      <td>0.002802</td>
+    </tr>
+    <tr>
+      <td>D_WQ_33 + D_rsi14_obv_x</td>
+      <td>falling | falling</td>
+      <td>2515</td>
+      <td>0.456859</td>
+      <td>0.427184</td>
+      <td>2.967435</td>
+      <td>0.001341</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_mdi14_diff1</td>
+      <td>falling | falling</td>
+      <td>1664</td>
+      <td>0.456130</td>
+      <td>0.427375</td>
+      <td>2.875490</td>
+      <td>0.003206</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w</td>
+      <td>falling</td>
+      <td>3216</td>
+      <td>0.453980</td>
+      <td>0.428010</td>
+      <td>2.596988</td>
+      <td>0.002782</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_WQ_44</td>
+      <td>falling | rising</td>
+      <td>6599</td>
+      <td>0.454463</td>
+      <td>0.429170</td>
+      <td>2.529254</td>
+      <td>0.002044</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_mdi14_diff1</td>
+      <td>rising | rising</td>
+      <td>1156</td>
+      <td>0.446367</td>
+      <td>0.421512</td>
+      <td>2.485495</td>
+      <td>0.000828</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_WQ_33</td>
+      <td>falling | falling</td>
+      <td>3860</td>
+      <td>0.450777</td>
+      <td>0.425925</td>
+      <td>2.485243</td>
+      <td>0.002146</td>
+    </tr>
+    <tr>
+      <td>W_ret_13w + D_mdi14_diff1</td>
+      <td>falling | rising</td>
+      <td>1552</td>
+      <td>0.451675</td>
+      <td>0.428691</td>
+      <td>2.298388</td>
+      <td>0.002328</td>
+    </tr>
+    <tr>
+      <td>D_WQ_44 + D_mdi14_diff1</td>
+      <td>rising | rising</td>
+      <td>6463</td>
+      <td>0.449327</td>
+      <td>0.426883</td>
+      <td>2.244358</td>
+      <td>0.001159</td>
+    </tr>
+    <tr>
+      <td>D_cmf20_rmean50 + D_rsi14_obv_x</td>
+      <td>rising | falling</td>
+      <td>4702</td>
+      <td>0.445980</td>
+      <td>0.425332</td>
+      <td>2.064833</td>
+      <td>0.000783</td>
+    </tr>
+    <tr>
+      <td>D_cmf20_rmean50 + D_mdi14_diff1</td>
+      <td>rising | rising</td>
+      <td>5635</td>
+      <td>0.445430</td>
+      <td>0.426497</td>
+      <td>1.893299</td>
+      <td>0.000614</td>
+    </tr>
+    <tr>
+      <td>D_bb_bw_20 + D_WQ_44</td>
+      <td>rising | rising</td>
+      <td>5967</td>
+      <td>0.449640</td>
+      <td>0.431008</td>
+      <td>1.863173</td>
+      <td>0.001054</td>
+    </tr>
+    <tr>
+      <td>D_donch_pos_50_rmean50 + D_rsi14_obv_x</td>
+      <td>rising | falling</td>
+      <td>4424</td>
+      <td>0.438743</td>
+      <td>0.420689</td>
+      <td>1.805438</td>
+      <td>-0.000030</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_WQ_12</td>
+      <td>falling | rising</td>
+      <td>6983</td>
+      <td>0.443935</td>
+      <td>0.426523</td>
+      <td>1.741210</td>
+      <td>0.001699</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_donch_pos_50_rmean50</td>
+      <td>falling | rising</td>
+      <td>5195</td>
+      <td>0.438114</td>
+      <td>0.421159</td>
+      <td>1.695478</td>
+      <td>0.000301</td>
+    </tr>
+    <tr>
+      <td>D_WQ_44 + D_WQ_12</td>
+      <td>rising | rising</td>
+      <td>6157</td>
+      <td>0.443723</td>
+      <td>0.427202</td>
+      <td>1.652064</td>
+      <td>0.000597</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_cmf20_rmean50</td>
+      <td>falling | rising</td>
+      <td>5636</td>
+      <td>0.442867</td>
+      <td>0.426461</td>
+      <td>1.640672</td>
+      <td>0.001015</td>
+    </tr>
+    <tr>
+      <td>D_WQ_33 + D_WQ_12</td>
+      <td>falling | rising</td>
+      <td>5441</td>
+      <td>0.440176</td>
+      <td>0.424250</td>
+      <td>1.592632</td>
+      <td>0.000137</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_cmf20_rmean50</td>
+      <td>falling | falling</td>
+      <td>6537</td>
+      <td>0.447453</td>
+      <td>0.431530</td>
+      <td>1.592299</td>
+      <td>0.001005</td>
+    </tr>
+    <tr>
+      <td>D_mdi14_diff1 + D_WQ_12</td>
+      <td>rising | rising</td>
+      <td>7511</td>
+      <td>0.441885</td>
+      <td>0.426188</td>
+      <td>1.569760</td>
+      <td>0.000903</td>
+    </tr>
+    <tr>
+      <td>D_ema20_angle_deg + D_rsi14_obv_x</td>
+      <td>falling | rising</td>
+      <td>4367</td>
+      <td>0.441035</td>
+      <td>0.425619</td>
+      <td>1.541559</td>
+      <td>0.002279</td>
+    </tr>
+    <tr>
+      <td>D_WQ_44 + D_rsi14_obv_x</td>
+      <td>rising | falling</td>
+      <td>6237</td>
+      <td>0.442841</td>
+      <td>0.427469</td>
+      <td>1.537174</td>
+      <td>0.001092</td>
+    </tr>
+  </tbody>
+</table></html>
