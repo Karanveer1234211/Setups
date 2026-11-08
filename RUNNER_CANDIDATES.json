@@ -1,0 +1,713 @@
+{
+ "file": "RUNNER_CANDIDATES.json",
+ "tool": "setuplab v0.9",
+ "made_at": "2026-11-08T20:32:31+05:30",
+ "rule": "runners v1, declared 8 Nov 2026 before any result on real picks. Karan: find which model picks will NOT dip and buy them at the model's open or on an event; 5-7 quality trades a week together with the dip setups; don't be conservative. PICKS: engines D and ENS, ranks 1-10, bought at the D1 open (the model's own price), sold at the D5 close, 0.35 pp costs; a pick whose own daily bars do not give the watchlist's D1-D5 closes is left out (counted). DIP = a close on D1-D4 at least 2% below the D1 open (Karan's choice: the closes a dip setup acts on); also measured: the intraday low 2% below on D1-D5, and a close 1 ATR below. RIGHT TAIL = the D5 close 5% or more above the D1 open (10% also shown). RUNNER = no dip and the right tail. A RULE = one to three conditions known at the signal close (a feature rose / fell on the signal day; a zone range at the signal close; the model's rank; the other engine picking it too; the weekday of D1; the market context and the stock's state at the pick) or at the D1 open (the gap, seen in the pre-open); it buys every pick it selects at the D1 open. SEARCH, in both engines: every single condition, every pair from different families, and the 150 best pairs with one more rank / agreement / weekday / context / gap condition; the 60 best by a quick 95% lower bound (day-clustered) get the full block bootstrap. A rule QUALIFIES when, in both engines: 25 or more trades a year; net per trade 95% interval above 0; its lift over every pick of the same days (net minus that day's mean over all the engine's picks) 95% interval above 0; net <= 0 in at most 2 of its years; EVERY CONDITION EARNS ITS PLACE: the rule's net per trade minus the net of the trades its simpler version (that condition dropped) adds, 95% interval above 0 (the quick screen applies the same test before the bootstrap, so a narrower rule never displaces the simpler one, with more trades, by luck). Score = the lower 95% bound of net per trade in the weaker engine. CANDIDATES for the forward paper test = the top 5 qualifiers that are not versions of each other (one's conditions within the other's, or 70% of the same D trades); the best 5 by score are listed too, qualified or not. Plain 95% per rule (don't be conservative): some rules pass by luck, so the whole search is replayed year by year 2022-2026 - choose the candidates with the picks whose D5 exit was before 1 January, judge their picks (each pick once) on that year: HOLDS when the pooled lift over all picks is above 0 out of sample (95%), WORSE when below, else NOT SHOWN. EVENTS on the candidates' picks and on all picks, each against the D1 open on the same picks: the breakout (a buy-stop 0.05% above the signal-day high, live on D1 and D2), the D2 open after a strong D1 (green, the close in the top 30% of its range), the D1 close after a strong D1. MONEY: Rs 5 L in 2 / 3 / 5 / 7 equal slots, profits reinvested, no MTF and MTF 2x (0.04% a day on the borrowed half), entries from 2022, one position per pick (its earliest entry); the dip arm = the frozen setups' trades in the newest ZONES run, IN or OUT of their picks zone; the same open: the source with the higher net per trade first, then the model's rank.",
+ "watchlist": "C:\\QuantData\\setuplab\\WL_R1_10",
+ "panel": "C:\\QuantData\\cache_daily\\panel_oc\\panel.parquet",
+ "features": "features_final.txt",
+ "alignment": "D: 15818 of 15818 settled picks complete (their bars give the watchlist's D1-D5 closes); ENS: 16256 of 16256 settled picks complete (their bars give the watchlist's D1-D5 closes)",
+ "counts": {
+  "D": {
+   "settled": 15818,
+   "with_bars": 15818,
+   "aligned": 15818,
+   "rescaled": 0,
+   "complete": 15818
+  },
+  "ENS": {
+   "settled": 16256,
+   "with_bars": 16256,
+   "aligned": 16256,
+   "rescaled": 0,
+   "complete": 16256
+  }
+ },
+ "base": [
+  {
+   "engine": "D",
+   "picks": 15818,
+   "no_dip_pct": 53.60349,
+   "dip_low_pct": 69.300797,
+   "dip_atr_pct": 23.903148,
+   "rt5_pct": 24.193956,
+   "rt10_pct": 11.524845,
+   "runner_pct": 19.844481,
+   "net_all": 0.852968,
+   "net_runner": 11.643267,
+   "net_nodip": 4.580158,
+   "net_dip": -3.453183,
+   "runner_share_of_profit": 270.88305,
+   "top3_no_dip_pct": 52.671756
+  },
+  {
+   "engine": "ENS",
+   "picks": 16256,
+   "no_dip_pct": 54.933563,
+   "dip_low_pct": 68.571604,
+   "dip_atr_pct": 23.111467,
+   "rt5_pct": 24.077264,
+   "rt10_pct": 11.085138,
+   "runner_pct": 20.084892,
+   "net_all": 0.904068,
+   "net_runner": 11.313533,
+   "net_nodip": 4.412226,
+   "net_dip": -3.372189,
+   "runner_share_of_profit": 251.343,
+   "top3_no_dip_pct": 53.340164
+  }
+ ],
+ "candidates": [
+  {
+   "list": "qualified",
+   "id": "R1",
+   "rule": "F|d_adx14>0 & Z|IDX:1:1 & C|NIFTY_UP",
+   "text": "d_adx14 rose on the signal day & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & NIFTY above its 50-day average",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_adx14_change",
+     ">",
+     0
+    ],
+    [
+     "zone:IDX",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "snap:pre_nifty_vs_ma50",
+     ">",
+     0.0
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 277,
+     "per_year": 41.567071,
+     "net": 5.020627,
+     "lo": 2.780294,
+     "hi": 7.204054,
+     "lift": 0.47292,
+     "lift_lo": 0.166701,
+     "lift_hi": 0.774585,
+     "dip": 43.3213,
+     "runner": 31.407942,
+     "rt5": 43.3213,
+     "rt10": 27.075812,
+     "mae": -4.382167,
+     "bad_years": 0,
+     "years": 6
+    },
+    "ENS": {
+     "n": 247,
+     "per_year": 37.065222,
+     "net": 5.01135,
+     "lo": 2.845854,
+     "hi": 7.111105,
+     "lift": 0.672823,
+     "lift_lo": 0.127075,
+     "lift_hi": 1.350034,
+     "dip": 41.700405,
+     "runner": 30.364372,
+     "rt5": 40.48583,
+     "rt10": 26.720648,
+     "mae": -4.136523,
+     "bad_years": 0,
+     "years": 6
+    }
+   }
+  },
+  {
+   "list": "qualified",
+   "id": "R2",
+   "rule": "F|d_dist_from_52wl<0 & F|d_intraday_ret_pct>0 & P|agree3",
+   "text": "d_dist_from_52wl fell on the signal day & d_intraday_ret_pct rose on the signal day & both engines have it in their ranks 1-3",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_dist_from_52wl_change",
+     "<",
+     0
+    ],
+    [
+     "d_intraday_ret_pct_change",
+     ">",
+     0
+    ],
+    [
+     "agree3",
+     ">=",
+     1
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 352,
+     "per_year": 52.821693,
+     "net": 2.889628,
+     "lo": 1.761207,
+     "hi": 3.953081,
+     "lift": 1.743351,
+     "lift_lo": 0.931501,
+     "lift_hi": 2.499315,
+     "dip": 45.454545,
+     "runner": 30.681818,
+     "rt5": 36.647727,
+     "rt10": 21.306818,
+     "mae": -5.300307,
+     "bad_years": 0,
+     "years": 7
+    },
+    "ENS": {
+     "n": 352,
+     "per_year": 52.821693,
+     "net": 2.889628,
+     "lo": 1.761207,
+     "hi": 3.953081,
+     "lift": 1.644432,
+     "lift_lo": 0.863299,
+     "lift_hi": 2.417736,
+     "dip": 45.454545,
+     "runner": 30.681818,
+     "rt5": 36.647727,
+     "rt10": 21.306818,
+     "mae": -5.300307,
+     "bad_years": 0,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "qualified",
+   "id": "R3",
+   "rule": "F|d_upside_vol_ratio>0 & Z|VIXP:2:2 & P|agree3",
+   "text": "d_upside_vol_ratio rose on the signal day & VIXP India VIX percentile in its last 250 sessions: 66.6667 and above at the signal close & both engines have it in their ranks 1-3",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_upside_vol_ratio_change",
+     ">",
+     0
+    ],
+    [
+     "zone:VIXP",
+     "in",
+     [
+      2,
+      2
+     ]
+    ],
+    [
+     "agree3",
+     ">=",
+     1
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 172,
+     "per_year": 25.8106,
+     "net": 3.729931,
+     "lo": 1.563504,
+     "hi": 6.016883,
+     "lift": 1.660446,
+     "lift_lo": 0.308905,
+     "lift_hi": 2.967986,
+     "dip": 48.255814,
+     "runner": 34.302326,
+     "rt5": 43.023256,
+     "rt10": 21.511628,
+     "mae": -5.696457,
+     "bad_years": 1,
+     "years": 7
+    },
+    "ENS": {
+     "n": 172,
+     "per_year": 25.8106,
+     "net": 3.729931,
+     "lo": 1.563504,
+     "hi": 6.016883,
+     "lift": 1.459367,
+     "lift_lo": 0.087326,
+     "lift_hi": 2.800774,
+     "dip": 48.255814,
+     "runner": 34.302326,
+     "rt5": 43.023256,
+     "rt10": 21.511628,
+     "mae": -5.696457,
+     "bad_years": 1,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "qualified",
+   "id": "R4",
+   "rule": "F|d_cmf20_rmean50<0 & Z|IDX:1:1 & P|agree",
+   "text": "d_cmf20_rmean50 fell on the signal day & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & the other engine picked it too (its ranks 1-10)",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_cmf20_rmean50_change",
+     "<",
+     0
+    ],
+    [
+     "zone:IDX",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "agree",
+     ">=",
+     1
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 236,
+     "per_year": 35.414544,
+     "net": 3.844967,
+     "lo": 1.436241,
+     "hi": 6.139425,
+     "lift": 0.708487,
+     "lift_lo": 0.09167,
+     "lift_hi": 1.465943,
+     "dip": 43.644068,
+     "runner": 27.118644,
+     "rt5": 35.169492,
+     "rt10": 20.762712,
+     "mae": -4.484103,
+     "bad_years": 1,
+     "years": 7
+    },
+    "ENS": {
+     "n": 236,
+     "per_year": 35.414544,
+     "net": 3.844967,
+     "lo": 1.436241,
+     "hi": 6.139425,
+     "lift": 0.809696,
+     "lift_lo": 0.110698,
+     "lift_hi": 1.632199,
+     "dip": 43.644068,
+     "runner": 27.118644,
+     "rt5": 35.169492,
+     "rt10": 20.762712,
+     "mae": -4.484103,
+     "bad_years": 1,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "qualified",
+   "id": "R5",
+   "rule": "Z|ATRP:1:3 & Z|VIX5:0:0 & C|VIX_HIGH",
+   "text": "ATRP ATR14 % of the close: 2 and above at the signal close & VIX5 India VIX 5-session change %: below -10 at the signal close & India VIX in the upper half of its last year",
+   "qualifies": true,
+   "conds": [
+    [
+     "zone:ATRP",
+     "in",
+     [
+      1,
+      3
+     ]
+    ],
+    [
+     "zone:VIX5",
+     "in",
+     [
+      0,
+      0
+     ]
+    ],
+    [
+     "snap:pre_vix_pct250",
+     ">=",
+     0.5
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 1017,
+     "per_year": 152.612675,
+     "net": 3.160797,
+     "lo": 0.915486,
+     "hi": 5.443344,
+     "lift": 0.018433,
+     "lift_lo": 0.000182,
+     "lift_hi": 0.053396,
+     "dip": 42.477876,
+     "runner": 28.810226,
+     "rt5": 34.906588,
+     "rt10": 19.370698,
+     "mae": -4.355077,
+     "bad_years": 2,
+     "years": 7
+    },
+    "ENS": {
+     "n": 1051,
+     "per_year": 157.71477,
+     "net": 3.005358,
+     "lo": 0.983722,
+     "hi": 5.048136,
+     "lift": 0.024055,
+     "lift_lo": 0.00016,
+     "lift_hi": 0.061173,
+     "dip": 42.62607,
+     "runner": 28.068506,
+     "rt5": 34.157945,
+     "rt10": 19.600381,
+     "mae": -4.239639,
+     "bad_years": 1,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "best by score",
+   "id": "B1",
+   "rule": "F|d_adx14>0 & Z|IDX:1:1 & C|NIFTY_UP",
+   "text": "d_adx14 rose on the signal day & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & NIFTY above its 50-day average",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_adx14_change",
+     ">",
+     0
+    ],
+    [
+     "zone:IDX",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "snap:pre_nifty_vs_ma50",
+     ">",
+     0.0
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 277,
+     "per_year": 41.567071,
+     "net": 5.020627,
+     "lo": 2.780294,
+     "hi": 7.204054,
+     "lift": 0.47292,
+     "lift_lo": 0.166701,
+     "lift_hi": 0.774585,
+     "dip": 43.3213,
+     "runner": 31.407942,
+     "rt5": 43.3213,
+     "rt10": 27.075812,
+     "mae": -4.382167,
+     "bad_years": 0,
+     "years": 6
+    },
+    "ENS": {
+     "n": 247,
+     "per_year": 37.065222,
+     "net": 5.01135,
+     "lo": 2.845854,
+     "hi": 7.111105,
+     "lift": 0.672823,
+     "lift_lo": 0.127075,
+     "lift_hi": 1.350034,
+     "dip": 41.700405,
+     "runner": 30.364372,
+     "rt5": 40.48583,
+     "rt10": 26.720648,
+     "mae": -4.136523,
+     "bad_years": 0,
+     "years": 6
+    }
+   }
+  },
+  {
+   "list": "best by score",
+   "id": "B2",
+   "rule": "Z|IDX:1:1 & P|agree & C|BEARSTATE",
+   "text": "IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & the other engine picked it too (its ranks 1-10) & a bearish stock state at the pick (S08/S09)",
+   "qualifies": false,
+   "conds": [
+    [
+     "zone:IDX",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "agree",
+     ">=",
+     1
+    ],
+    [
+     "snap:pre_state_bearish",
+     ">",
+     0.5
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 196,
+     "per_year": 29.412079,
+     "net": 4.980314,
+     "lo": 2.229865,
+     "hi": 7.237651,
+     "lift": 0.747899,
+     "lift_lo": -0.021408,
+     "lift_hi": 1.859701,
+     "dip": 41.326531,
+     "runner": 32.142857,
+     "rt5": 40.816327,
+     "rt10": 27.040816,
+     "mae": -4.472149,
+     "bad_years": 1,
+     "years": 7
+    },
+    "ENS": {
+     "n": 196,
+     "per_year": 29.412079,
+     "net": 4.980314,
+     "lo": 2.229865,
+     "hi": 7.237651,
+     "lift": 0.860944,
+     "lift_lo": 0.148681,
+     "lift_hi": 1.835895,
+     "dip": 41.326531,
+     "runner": 32.142857,
+     "rt5": 40.816327,
+     "rt10": 27.040816,
+     "mae": -4.472149,
+     "bad_years": 1,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "best by score",
+   "id": "B3",
+   "rule": "F|d_dist_from_52wl<0 & F|d_intraday_ret_pct>0 & P|agree3",
+   "text": "d_dist_from_52wl fell on the signal day & d_intraday_ret_pct rose on the signal day & both engines have it in their ranks 1-3",
+   "qualifies": true,
+   "conds": [
+    [
+     "d_dist_from_52wl_change",
+     "<",
+     0
+    ],
+    [
+     "d_intraday_ret_pct_change",
+     ">",
+     0
+    ],
+    [
+     "agree3",
+     ">=",
+     1
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 352,
+     "per_year": 52.821693,
+     "net": 2.889628,
+     "lo": 1.761207,
+     "hi": 3.953081,
+     "lift": 1.743351,
+     "lift_lo": 0.931501,
+     "lift_hi": 2.499315,
+     "dip": 45.454545,
+     "runner": 30.681818,
+     "rt5": 36.647727,
+     "rt10": 21.306818,
+     "mae": -5.300307,
+     "bad_years": 0,
+     "years": 7
+    },
+    "ENS": {
+     "n": 352,
+     "per_year": 52.821693,
+     "net": 2.889628,
+     "lo": 1.761207,
+     "hi": 3.953081,
+     "lift": 1.644432,
+     "lift_lo": 0.863299,
+     "lift_hi": 2.417736,
+     "dip": 45.454545,
+     "runner": 30.681818,
+     "rt5": 36.647727,
+     "rt10": 21.306818,
+     "mae": -5.300307,
+     "bad_years": 0,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "best by score",
+   "id": "B4",
+   "rule": "Z|TREND:1:1 & Z|RSI14:0:0",
+   "text": "TREND close vs EMA50 and EMA200: between at the signal close & RSI14 RSI 14: below 30 at the signal close",
+   "qualifies": false,
+   "conds": [
+    [
+     "zone:TREND",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "zone:RSI14",
+     "in",
+     [
+      0,
+      0
+     ]
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 418,
+     "per_year": 62.72576,
+     "net": 3.088793,
+     "lo": 1.960388,
+     "hi": 4.203798,
+     "lift": 1.171482,
+     "lift_lo": 0.484801,
+     "lift_hi": 1.942769,
+     "dip": 42.822967,
+     "runner": 28.947368,
+     "rt5": 36.602871,
+     "rt10": 20.574163,
+     "mae": -4.924033,
+     "bad_years": 1,
+     "years": 7
+    },
+    "ENS": {
+     "n": 474,
+     "per_year": 71.129211,
+     "net": 2.781324,
+     "lo": 1.675884,
+     "hi": 3.929801,
+     "lift": 0.860728,
+     "lift_lo": 0.140849,
+     "lift_hi": 1.597798,
+     "dip": 41.561181,
+     "runner": 29.113924,
+     "rt5": 35.021097,
+     "rt10": 18.987342,
+     "mae": -4.797478,
+     "bad_years": 1,
+     "years": 7
+    }
+   }
+  },
+  {
+   "list": "best by score",
+   "id": "B5",
+   "rule": "F|d_donch_pos_50_rmean50>0 & Z|RSI14:1:1 & G|up1",
+   "text": "d_donch_pos_50_rmean50 rose on the signal day & RSI14 RSI 14: 30 to 50 at the signal close & D1 opens 1% or more above the signal close (pre-open)",
+   "qualifies": false,
+   "conds": [
+    [
+     "d_donch_pos_50_rmean50_change",
+     ">",
+     0
+    ],
+    [
+     "zone:RSI14",
+     "in",
+     [
+      1,
+      1
+     ]
+    ],
+    [
+     "gap_d1",
+     ">=",
+     1
+    ]
+   ],
+   "stats": {
+    "D": {
+     "n": 226,
+     "per_year": 33.913928,
+     "net": 4.043138,
+     "lo": 1.740248,
+     "hi": 6.204682,
+     "lift": 0.67583,
+     "lift_lo": -0.425375,
+     "lift_hi": 1.766038,
+     "dip": 41.59292,
+     "runner": 36.283186,
+     "rt5": 41.150442,
+     "rt10": 23.451327,
+     "mae": -4.368321,
+     "bad_years": 1,
+     "years": 7
+    },
+    "ENS": {
+     "n": 207,
+     "per_year": 31.062757,
+     "net": 3.78665,
+     "lo": 1.594978,
+     "hi": 5.777942,
+     "lift": 0.872641,
+     "lift_lo": -0.331239,
+     "lift_hi": 2.215353,
+     "dip": 45.89372,
+     "runner": 32.36715,
+     "rt5": 38.164251,
+     "rt10": 23.188406,
+     "mae": -4.632484,
+     "bad_years": 0,
+     "years": 7
+    }
+   }
+  }
+ ],
+ "out_of_sample": {
+  "D": {
+   "years": 5,
+   "n": 952,
+   "lift": -0.153351,
+   "lift_lo": -0.569205,
+   "lift_hi": 0.334019,
+   "net": 0.521233,
+   "net_lo": -0.592675,
+   "net_hi": 1.723711,
+   "verdict": "NOT SHOWN"
+  },
+  "ENS": {
+   "years": 5,
+   "n": 927,
+   "lift": 0.031636,
+   "lift_lo": -0.400775,
+   "lift_hi": 0.482744,
+   "net": 0.699501,
+   "net_lo": -0.439428,
+   "net_hi": 1.970466,
+   "verdict": "NOT SHOWN"
+  }
+ },
+ "dip_arm": "ZONES_20261108_001: 21538 setup trades, 7403 of them IN their picks zone",
+ "sha256": "d10ccaf5767a5d8f4b73415727a08a4c02d4dc3d81084622fd86ecc08fa2b321"
+}
