@@ -1,0 +1,3442 @@
+{
+ "file": "NODIP_CANDIDATES.json",
+ "tool": "setuplab v1.0",
+ "made_at": "2026-11-09T00:20:26+05:30",
+ "rule": "nodip v2, declared 8 Nov 2026 before any result (Karan: test it as rigorously as the setups - which features and combinations help most and how they behaved in the sessions before the pick; be very open, we are exploring). PICKS: engines D and ENS, ranks 1-10, bought at the D1 open, sold at the D5 close, 0.35 pp costs, judged on the POOLED picks: a stock-day picked by both engines counts once (its best rank); each engine is also checked on its own. DIP = a close on D1-D4 at least 2% below the D1 open; RUNNER = no dip and the D5 close 5% or more above the D1 open. THREE LISTS from the same search: no-dip (target = the share of picks with no dip), runner (the runner share), money (net % per trade). CONDITIONS, all known at the signal close or the D1 open: for each of the 60 features - its level at the signal close (low third, high third, lower half, upper half; the cut-offs come from the picks of the window the rule is chosen on, never from later ones), its move on the signal day (rose / fell), its move on the session before the pick (rose / fell) and the two together (rose twice, fell twice, turned up, turned down); the stock's own candles into the pick (green / red signal day, a close in the top / bottom third of its range, a gap up / down, a 2% rise / fall, up / down over 3 sessions, two higher / lower closes in a row); the 12 zone measures; the model's rank, both engines picking it, D1's weekday, the market context and the stock's state at the pick, the gap at the D1 open. SEARCH: stage 1 every single condition; stage 2 every pair from different families (a feature's level may pair with its own moves); stage 3 the 150 best earning pairs of each list with one more rank / agreement / weekday / context / gap condition. Per list, the 5,000 best by a quick day-clustered lower bound of its target are tested for every condition earning its place (quick) and the first 60 that pass get the full block bootstrap. A rule QUALIFIES for its list when, on the pooled picks: 25 or more trades a year; its target's excess over all picks of the same days (resampled together) has a 95% interval above 0; net per trade at the D1 open 95% above 0; every condition earns its place on the target (the rule minus the trades its simpler version adds, 95% above 0); net <= 0 in at most 2 of its years; and in each engine on its own the target beats that engine's picks and the net is above 0. Score = the lower 95% bound of the target. CANDIDATES: per list the top 5 qualifiers that are not versions of each other (conditions within, or 70% of the same trades); the 10 best by score are listed too, qualified or not. Plain 95% per rule (be very open): the whole search is replayed year by year 2022-2026 (chosen with the picks whose D5 exit was before 1 January - the cut-offs too - and judged on that year); per list HOLDS when the chosen rules' target beats all picks out of sample (95%), WORSE when below, else NOT SHOWN. MONEY, apples to apples: Rs 5 L in 2 / 3 / 5 / 7 equal slots, profits reinvested, no MTF and MTF 2x, entries from 2022, one position per pick, the same open by the model's rank: the baseline (each engine's ranks 1-3 at the D1 open) against each list's arm OUT OF SAMPLE (each year the rules chosen from the years before), the arm in-sample (the candidates) and the out-of-sample arm with S3 in its zone (the newest ZONES run; in-sample). ENTRIES: the D1 open against the breakout, the D2 open after a strong D1 and the D1 close after a strong D1, on the same picks.",
+ "watchlist": "C:\\QuantData\\setuplab\\WL_R1_10",
+ "panel": "C:\\QuantData\\cache_daily\\panel_oc\\panel.parquet",
+ "features": "features_final.txt",
+ "alignment": "D: 15818 of 15818 settled picks complete; ENS: 16256 of 16256 settled picks complete; pooled 25831 stock-days, 6243 of them picked by both engines (counted once)",
+ "counts": {
+  "D": {
+   "settled": 15818,
+   "with_bars": 15818,
+   "aligned": 15818,
+   "rescaled": 0,
+   "complete": 15818
+  },
+  "ENS": {
+   "settled": 16256,
+   "with_bars": 16256,
+   "aligned": 16256,
+   "rescaled": 0,
+   "complete": 16256
+  }
+ },
+ "base": [
+  {
+   "table": "D",
+   "picks": 15818,
+   "nodip": 53.60349,
+   "runner": 19.844481,
+   "net": 0.852968,
+   "top3_nodip": 52.671756,
+   "top3_net": 1.237657
+  },
+  {
+   "table": "ENS",
+   "picks": 16256,
+   "nodip": 54.933563,
+   "runner": 20.084892,
+   "net": 0.904068,
+   "top3_nodip": 53.340164,
+   "top3_net": 1.268794
+  },
+  {
+   "table": "pooled",
+   "picks": 25831,
+   "nodip": 54.740428,
+   "runner": 19.352716,
+   "net": 0.804223,
+   "top3_nodip": 53.695077,
+   "top3_net": 1.215345
+  }
+ ],
+ "lists": {
+  "nodip": {
+   "target": "no-dip share (never a close 2% below the D1 open on D1-D4)",
+   "candidates": [
+    {
+     "list": "qualified",
+     "id": "N1",
+     "rule": "V|d_donch_pos_50_rmean50:H3 & V|w_ret_13w:LO & G|dn0",
+     "text": "d_donch_pos_50_rmean50 in its high third at the signal close (> 0.777783) & w_ret_13w in its lower half at the signal close (<= 16.4325) & D1 opens below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_donch_pos_50_rmean50",
+       0.777783,
+       null
+      ],
+      [
+       "fv",
+       "w_ret_13w",
+       null,
+       16.432524
+      ],
+      [
+       "gap_d1",
+       "<",
+       0
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.745843,
+      "screen": 0.746271,
+      "n": 209,
+      "per_year": 31.36288,
+      "earn_lo": 0.026842,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.803828,
+      "nodip_ex": 0.256423,
+      "nodip_lo": 0.745843,
+      "nodip_hi": 0.857924,
+      "nodip_ex_lo": 0.201415,
+      "nodip_ex_hi": 0.310011,
+      "runner": 0.095694,
+      "runner_ex": -0.097833,
+      "runner_lo": 0.058824,
+      "runner_hi": 0.138759,
+      "runner_ex_lo": -0.136246,
+      "runner_ex_hi": -0.054257,
+      "money": 0.569231,
+      "money_ex": -0.234992,
+      "money_lo": 0.086017,
+      "money_hi": 1.09825,
+      "money_ex_lo": -0.85773,
+      "money_ex_hi": 0.392032,
+      "lift": 0.131079,
+      "lift_lo": 0.089322,
+      "lift_hi": 0.174637,
+      "mae": -2.262729,
+      "D_n": 122,
+      "D_target": 0.827869,
+      "D_net": 0.880509,
+      "D_all": 0.536035,
+      "ENS_n": 128,
+      "ENS_target": 0.78125,
+      "ENS_net": 0.531973,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "N2",
+     "rule": "Z|ATRP:0:1 & C|BULLSTATE & G|dn0",
+     "text": "ATRP ATR14 % of the close: below 3 at the signal close & a bullish stock state at the pick (S01-S03) & D1 opens below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        1
+       ]
+      ],
+      [
+       "snap:pre_state_bullish",
+       ">",
+       0.5
+      ],
+      [
+       "gap_d1",
+       "<",
+       0
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.738838,
+      "screen": 0.742974,
+      "n": 727,
+      "per_year": 109.094803,
+      "earn_lo": 0.005676,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.777166,
+      "nodip_ex": 0.229762,
+      "nodip_lo": 0.738838,
+      "nodip_hi": 0.814968,
+      "nodip_ex_lo": 0.190941,
+      "nodip_ex_hi": 0.270678,
+      "runner": 0.086657,
+      "runner_ex": -0.10687,
+      "runner_lo": 0.064318,
+      "runner_hi": 0.111412,
+      "runner_ex_lo": -0.131673,
+      "runner_ex_hi": -0.080487,
+      "money": 0.384719,
+      "money_ex": -0.419504,
+      "money_lo": 0.046912,
+      "money_hi": 0.729041,
+      "money_ex_lo": -0.901703,
+      "money_ex_hi": 0.09374,
+      "lift": 0.11344,
+      "lift_lo": 0.088316,
+      "lift_hi": 0.145671,
+      "mae": -2.223745,
+      "D_n": 426,
+      "D_target": 0.755869,
+      "D_net": 0.234572,
+      "D_all": 0.536035,
+      "ENS_n": 409,
+      "ENS_target": 0.772616,
+      "ENS_net": 0.411666,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "N3",
+     "rule": "V|d_slope_stability:H3 & Z|ATRP:0:1 & G|dn0",
+     "text": "d_slope_stability in its high third at the signal close (> 5.05058) & ATRP ATR14 % of the close: below 3 at the signal close & D1 opens below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_slope_stability",
+       5.050578,
+       null
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        1
+       ]
+      ],
+      [
+       "gap_d1",
+       "<",
+       0
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.736664,
+      "screen": 0.746465,
+      "n": 644,
+      "per_year": 96.639688,
+      "earn_lo": 0.00655,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.784161,
+      "nodip_ex": 0.236757,
+      "nodip_lo": 0.736664,
+      "nodip_hi": 0.829635,
+      "nodip_ex_lo": 0.192435,
+      "nodip_ex_hi": 0.284695,
+      "runner": 0.079193,
+      "runner_ex": -0.114335,
+      "runner_lo": 0.056552,
+      "runner_hi": 0.10509,
+      "runner_ex_lo": -0.140452,
+      "runner_ex_hi": -0.087343,
+      "money": 0.377516,
+      "money_ex": -0.426707,
+      "money_lo": 0.02798,
+      "money_hi": 0.741543,
+      "money_ex_lo": -0.923064,
+      "money_ex_hi": 0.068579,
+      "lift": 0.105416,
+      "lift_lo": 0.077097,
+      "lift_hi": 0.137579,
+      "mae": -2.089554,
+      "D_n": 387,
+      "D_target": 0.793282,
+      "D_net": 0.390572,
+      "D_all": 0.536035,
+      "ENS_n": 326,
+      "ENS_target": 0.751534,
+      "ENS_net": 0.260963,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "N4",
+     "rule": "V|w_ret_13w:LO & V|x_z_d_downside_dev_60:L3 & P|rank1",
+     "text": "w_ret_13w in its lower half at the signal close (<= 16.4325) & x_z_d_downside_dev_60 in its low third at the signal close (<= -0.187485) & the model's rank 1",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "w_ret_13w",
+       null,
+       16.432524
+      ],
+      [
+       "fv",
+       "x_z_d_downside_dev_60",
+       null,
+       -0.187485
+      ],
+      [
+       "rank",
+       "<=",
+       1
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.734298,
+      "screen": 0.73237,
+      "n": 241,
+      "per_year": 36.164852,
+      "earn_lo": 0.027665,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.784232,
+      "nodip_ex": 0.236828,
+      "nodip_lo": 0.734298,
+      "nodip_hi": 0.832728,
+      "nodip_ex_lo": 0.18498,
+      "nodip_ex_hi": 0.28709,
+      "runner": 0.145228,
+      "runner_ex": -0.048299,
+      "runner_lo": 0.091953,
+      "runner_hi": 0.213637,
+      "runner_ex_lo": -0.101318,
+      "runner_ex_hi": 0.017823,
+      "money": 1.301374,
+      "money_ex": 0.497151,
+      "money_lo": 0.397536,
+      "money_hi": 2.491304,
+      "money_ex_lo": -0.403682,
+      "money_ex_hi": 1.621546,
+      "lift": 0.094489,
+      "lift_lo": 0.057403,
+      "lift_hi": 0.136012,
+      "mae": -2.282521,
+      "D_n": 156,
+      "D_target": 0.801282,
+      "D_net": 1.437408,
+      "D_all": 0.536035,
+      "ENS_n": 94,
+      "ENS_target": 0.744681,
+      "ENS_net": 0.87732,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "N5",
+     "rule": "B|d_adx14:dndn & Z|ATRP:1:1 & G|dn0",
+     "text": "d_adx14 fell on the session before the pick and on the signal day & ATRP ATR14 % of the close: 2 to 3 at the signal close & D1 opens below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_adx14",
+       -1,
+       -1
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "gap_d1",
+       "<",
+       0
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.725451,
+      "screen": 0.730281,
+      "n": 460,
+      "per_year": 69.028348,
+      "earn_lo": 0.010943,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.771739,
+      "nodip_ex": 0.224335,
+      "nodip_lo": 0.725451,
+      "nodip_hi": 0.817853,
+      "nodip_ex_lo": 0.177072,
+      "nodip_ex_hi": 0.269582,
+      "runner": 0.091304,
+      "runner_ex": -0.102223,
+      "runner_lo": 0.064433,
+      "runner_hi": 0.118208,
+      "runner_ex_lo": -0.13216,
+      "runner_ex_hi": -0.072286,
+      "money": 0.578054,
+      "money_ex": -0.226168,
+      "money_lo": 0.124511,
+      "money_hi": 1.058876,
+      "money_ex_lo": -0.797136,
+      "money_ex_hi": 0.35736,
+      "lift": 0.140548,
+      "lift_lo": 0.106998,
+      "lift_hi": 0.176317,
+      "mae": -2.387083,
+      "D_n": 210,
+      "D_target": 0.790476,
+      "D_net": 0.544475,
+      "D_all": 0.536035,
+      "ENS_n": 312,
+      "ENS_target": 0.759615,
+      "ENS_net": 0.702208,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B1",
+     "rule": "V|d_realvol_ratio_20_60:H3 & Z|ATRP:0:0 & C|VIX_LOW",
+     "text": "d_realvol_ratio_20_60 in its high third at the signal close (> 1.04055) & ATRP ATR14 % of the close: below 2 at the signal close & India VIX in the lower half of its last year",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_realvol_ratio_20_60",
+       1.040552,
+       null
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "snap:pre_vix_pct250",
+       "<",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 2,
+      "years": 2,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.791659,
+      "screen": 0.819752,
+      "n": 233,
+      "per_year": 34.964359,
+      "earn_lo": 0.03724,
+      "years": 6,
+      "bad_years": 2,
+      "nodip": 0.871245,
+      "nodip_ex": 0.32384,
+      "nodip_lo": 0.791659,
+      "nodip_hi": 0.927279,
+      "nodip_ex_lo": 0.246613,
+      "nodip_ex_hi": 0.381647,
+      "runner": 0.042918,
+      "runner_ex": -0.150609,
+      "runner_lo": 0.014386,
+      "runner_hi": 0.082903,
+      "runner_ex_lo": -0.183616,
+      "runner_ex_hi": -0.110842,
+      "money": 0.317103,
+      "money_ex": -0.48712,
+      "money_lo": -0.217828,
+      "money_hi": 0.804579,
+      "money_ex_lo": -1.150289,
+      "money_ex_hi": 0.132454,
+      "lift": 0.138274,
+      "lift_lo": 0.097521,
+      "lift_hi": 0.185776,
+      "mae": -1.60299,
+      "D_n": 176,
+      "D_target": 0.897727,
+      "D_net": 0.404732,
+      "D_all": 0.536035,
+      "ENS_n": 78,
+      "ENS_target": 0.820513,
+      "ENS_net": 0.368975,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B2",
+     "rule": "B|d_wq_29:dndn & Z|ATRP:0:0",
+     "text": "d_wq_29 fell on the session before the pick and on the signal day & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "pat",
+       "d_wq_29",
+       -1,
+       -1
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.789243,
+      "screen": 0.805042,
+      "n": 301,
+      "per_year": 45.16855,
+      "earn_lo": 0.011726,
+      "years": 7,
+      "bad_years": 4,
+      "nodip": 0.847176,
+      "nodip_ex": 0.299772,
+      "nodip_lo": 0.789243,
+      "nodip_hi": 0.896432,
+      "nodip_ex_lo": 0.243004,
+      "nodip_ex_hi": 0.351679,
+      "runner": 0.039867,
+      "runner_ex": -0.15366,
+      "runner_lo": 0.016805,
+      "runner_hi": 0.063389,
+      "runner_ex_lo": -0.18203,
+      "runner_ex_hi": -0.126934,
+      "money": 0.12827,
+      "money_ex": -0.675953,
+      "money_lo": -0.240349,
+      "money_hi": 0.45726,
+      "money_ex_lo": -1.211778,
+      "money_ex_hi": -0.160876,
+      "lift": 0.133976,
+      "lift_lo": 0.083442,
+      "lift_hi": 0.185237,
+      "mae": -1.806407,
+      "D_n": 226,
+      "D_target": 0.840708,
+      "D_net": 0.14168,
+      "D_all": 0.536035,
+      "ENS_n": 120,
+      "ENS_target": 0.866667,
+      "ENS_net": 0.067468,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B3",
+     "rule": "B|d_ret_5d_roll_std:up1 & Z|ATRP:0:0",
+     "text": "d_ret_5d_roll_std rose on the session before the pick & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "fcp",
+       "d_ret_5d_roll_std",
+       ">"
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": false,
+      "score": 0.777375,
+      "screen": 0.790991,
+      "n": 598,
+      "per_year": 89.736853,
+      "earn_lo": 0.019348,
+      "years": 7,
+      "bad_years": 3,
+      "nodip": 0.826087,
+      "nodip_ex": 0.278683,
+      "nodip_lo": 0.777375,
+      "nodip_hi": 0.871276,
+      "nodip_ex_lo": 0.227993,
+      "nodip_ex_hi": 0.325846,
+      "runner": 0.063545,
+      "runner_ex": -0.129982,
+      "runner_lo": 0.035714,
+      "runner_hi": 0.09363,
+      "runner_ex_lo": -0.162471,
+      "runner_ex_hi": -0.097833,
+      "money": 0.175877,
+      "money_ex": -0.628345,
+      "money_lo": -0.264587,
+      "money_hi": 0.567078,
+      "money_ex_lo": -1.222483,
+      "money_ex_hi": -0.069342,
+      "lift": 0.104399,
+      "lift_lo": 0.075577,
+      "lift_hi": 0.141825,
+      "mae": -1.787467,
+      "D_n": 425,
+      "D_target": 0.837647,
+      "D_net": 0.301247,
+      "D_all": 0.536035,
+      "ENS_n": 247,
+      "ENS_target": 0.801619,
+      "ENS_net": -0.217412,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B4",
+     "rule": "B|d_vol_yz_50:up1 & Z|ATRP:0:0",
+     "text": "d_vol_yz_50 rose on the session before the pick & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "fcp",
+       "d_vol_yz_50",
+       ">"
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": false,
+      "score": 0.771473,
+      "screen": 0.782768,
+      "n": 553,
+      "per_year": 82.98408,
+      "earn_lo": 0.009403,
+      "years": 7,
+      "bad_years": 3,
+      "nodip": 0.820976,
+      "nodip_ex": 0.273572,
+      "nodip_lo": 0.771473,
+      "nodip_hi": 0.867929,
+      "nodip_ex_lo": 0.223481,
+      "nodip_ex_hi": 0.322749,
+      "runner": 0.057866,
+      "runner_ex": -0.135661,
+      "runner_lo": 0.036875,
+      "runner_hi": 0.079594,
+      "runner_ex_lo": -0.162857,
+      "runner_ex_hi": -0.110408,
+      "money": 0.271712,
+      "money_ex": -0.532511,
+      "money_lo": -0.130175,
+      "money_hi": 0.638358,
+      "money_ex_lo": -1.084536,
+      "money_ex_hi": -0.006953,
+      "lift": 0.09209,
+      "lift_lo": 0.061167,
+      "lift_hi": 0.128984,
+      "mae": -1.771872,
+      "D_n": 398,
+      "D_target": 0.831658,
+      "D_net": 0.377645,
+      "D_all": 0.536035,
+      "ENS_n": 217,
+      "ENS_target": 0.792627,
+      "ENS_net": -0.007007,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B5",
+     "rule": "Z|ATRP:0:0 & Z|RSI14:0:1",
+     "text": "ATRP ATR14 % of the close: below 2 at the signal close & RSI14 RSI 14: below 50 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "zone:RSI14",
+       "in",
+       [
+        0,
+        1
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": [
+       {
+        "year": 2024,
+        "n": 1,
+        "diff": 0.508662,
+        "net": -1.56558
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.768468,
+      "screen": 0.788261,
+      "n": 224,
+      "per_year": 33.613804,
+      "earn_lo": -0.020957,
+      "years": 7,
+      "bad_years": 5,
+      "nodip": 0.839286,
+      "nodip_ex": 0.291881,
+      "nodip_lo": 0.768468,
+      "nodip_hi": 0.897639,
+      "nodip_ex_lo": 0.219512,
+      "nodip_ex_hi": 0.351594,
+      "runner": 0.044643,
+      "runner_ex": -0.148884,
+      "runner_lo": 0.017334,
+      "runner_hi": 0.078947,
+      "runner_ex_lo": -0.179771,
+      "runner_ex_hi": -0.112715,
+      "money": 0.120314,
+      "money_ex": -0.683908,
+      "money_lo": -0.443933,
+      "money_hi": 0.615293,
+      "money_ex_lo": -1.365295,
+      "money_ex_hi": -0.064024,
+      "lift": 0.158337,
+      "lift_lo": 0.09937,
+      "lift_hi": 0.214186,
+      "mae": -1.808191,
+      "D_n": 135,
+      "D_target": 0.881481,
+      "D_net": 0.105319,
+      "D_all": 0.536035,
+      "ENS_n": 129,
+      "ENS_target": 0.821705,
+      "ENS_net": 0.130999,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B6",
+     "rule": "V|d_cmf20_rmean50:LO & Z|ATRP:0:0",
+     "text": "d_cmf20_rmean50 in its lower half at the signal close (<= -0.0140144) & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_cmf20_rmean50",
+       null,
+       -0.014014
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": false,
+      "score": 0.767856,
+      "screen": 0.779586,
+      "n": 533,
+      "per_year": 79.982847,
+      "earn_lo": -0.010168,
+      "years": 7,
+      "bad_years": 5,
+      "nodip": 0.816135,
+      "nodip_ex": 0.268731,
+      "nodip_lo": 0.767856,
+      "nodip_hi": 0.859651,
+      "nodip_ex_lo": 0.221342,
+      "nodip_ex_hi": 0.315661,
+      "runner": 0.06379,
+      "runner_ex": -0.129737,
+      "runner_lo": 0.03885,
+      "runner_hi": 0.090263,
+      "runner_ex_lo": -0.159491,
+      "runner_ex_hi": -0.099886,
+      "money": 0.141067,
+      "money_ex": -0.663156,
+      "money_lo": -0.251339,
+      "money_hi": 0.49724,
+      "money_ex_lo": -1.2214,
+      "money_ex_hi": -0.131528,
+      "lift": 0.140149,
+      "lift_lo": 0.102881,
+      "lift_hi": 0.182514,
+      "mae": -1.825822,
+      "D_n": 368,
+      "D_target": 0.809783,
+      "D_net": 0.303999,
+      "D_all": 0.536035,
+      "ENS_n": 224,
+      "ENS_target": 0.839286,
+      "ENS_net": -0.116398,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B7",
+     "rule": "B|d_slope_stability:upup & Z|ATRP:0:0",
+     "text": "d_slope_stability rose on the session before the pick and on the signal day & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "pat",
+       "d_slope_stability",
+       1,
+       1
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": false,
+      "score": 0.767295,
+      "screen": 0.779826,
+      "n": 415,
+      "per_year": 62.275575,
+      "earn_lo": 0.007173,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.821687,
+      "nodip_ex": 0.274282,
+      "nodip_lo": 0.767295,
+      "nodip_hi": 0.874652,
+      "nodip_ex_lo": 0.220993,
+      "nodip_ex_hi": 0.331016,
+      "runner": 0.050602,
+      "runner_ex": -0.142925,
+      "runner_lo": 0.025576,
+      "runner_hi": 0.080991,
+      "runner_ex_lo": -0.171413,
+      "runner_ex_hi": -0.110762,
+      "money": 0.043928,
+      "money_ex": -0.760294,
+      "money_lo": -0.363834,
+      "money_hi": 0.426832,
+      "money_ex_lo": -1.296646,
+      "money_ex_hi": -0.209962,
+      "lift": 0.101575,
+      "lift_lo": 0.064758,
+      "lift_hi": 0.144725,
+      "mae": -1.799997,
+      "D_n": 289,
+      "D_target": 0.83737,
+      "D_net": 0.284736,
+      "D_all": 0.536035,
+      "ENS_n": 182,
+      "ENS_target": 0.802198,
+      "ENS_net": -0.288487,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B8",
+     "rule": "B|d_amihud_20:upup & Z|ATRP:0:0",
+     "text": "d_amihud_20 rose on the session before the pick and on the signal day & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "pat",
+       "d_amihud_20",
+       1,
+       1
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.76494,
+      "screen": 0.78281,
+      "n": 338,
+      "per_year": 50.72083,
+      "earn_lo": -0.005904,
+      "years": 7,
+      "bad_years": 3,
+      "nodip": 0.825444,
+      "nodip_ex": 0.27804,
+      "nodip_lo": 0.76494,
+      "nodip_hi": 0.876266,
+      "nodip_ex_lo": 0.218924,
+      "nodip_ex_hi": 0.331747,
+      "runner": 0.044379,
+      "runner_ex": -0.149148,
+      "runner_lo": 0.023322,
+      "runner_hi": 0.068751,
+      "runner_ex_lo": -0.174386,
+      "runner_ex_hi": -0.121079,
+      "money": 0.362675,
+      "money_ex": -0.441548,
+      "money_lo": -0.052692,
+      "money_hi": 0.69673,
+      "money_ex_lo": -0.984592,
+      "money_ex_hi": 0.049823,
+      "lift": 0.102306,
+      "lift_lo": 0.062797,
+      "lift_hi": 0.152603,
+      "mae": -1.671026,
+      "D_n": 258,
+      "D_target": 0.821705,
+      "D_net": 0.359164,
+      "D_all": 0.536035,
+      "ENS_n": 129,
+      "ENS_target": 0.821705,
+      "ENS_net": 0.157486,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B9",
+     "rule": "V|d_wq_12:HI & Z|ATRP:0:0",
+     "text": "d_wq_12 in its upper half at the signal close (> 0.05) & ATRP ATR14 % of the close: below 2 at the signal close",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_wq_12",
+       0.05,
+       null
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        0
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.764459,
+      "screen": 0.779717,
+      "n": 748,
+      "per_year": 112.246097,
+      "earn_lo": 0.00873,
+      "years": 7,
+      "bad_years": 5,
+      "nodip": 0.812834,
+      "nodip_ex": 0.26543,
+      "nodip_lo": 0.764459,
+      "nodip_hi": 0.853817,
+      "nodip_ex_lo": 0.218913,
+      "nodip_ex_hi": 0.30768,
+      "runner": 0.058824,
+      "runner_ex": -0.134704,
+      "runner_lo": 0.040441,
+      "runner_hi": 0.07972,
+      "runner_ex_lo": -0.157917,
+      "runner_ex_hi": -0.110367,
+      "money": 0.070091,
+      "money_ex": -0.734131,
+      "money_lo": -0.304684,
+      "money_hi": 0.401642,
+      "money_ex_lo": -1.264439,
+      "money_ex_hi": -0.216262,
+      "lift": 0.106738,
+      "lift_lo": 0.082458,
+      "lift_hi": 0.136237,
+      "mae": -1.882393,
+      "D_n": 522,
+      "D_target": 0.82567,
+      "D_net": 0.1273,
+      "D_all": 0.536035,
+      "ENS_n": 332,
+      "ENS_target": 0.798193,
+      "ENS_net": 0.029219,
+      "ENS_all": 0.549336
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B10",
+     "rule": "V|d_slope_stability:H3 & Z|ATRP:0:1 & C|NIFTY_DN",
+     "text": "d_slope_stability in its high third at the signal close (> 5.05058) & ATRP ATR14 % of the close: below 3 at the signal close & NIFTY below its 50-day average",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_slope_stability",
+       5.050578,
+       null
+      ],
+      [
+       "zone:ATRP",
+       "in",
+       [
+        0,
+        1
+       ]
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       "<",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.762706,
+      "screen": 0.783188,
+      "n": 398,
+      "per_year": 59.724528,
+      "earn_lo": 0.032229,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.831658,
+      "nodip_ex": 0.284254,
+      "nodip_lo": 0.762706,
+      "nodip_hi": 0.881991,
+      "nodip_ex_lo": 0.214893,
+      "nodip_ex_hi": 0.337036,
+      "runner": 0.075377,
+      "runner_ex": -0.11815,
+      "runner_lo": 0.039388,
+      "runner_hi": 0.11628,
+      "runner_ex_lo": -0.154935,
+      "runner_ex_hi": -0.074734,
+      "money": 0.61714,
+      "money_ex": -0.187082,
+      "money_lo": -0.010833,
+      "money_hi": 1.076764,
+      "money_ex_lo": -0.864512,
+      "money_ex_hi": 0.379482,
+      "lift": 0.137062,
+      "lift_lo": 0.099341,
+      "lift_hi": 0.199046,
+      "mae": -2.012375,
+      "D_n": 252,
+      "D_target": 0.853175,
+      "D_net": 0.816854,
+      "D_all": 0.536035,
+      "ENS_n": 188,
+      "ENS_target": 0.803191,
+      "ENS_net": 0.303229,
+      "ENS_all": 0.549336
+     }
+    }
+   ],
+   "out_of_sample": {
+    "list": "nodip",
+    "picks": 1261,
+    "nodip": 0.702617,
+    "nodip_all": 0.545778,
+    "nodip_ex_lo": 0.114715,
+    "nodip_ex_hi": 0.195777,
+    "money": 0.636097,
+    "money_all": 0.601,
+    "money_ex_lo": -0.492145,
+    "money_ex_hi": 0.53809,
+    "verdict": "HOLDS"
+   }
+  },
+  "runner": {
+   "target": "runner share (no dip and the D5 close 5% or more above the D1 open)",
+   "candidates": [
+    {
+     "list": "qualified",
+     "id": "U1",
+     "rule": "B|w_ret_13w:dn0 & C|BEARSTATE & G|dn1",
+     "text": "w_ret_13w fell on the signal day & a bearish stock state at the pick (S08/S09) & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fc",
+       "w_ret_13w",
+       "<"
+      ],
+      [
+       "snap:pre_state_bearish",
+       ">",
+       0.5
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2023,
+        "n": 10,
+        "diff": 0.367312,
+        "net": 8.972382
+       },
+       {
+        "year": 2024,
+        "n": 22,
+        "diff": 0.197692,
+        "net": 3.6469
+       },
+       {
+        "year": 2025,
+        "n": 49,
+        "diff": 0.188423,
+        "net": 4.386821
+       },
+       {
+        "year": 2026,
+        "n": 15,
+        "diff": 0.091439,
+        "net": 2.927008
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.345732,
+      "screen": 0.348135,
+      "n": 193,
+      "per_year": 28.961894,
+      "earn_lo": 0.057558,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.658031,
+      "nodip_ex": 0.110627,
+      "nodip_lo": 0.569376,
+      "nodip_hi": 0.742272,
+      "nodip_ex_lo": 0.02366,
+      "nodip_ex_hi": 0.193692,
+      "runner": 0.435233,
+      "runner_ex": 0.241706,
+      "runner_lo": 0.345732,
+      "runner_hi": 0.522995,
+      "runner_ex_lo": 0.158526,
+      "runner_ex_hi": 0.324214,
+      "money": 4.407132,
+      "money_ex": 3.602909,
+      "money_lo": 2.113727,
+      "money_hi": 6.78315,
+      "money_ex_lo": 1.568597,
+      "money_ex_hi": 5.799779,
+      "lift": 0.148021,
+      "lift_lo": 0.095991,
+      "lift_hi": 0.206412,
+      "mae": -5.169551,
+      "D_n": 144,
+      "D_target": 0.423611,
+      "D_net": 3.725098,
+      "D_all": 0.198445,
+      "ENS_n": 151,
+      "ENS_target": 0.450331,
+      "ENS_net": 4.953893,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "U2",
+     "rule": "V|d_ll_run:H3 & W|1 & G|dn1",
+     "text": "d_ll_run in its high third at the signal close (> 2) & D1 (the buy day) is a Tuesday & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_ll_run",
+       2.0,
+       null
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 14,
+        "diff": 0.110486,
+        "net": 1.296964
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.323798,
+      "screen": 0.318527,
+      "n": 186,
+      "per_year": 27.911463,
+      "earn_lo": 0.012591,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.634409,
+      "nodip_ex": 0.087004,
+      "nodip_lo": 0.546248,
+      "nodip_hi": 0.720513,
+      "nodip_ex_lo": -0.001024,
+      "nodip_ex_hi": 0.173983,
+      "runner": 0.403226,
+      "runner_ex": 0.209699,
+      "runner_lo": 0.323798,
+      "runner_hi": 0.485459,
+      "runner_ex_lo": 0.129642,
+      "runner_ex_hi": 0.289688,
+      "money": 3.726289,
+      "money_ex": 2.922066,
+      "money_lo": 1.848049,
+      "money_hi": 5.947023,
+      "money_ex_lo": 1.035171,
+      "money_ex_hi": 5.073544,
+      "lift": 0.094655,
+      "lift_lo": 0.036881,
+      "lift_hi": 0.155849,
+      "mae": -5.153022,
+      "D_n": 130,
+      "D_target": 0.4,
+      "D_net": 3.731776,
+      "D_all": 0.198445,
+      "ENS_n": 149,
+      "ENS_target": 0.42953,
+      "ENS_net": 4.120677,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "U3",
+     "rule": "W|1 & C|VOL_ELEV & G|dn1",
+     "text": "D1 (the buy day) is a Tuesday & volatility elevated at the pick & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "snap:pre_state_vol_elevated",
+       ">",
+       0.5
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.306218,
+      "screen": 0.296596,
+      "n": 224,
+      "per_year": 33.613804,
+      "earn_lo": 0.016016,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.59375,
+      "nodip_ex": 0.046346,
+      "nodip_lo": 0.497047,
+      "nodip_hi": 0.688273,
+      "nodip_ex_lo": -0.050045,
+      "nodip_ex_hi": 0.140965,
+      "runner": 0.388393,
+      "runner_ex": 0.194866,
+      "runner_lo": 0.306218,
+      "runner_hi": 0.482464,
+      "runner_ex_lo": 0.115621,
+      "runner_ex_hi": 0.283838,
+      "money": 4.114464,
+      "money_ex": 3.310242,
+      "money_lo": 2.293235,
+      "money_hi": 6.064489,
+      "money_ex_lo": 1.584828,
+      "money_ex_hi": 5.174673,
+      "lift": 0.10008,
+      "lift_lo": 0.046338,
+      "lift_hi": 0.160515,
+      "mae": -5.232017,
+      "D_n": 164,
+      "D_target": 0.378049,
+      "D_net": 4.274808,
+      "D_all": 0.198445,
+      "ENS_n": 161,
+      "ENS_target": 0.416149,
+      "ENS_net": 4.464679,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "U4",
+     "rule": "V|d_mdi14:HI & X|bigup & W|1",
+     "text": "d_mdi14 in its upper half at the signal close (> 19.0334) & the signal day rose 2% or more & D1 (the buy day) is a Tuesday",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_mdi14",
+       19.033434,
+       null
+      ],
+      [
+       "px",
+       "ret1",
+       ">=",
+       2
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 16,
+        "diff": 0.137272,
+        "net": -1.45577
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.302552,
+      "screen": 0.302123,
+      "n": 195,
+      "per_year": 29.262017,
+      "earn_lo": 0.044766,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.630769,
+      "nodip_ex": 0.083365,
+      "nodip_lo": 0.526875,
+      "nodip_hi": 0.721664,
+      "nodip_ex_lo": -0.016676,
+      "nodip_ex_hi": 0.171289,
+      "runner": 0.415385,
+      "runner_ex": 0.221857,
+      "runner_lo": 0.302552,
+      "runner_hi": 0.515287,
+      "runner_ex_lo": 0.111421,
+      "runner_ex_hi": 0.319578,
+      "money": 3.829593,
+      "money_ex": 3.025371,
+      "money_lo": 1.31641,
+      "money_hi": 6.11607,
+      "money_ex_lo": 0.638014,
+      "money_ex_hi": 5.210441,
+      "lift": 0.077968,
+      "lift_lo": 0.033343,
+      "lift_hi": 0.135662,
+      "mae": -4.222419,
+      "D_n": 136,
+      "D_target": 0.367647,
+      "D_net": 2.239791,
+      "D_all": 0.198445,
+      "ENS_n": 102,
+      "ENS_target": 0.460784,
+      "ENS_net": 4.666653,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "U5",
+     "rule": "V|d_wq_26:HI & W|1 & G|dn1",
+     "text": "d_wq_26 in its upper half at the signal close (> -0.579066) & D1 (the buy day) is a Tuesday & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_wq_26",
+       -0.579066,
+       null
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 10,
+        "diff": 0.124772,
+        "net": 3.362825
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.298116,
+      "screen": 0.298526,
+      "n": 186,
+      "per_year": 27.911463,
+      "earn_lo": 0.003158,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.645161,
+      "nodip_ex": 0.097757,
+      "nodip_lo": 0.559506,
+      "nodip_hi": 0.734046,
+      "nodip_ex_lo": 0.01226,
+      "nodip_ex_hi": 0.182895,
+      "runner": 0.38172,
+      "runner_ex": 0.188193,
+      "runner_lo": 0.298116,
+      "runner_hi": 0.461967,
+      "runner_ex_lo": 0.103417,
+      "runner_ex_hi": 0.2673,
+      "money": 3.395414,
+      "money_ex": 2.591191,
+      "money_lo": 1.759174,
+      "money_hi": 4.958767,
+      "money_ex_lo": 1.021091,
+      "money_ex_hi": 4.129039,
+      "lift": 0.100061,
+      "lift_lo": 0.049277,
+      "lift_hi": 0.154573,
+      "mae": -4.858096,
+      "D_n": 121,
+      "D_target": 0.355372,
+      "D_net": 3.23706,
+      "D_all": 0.198445,
+      "ENS_n": 130,
+      "ENS_target": 0.4,
+      "ENS_net": 3.298724,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B1",
+     "rule": "B|w_ret_13w:dn0 & C|BEARSTATE & G|dn1",
+     "text": "w_ret_13w fell on the signal day & a bearish stock state at the pick (S08/S09) & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fc",
+       "w_ret_13w",
+       "<"
+      ],
+      [
+       "snap:pre_state_bearish",
+       ">",
+       0.5
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2023,
+        "n": 10,
+        "diff": 0.367312,
+        "net": 8.972382
+       },
+       {
+        "year": 2024,
+        "n": 22,
+        "diff": 0.197692,
+        "net": 3.6469
+       },
+       {
+        "year": 2025,
+        "n": 49,
+        "diff": 0.188423,
+        "net": 4.386821
+       },
+       {
+        "year": 2026,
+        "n": 15,
+        "diff": 0.091439,
+        "net": 2.927008
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.345732,
+      "screen": 0.348135,
+      "n": 193,
+      "per_year": 28.961894,
+      "earn_lo": 0.057558,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.658031,
+      "nodip_ex": 0.110627,
+      "nodip_lo": 0.569376,
+      "nodip_hi": 0.742272,
+      "nodip_ex_lo": 0.02366,
+      "nodip_ex_hi": 0.193692,
+      "runner": 0.435233,
+      "runner_ex": 0.241706,
+      "runner_lo": 0.345732,
+      "runner_hi": 0.522995,
+      "runner_ex_lo": 0.158526,
+      "runner_ex_hi": 0.324214,
+      "money": 4.407132,
+      "money_ex": 3.602909,
+      "money_lo": 2.113727,
+      "money_hi": 6.78315,
+      "money_ex_lo": 1.568597,
+      "money_ex_hi": 5.799779,
+      "lift": 0.148021,
+      "lift_lo": 0.095991,
+      "lift_hi": 0.206412,
+      "mae": -5.169551,
+      "D_n": 144,
+      "D_target": 0.423611,
+      "D_net": 3.725098,
+      "D_all": 0.198445,
+      "ENS_n": 151,
+      "ENS_target": 0.450331,
+      "ENS_net": 4.953893,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B2",
+     "rule": "V|d_ll_run:H3 & W|1 & G|dn1",
+     "text": "d_ll_run in its high third at the signal close (> 2) & D1 (the buy day) is a Tuesday & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_ll_run",
+       2.0,
+       null
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 14,
+        "diff": 0.110486,
+        "net": 1.296964
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.323798,
+      "screen": 0.318527,
+      "n": 186,
+      "per_year": 27.911463,
+      "earn_lo": 0.012591,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.634409,
+      "nodip_ex": 0.087004,
+      "nodip_lo": 0.546248,
+      "nodip_hi": 0.720513,
+      "nodip_ex_lo": -0.001024,
+      "nodip_ex_hi": 0.173983,
+      "runner": 0.403226,
+      "runner_ex": 0.209699,
+      "runner_lo": 0.323798,
+      "runner_hi": 0.485459,
+      "runner_ex_lo": 0.129642,
+      "runner_ex_hi": 0.289688,
+      "money": 3.726289,
+      "money_ex": 2.922066,
+      "money_lo": 1.848049,
+      "money_hi": 5.947023,
+      "money_ex_lo": 1.035171,
+      "money_ex_hi": 5.073544,
+      "lift": 0.094655,
+      "lift_lo": 0.036881,
+      "lift_hi": 0.155849,
+      "mae": -5.153022,
+      "D_n": 130,
+      "D_target": 0.4,
+      "D_net": 3.731776,
+      "D_all": 0.198445,
+      "ENS_n": 149,
+      "ENS_target": 0.42953,
+      "ENS_net": 4.120677,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B3",
+     "rule": "W|1 & C|VOL_ELEV & G|dn1",
+     "text": "D1 (the buy day) is a Tuesday & volatility elevated at the pick & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "snap:pre_state_vol_elevated",
+       ">",
+       0.5
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.306218,
+      "screen": 0.296596,
+      "n": 224,
+      "per_year": 33.613804,
+      "earn_lo": 0.016016,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.59375,
+      "nodip_ex": 0.046346,
+      "nodip_lo": 0.497047,
+      "nodip_hi": 0.688273,
+      "nodip_ex_lo": -0.050045,
+      "nodip_ex_hi": 0.140965,
+      "runner": 0.388393,
+      "runner_ex": 0.194866,
+      "runner_lo": 0.306218,
+      "runner_hi": 0.482464,
+      "runner_ex_lo": 0.115621,
+      "runner_ex_hi": 0.283838,
+      "money": 4.114464,
+      "money_ex": 3.310242,
+      "money_lo": 2.293235,
+      "money_hi": 6.064489,
+      "money_ex_lo": 1.584828,
+      "money_ex_hi": 5.174673,
+      "lift": 0.10008,
+      "lift_lo": 0.046338,
+      "lift_hi": 0.160515,
+      "mae": -5.232017,
+      "D_n": 164,
+      "D_target": 0.378049,
+      "D_net": 4.274808,
+      "D_all": 0.198445,
+      "ENS_n": 161,
+      "ENS_target": 0.416149,
+      "ENS_net": 4.464679,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B4",
+     "rule": "V|d_mdi14:HI & X|bigup & W|1",
+     "text": "d_mdi14 in its upper half at the signal close (> 19.0334) & the signal day rose 2% or more & D1 (the buy day) is a Tuesday",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_mdi14",
+       19.033434,
+       null
+      ],
+      [
+       "px",
+       "ret1",
+       ">=",
+       2
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 16,
+        "diff": 0.137272,
+        "net": -1.45577
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.302552,
+      "screen": 0.302123,
+      "n": 195,
+      "per_year": 29.262017,
+      "earn_lo": 0.044766,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.630769,
+      "nodip_ex": 0.083365,
+      "nodip_lo": 0.526875,
+      "nodip_hi": 0.721664,
+      "nodip_ex_lo": -0.016676,
+      "nodip_ex_hi": 0.171289,
+      "runner": 0.415385,
+      "runner_ex": 0.221857,
+      "runner_lo": 0.302552,
+      "runner_hi": 0.515287,
+      "runner_ex_lo": 0.111421,
+      "runner_ex_hi": 0.319578,
+      "money": 3.829593,
+      "money_ex": 3.025371,
+      "money_lo": 1.31641,
+      "money_hi": 6.11607,
+      "money_ex_lo": 0.638014,
+      "money_ex_hi": 5.210441,
+      "lift": 0.077968,
+      "lift_lo": 0.033343,
+      "lift_hi": 0.135662,
+      "mae": -4.222419,
+      "D_n": 136,
+      "D_target": 0.367647,
+      "D_net": 2.239791,
+      "D_all": 0.198445,
+      "ENS_n": 102,
+      "ENS_target": 0.460784,
+      "ENS_net": 4.666653,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B5",
+     "rule": "V|d_wq_26:HI & W|1 & G|dn1",
+     "text": "d_wq_26 in its upper half at the signal close (> -0.579066) & D1 (the buy day) is a Tuesday & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_wq_26",
+       -0.579066,
+       null
+      ],
+      [
+       "weekday_d1",
+       "==",
+       1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 7,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 10,
+        "diff": 0.124772,
+        "net": 3.362825
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.298116,
+      "screen": 0.298526,
+      "n": 186,
+      "per_year": 27.911463,
+      "earn_lo": 0.003158,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.645161,
+      "nodip_ex": 0.097757,
+      "nodip_lo": 0.559506,
+      "nodip_hi": 0.734046,
+      "nodip_ex_lo": 0.01226,
+      "nodip_ex_hi": 0.182895,
+      "runner": 0.38172,
+      "runner_ex": 0.188193,
+      "runner_lo": 0.298116,
+      "runner_hi": 0.461967,
+      "runner_ex_lo": 0.103417,
+      "runner_ex_hi": 0.2673,
+      "money": 3.395414,
+      "money_ex": 2.591191,
+      "money_lo": 1.759174,
+      "money_hi": 4.958767,
+      "money_ex_lo": 1.021091,
+      "money_ex_hi": 4.129039,
+      "lift": 0.100061,
+      "lift_lo": 0.049277,
+      "lift_hi": 0.154573,
+      "mae": -4.858096,
+      "D_n": 121,
+      "D_target": 0.355372,
+      "D_net": 3.23706,
+      "D_all": 0.198445,
+      "ENS_n": 130,
+      "ENS_target": 0.4,
+      "ENS_net": 3.298724,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B6",
+     "rule": "V|d_ema20_angle_deg:L3 & Z|RS20:2:2",
+     "text": "d_ema20_angle_deg in its low third at the signal close (<= -0.226484) & RS20 20-session return minus Smallcap 250's (pts): 5 and above at the signal close",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_ema20_angle_deg",
+       null,
+       -0.226484
+      ],
+      [
+       "zone:RS20",
+       "in",
+       [
+        2,
+        2
+       ]
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.297777,
+      "screen": 0.301876,
+      "n": 191,
+      "per_year": 28.661771,
+      "earn_lo": 0.06609,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.565445,
+      "nodip_ex": 0.018041,
+      "nodip_lo": 0.475889,
+      "nodip_hi": 0.655738,
+      "nodip_ex_lo": -0.068082,
+      "nodip_ex_hi": 0.106103,
+      "runner": 0.371728,
+      "runner_ex": 0.178201,
+      "runner_lo": 0.297777,
+      "runner_hi": 0.447067,
+      "runner_ex_lo": 0.105087,
+      "runner_ex_hi": 0.251998,
+      "money": 3.032072,
+      "money_ex": 2.227849,
+      "money_lo": 1.237393,
+      "money_hi": 4.816713,
+      "money_ex_lo": 0.501209,
+      "money_ex_hi": 3.960092,
+      "lift": 0.120519,
+      "lift_lo": 0.063966,
+      "lift_hi": 0.178896,
+      "mae": -5.782031,
+      "D_n": 125,
+      "D_target": 0.384,
+      "D_net": 3.361783,
+      "D_all": 0.198445,
+      "ENS_n": 137,
+      "ENS_target": 0.350365,
+      "ENS_net": 2.284797,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B7",
+     "rule": "V|d_range_pct:H3 & B|d_dist_from_52wl:dndn & G|dn1",
+     "text": "d_range_pct in its high third at the signal close (> 4.90722) & d_dist_from_52wl fell on the session before the pick and on the signal day & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_range_pct",
+       4.907217,
+       null
+      ],
+      [
+       "pat",
+       "d_dist_from_52wl",
+       -1,
+       -1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.296525,
+      "screen": 0.298284,
+      "n": 775,
+      "per_year": 116.297761,
+      "earn_lo": 0.042025,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.554839,
+      "nodip_ex": 0.007434,
+      "nodip_lo": 0.503554,
+      "nodip_hi": 0.610561,
+      "nodip_ex_lo": -0.04058,
+      "nodip_ex_hi": 0.059644,
+      "runner": 0.343226,
+      "runner_ex": 0.149699,
+      "runner_lo": 0.296525,
+      "runner_hi": 0.394288,
+      "runner_ex_lo": 0.108489,
+      "runner_ex_hi": 0.194243,
+      "money": 3.055138,
+      "money_ex": 2.250916,
+      "money_lo": 1.489339,
+      "money_hi": 4.623798,
+      "money_ex_lo": 0.902645,
+      "money_ex_hi": 3.624771,
+      "lift": 0.078314,
+      "lift_lo": 0.052807,
+      "lift_hi": 0.104664,
+      "mae": -6.159254,
+      "D_n": 537,
+      "D_target": 0.357542,
+      "D_net": 3.278342,
+      "D_all": 0.198445,
+      "ENS_n": 565,
+      "ENS_target": 0.350442,
+      "ENS_net": 3.207225,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B8",
+     "rule": "V|d_ema20_angle_z252:L3 & Z|RS20:2:2 & C|VIX_HIGH",
+     "text": "d_ema20_angle_z252 in its low third at the signal close (<= -0.793322) & RS20 20-session return minus Smallcap 250's (pts): 5 and above at the signal close & India VIX in the upper half of its last year",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_ema20_angle_z252",
+       null,
+       -0.793322
+      ],
+      [
+       "zone:RS20",
+       "in",
+       [
+        2,
+        2
+       ]
+      ],
+      [
+       "snap:pre_vix_pct250",
+       ">=",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 0.288766,
+      "screen": 0.297441,
+      "n": 173,
+      "per_year": 25.960661,
+      "earn_lo": 0.031748,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.520231,
+      "nodip_ex": -0.027173,
+      "nodip_lo": 0.409091,
+      "nodip_hi": 0.633517,
+      "nodip_ex_lo": -0.139691,
+      "nodip_ex_hi": 0.083297,
+      "runner": 0.381503,
+      "runner_ex": 0.187976,
+      "runner_lo": 0.288766,
+      "runner_hi": 0.477273,
+      "runner_ex_lo": 0.097321,
+      "runner_ex_hi": 0.27995,
+      "money": 2.690398,
+      "money_ex": 1.886175,
+      "money_lo": -0.009584,
+      "money_hi": 5.505779,
+      "money_ex_lo": -0.725585,
+      "money_ex_hi": 4.540714,
+      "lift": 0.090767,
+      "lift_lo": 0.042962,
+      "lift_hi": 0.141524,
+      "mae": -6.533243,
+      "D_n": 102,
+      "D_target": 0.421569,
+      "D_net": 3.567948,
+      "D_all": 0.198445,
+      "ENS_n": 130,
+      "ENS_target": 0.361538,
+      "ENS_net": 2.018783,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B9",
+     "rule": "B|d_wq_35:upup & P|agree & G|dn1",
+     "text": "d_wq_35 rose on the session before the pick and on the signal day & the other engine picked it too (its ranks 1-10) & D1 opens 1% or more below the signal close (pre-open)",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_wq_35",
+       1,
+       1
+      ],
+      [
+       "agree",
+       ">=",
+       1
+      ],
+      [
+       "gap_d1",
+       "<=",
+       -1
+      ]
+     ],
+     "evidence": {
+      "years_better": 7,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.288134,
+      "screen": 0.28726,
+      "n": 280,
+      "per_year": 42.017256,
+      "earn_lo": 0.003531,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.542857,
+      "nodip_ex": -0.004547,
+      "nodip_lo": 0.476369,
+      "nodip_hi": 0.611486,
+      "nodip_ex_lo": -0.068111,
+      "nodip_ex_hi": 0.062131,
+      "runner": 0.35,
+      "runner_ex": 0.156473,
+      "runner_lo": 0.288134,
+      "runner_hi": 0.416674,
+      "runner_ex_lo": 0.098836,
+      "runner_ex_hi": 0.218516,
+      "money": 3.310865,
+      "money_ex": 2.506642,
+      "money_lo": 1.84838,
+      "money_hi": 4.884608,
+      "money_ex_lo": 1.209619,
+      "money_ex_hi": 3.963205,
+      "lift": 0.111111,
+      "lift_lo": 0.064373,
+      "lift_hi": 0.160696,
+      "mae": -5.784666,
+      "D_n": 280,
+      "D_target": 0.35,
+      "D_net": 3.310865,
+      "D_all": 0.198445,
+      "ENS_n": 280,
+      "ENS_target": 0.35,
+      "ENS_net": 3.310865,
+      "ENS_all": 0.200849
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B10",
+     "rule": "V|d_mdi14:HI & B|d_n_5pct_up_60:up0",
+     "text": "d_mdi14 in its upper half at the signal close (> 19.0334) & d_n_5pct_up_60 rose on the signal day",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_mdi14",
+       19.033434,
+       null
+      ],
+      [
+       "fc",
+       "d_n_5pct_up_60",
+       ">"
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 0.27868,
+      "screen": 0.302395,
+      "n": 169,
+      "per_year": 25.360415,
+      "earn_lo": 0.072577,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.56213,
+      "nodip_ex": 0.014726,
+      "nodip_lo": 0.441482,
+      "nodip_hi": 0.673917,
+      "nodip_ex_lo": -0.103094,
+      "nodip_ex_hi": 0.121311,
+      "runner": 0.402367,
+      "runner_ex": 0.20884,
+      "runner_lo": 0.27868,
+      "runner_hi": 0.506331,
+      "runner_ex_lo": 0.093824,
+      "runner_ex_hi": 0.307173,
+      "money": 4.207908,
+      "money_ex": 3.403685,
+      "money_lo": 1.001687,
+      "money_hi": 6.915027,
+      "money_ex_lo": 0.441847,
+      "money_ex_hi": 5.960977,
+      "lift": 0.027336,
+      "lift_lo": -0.029437,
+      "lift_hi": 0.087477,
+      "mae": -5.855666,
+      "D_n": 121,
+      "D_target": 0.363636,
+      "D_net": 2.854768,
+      "D_all": 0.198445,
+      "ENS_n": 84,
+      "ENS_target": 0.392857,
+      "ENS_net": 4.594903,
+      "ENS_all": 0.200849
+     }
+    }
+   ],
+   "out_of_sample": {
+    "list": "runner",
+    "picks": 693,
+    "runner": 0.24531,
+    "runner_all": 0.180777,
+    "runner_ex_lo": 0.027347,
+    "runner_ex_hi": 0.108197,
+    "money": 0.901676,
+    "money_all": 0.601,
+    "money_ex_lo": -0.940518,
+    "money_ex_hi": 1.63119,
+    "verdict": "HOLDS"
+   }
+  },
+  "money": {
+   "target": "net % per trade at the D1 open",
+   "candidates": [
+    {
+     "list": "qualified",
+     "id": "M1",
+     "rule": "B|d_atr_pct:upup & Z|IDX:1:1 & C|NIFTY_UP",
+     "text": "d_atr_pct rose on the session before the pick and on the signal day & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & NIFTY above its 50-day average",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_atr_pct",
+       1,
+       1
+      ],
+      [
+       "zone:IDX",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 2.346158,
+      "screen": 2.710487,
+      "n": 204,
+      "per_year": 30.612572,
+      "earn_lo": 0.523677,
+      "years": 5,
+      "bad_years": 0,
+      "nodip": 0.568627,
+      "nodip_ex": 0.021223,
+      "nodip_lo": 0.448818,
+      "nodip_hi": 0.682552,
+      "nodip_ex_lo": -0.097647,
+      "nodip_ex_hi": 0.130392,
+      "runner": 0.338235,
+      "runner_ex": 0.144708,
+      "runner_lo": 0.237754,
+      "runner_hi": 0.452388,
+      "runner_ex_lo": 0.043753,
+      "runner_ex_hi": 0.255292,
+      "money": 5.029241,
+      "money_ex": 4.225018,
+      "money_lo": 2.346158,
+      "money_hi": 7.681412,
+      "money_ex_lo": 1.552489,
+      "money_ex_hi": 6.804335,
+      "lift": 0.114352,
+      "lift_lo": -0.467856,
+      "lift_hi": 0.807239,
+      "mae": -4.796645,
+      "D_n": 147,
+      "D_target": 5.054096,
+      "D_net": 5.054096,
+      "D_all": 0.852968,
+      "ENS_n": 161,
+      "ENS_target": 5.335271,
+      "ENS_net": 5.335271,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "M2",
+     "rule": "Z|IDX:1:1 & P|agree & C|BEARSTATE",
+     "text": "IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & the other engine picked it too (its ranks 1-10) & a bearish stock state at the pick (S08/S09)",
+     "qualifies": true,
+     "conds": [
+      [
+       "zone:IDX",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "agree",
+       ">=",
+       1
+      ],
+      [
+       "snap:pre_state_bearish",
+       ">",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 2.229865,
+      "screen": 2.964582,
+      "n": 196,
+      "per_year": 29.412079,
+      "earn_lo": 0.389333,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.586735,
+      "nodip_ex": 0.03933,
+      "nodip_lo": 0.479761,
+      "nodip_hi": 0.704828,
+      "nodip_ex_lo": -0.06312,
+      "nodip_ex_hi": 0.155967,
+      "runner": 0.321429,
+      "runner_ex": 0.127901,
+      "runner_lo": 0.235286,
+      "runner_hi": 0.409698,
+      "runner_ex_lo": 0.042166,
+      "runner_ex_hi": 0.213138,
+      "money": 4.980314,
+      "money_ex": 4.176092,
+      "money_lo": 2.229865,
+      "money_hi": 7.237651,
+      "money_ex_lo": 1.467147,
+      "money_ex_hi": 6.370992,
+      "lift": 0.983424,
+      "lift_lo": 0.12902,
+      "lift_hi": 2.110517,
+      "mae": -4.472149,
+      "D_n": 196,
+      "D_target": 4.980314,
+      "D_net": 4.980314,
+      "D_all": 0.852968,
+      "ENS_n": 196,
+      "ENS_target": 4.980314,
+      "ENS_net": 4.980314,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "M3",
+     "rule": "Z|IDX:0:1 & C|BEARSTATE & C|NIFTY_UP",
+     "text": "IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 0 to 1 at the signal close & a bearish stock state at the pick (S08/S09) & NIFTY above its 50-day average",
+     "qualifies": true,
+     "conds": [
+      [
+       "zone:IDX",
+       "in",
+       [
+        0,
+        1
+       ]
+      ],
+      [
+       "snap:pre_state_bearish",
+       ">",
+       0.5
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 2.075557,
+      "screen": 2.766283,
+      "n": 286,
+      "per_year": 42.917625,
+      "earn_lo": 0.090762,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.562937,
+      "nodip_ex": 0.015533,
+      "nodip_lo": 0.454545,
+      "nodip_hi": 0.677648,
+      "nodip_ex_lo": -0.092072,
+      "nodip_ex_hi": 0.129652,
+      "runner": 0.29021,
+      "runner_ex": 0.096683,
+      "runner_lo": 0.193947,
+      "runner_hi": 0.384015,
+      "runner_ex_lo": 0.003277,
+      "runner_ex_hi": 0.188236,
+      "money": 4.892593,
+      "money_ex": 4.088371,
+      "money_lo": 2.075557,
+      "money_hi": 7.600943,
+      "money_ex_lo": 1.328861,
+      "money_ex_hi": 6.736005,
+      "lift": 0.284297,
+      "lift_lo": -0.127203,
+      "lift_hi": 0.770827,
+      "mae": -4.427071,
+      "D_n": 212,
+      "D_target": 5.205107,
+      "D_net": 5.205107,
+      "D_all": 0.852968,
+      "ENS_n": 204,
+      "ENS_target": 5.105975,
+      "ENS_net": 5.105975,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "M4",
+     "rule": "B|d_upside_vol_ratio:upup & Z|VIX5:0:0 & C|VIX_HIGH",
+     "text": "d_upside_vol_ratio rose on the session before the pick and on the signal day & VIX5 India VIX 5-session change %: below -10 at the signal close & India VIX in the upper half of its last year",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_upside_vol_ratio",
+       1,
+       1
+      ],
+      [
+       "zone:VIX5",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "snap:pre_vix_pct250",
+       ">=",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 75,
+        "diff": 1.991361,
+        "net": 2.41943
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.996093,
+      "screen": 2.765678,
+      "n": 435,
+      "per_year": 65.276808,
+      "earn_lo": 0.36326,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.636782,
+      "nodip_ex": 0.089377,
+      "nodip_lo": 0.548595,
+      "nodip_hi": 0.713971,
+      "nodip_ex_lo": 0.00195,
+      "nodip_ex_hi": 0.166621,
+      "runner": 0.34023,
+      "runner_ex": 0.146703,
+      "runner_lo": 0.256892,
+      "runner_hi": 0.412869,
+      "runner_ex_lo": 0.067779,
+      "runner_ex_hi": 0.217063,
+      "money": 4.050993,
+      "money_ex": 3.24677,
+      "money_lo": 1.996093,
+      "money_hi": 6.000997,
+      "money_ex_lo": 1.350938,
+      "money_ex_hi": 5.084402,
+      "lift": 0.951262,
+      "lift_lo": 0.279096,
+      "lift_hi": 1.544883,
+      "mae": -3.670688,
+      "D_n": 268,
+      "D_target": 4.594575,
+      "D_net": 4.594575,
+      "D_all": 0.852968,
+      "ENS_n": 253,
+      "ENS_target": 4.006548,
+      "ENS_net": 4.006548,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "qualified",
+     "id": "M5",
+     "rule": "V|d_atr_pct:HI & V|d_realvol_20:L3 & C|VIX_HIGH",
+     "text": "d_atr_pct in its upper half at the signal close (> 4.67053) & d_realvol_20 in its low third at the signal close (<= 33.7557) & India VIX in the upper half of its last year",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_atr_pct",
+       4.670529,
+       null
+      ],
+      [
+       "fv",
+       "d_realvol_20",
+       null,
+       33.755718
+      ],
+      [
+       "snap:pre_vix_pct250",
+       ">=",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.967174,
+      "screen": 2.544044,
+      "n": 226,
+      "per_year": 33.913928,
+      "earn_lo": 0.3919,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.584071,
+      "nodip_ex": 0.036667,
+      "nodip_lo": 0.502242,
+      "nodip_hi": 0.671499,
+      "nodip_ex_lo": -0.042047,
+      "nodip_ex_hi": 0.119163,
+      "runner": 0.292035,
+      "runner_ex": 0.098508,
+      "runner_lo": 0.211109,
+      "runner_hi": 0.381168,
+      "runner_ex_lo": 0.022678,
+      "runner_ex_hi": 0.184376,
+      "money": 4.31097,
+      "money_ex": 3.506747,
+      "money_lo": 1.967174,
+      "money_hi": 6.944949,
+      "money_ex_lo": 1.301538,
+      "money_ex_hi": 5.961725,
+      "lift": 2.057896,
+      "lift_lo": 0.604271,
+      "lift_hi": 3.727554,
+      "mae": -4.607778,
+      "D_n": 147,
+      "D_target": 4.537425,
+      "D_net": 4.537425,
+      "D_all": 0.852968,
+      "ENS_n": 145,
+      "ENS_target": 3.538617,
+      "ENS_net": 3.538617,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B1",
+     "rule": "Z|RSI14:0:0 & Z|IDX:1:1 & C|NIFTY_UP",
+     "text": "RSI14 RSI 14: below 30 at the signal close & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & NIFTY above its 50-day average",
+     "qualifies": false,
+     "conds": [
+      [
+       "zone:RSI14",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "zone:IDX",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 2.466496,
+      "screen": 2.808665,
+      "n": 221,
+      "per_year": 33.16362,
+      "earn_lo": -1.172405,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.574661,
+      "nodip_ex": 0.027256,
+      "nodip_lo": 0.466644,
+      "nodip_hi": 0.66671,
+      "nodip_ex_lo": -0.080625,
+      "nodip_ex_hi": 0.121131,
+      "runner": 0.298643,
+      "runner_ex": 0.105115,
+      "runner_lo": 0.21942,
+      "runner_hi": 0.39025,
+      "runner_ex_lo": 0.026282,
+      "runner_ex_hi": 0.197138,
+      "money": 5.142065,
+      "money_ex": 4.337842,
+      "money_lo": 2.466496,
+      "money_hi": 8.015703,
+      "money_ex_lo": 1.671432,
+      "money_ex_hi": 7.128925,
+      "lift": 0.159023,
+      "lift_lo": -0.412264,
+      "lift_hi": 1.4058,
+      "mae": -4.354356,
+      "D_n": 175,
+      "D_target": 5.623108,
+      "D_net": 5.623108,
+      "D_all": 0.852968,
+      "ENS_n": 155,
+      "ENS_target": 5.588986,
+      "ENS_net": 5.588986,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B2",
+     "rule": "B|d_atr_pct:upup & Z|IDX:1:1 & C|NIFTY_UP",
+     "text": "d_atr_pct rose on the session before the pick and on the signal day & IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & NIFTY above its 50-day average",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_atr_pct",
+       1,
+       1
+      ],
+      [
+       "zone:IDX",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 4,
+      "years": 4,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 2.346158,
+      "screen": 2.710487,
+      "n": 204,
+      "per_year": 30.612572,
+      "earn_lo": 0.523677,
+      "years": 5,
+      "bad_years": 0,
+      "nodip": 0.568627,
+      "nodip_ex": 0.021223,
+      "nodip_lo": 0.448818,
+      "nodip_hi": 0.682552,
+      "nodip_ex_lo": -0.097647,
+      "nodip_ex_hi": 0.130392,
+      "runner": 0.338235,
+      "runner_ex": 0.144708,
+      "runner_lo": 0.237754,
+      "runner_hi": 0.452388,
+      "runner_ex_lo": 0.043753,
+      "runner_ex_hi": 0.255292,
+      "money": 5.029241,
+      "money_ex": 4.225018,
+      "money_lo": 2.346158,
+      "money_hi": 7.681412,
+      "money_ex_lo": 1.552489,
+      "money_ex_hi": 6.804335,
+      "lift": 0.114352,
+      "lift_lo": -0.467856,
+      "lift_hi": 0.807239,
+      "mae": -4.796645,
+      "D_n": 147,
+      "D_target": 5.054096,
+      "D_net": 5.054096,
+      "D_all": 0.852968,
+      "ENS_n": 161,
+      "ENS_target": 5.335271,
+      "ENS_net": 5.335271,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B3",
+     "rule": "Z|TREND:1:1 & Z|RSI14:0:0 & C|VOL_ELEV",
+     "text": "TREND close vs EMA50 and EMA200: between at the signal close & RSI14 RSI 14: below 30 at the signal close & volatility elevated at the pick",
+     "qualifies": false,
+     "conds": [
+      [
+       "zone:TREND",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "zone:RSI14",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "snap:pre_state_vol_elevated",
+       ">",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 2.276147,
+      "screen": 2.617755,
+      "n": 325,
+      "per_year": 48.770029,
+      "earn_lo": -0.1118,
+      "years": 7,
+      "bad_years": 2,
+      "nodip": 0.566154,
+      "nodip_ex": 0.01875,
+      "nodip_lo": 0.498855,
+      "nodip_hi": 0.634504,
+      "nodip_ex_lo": -0.048398,
+      "nodip_ex_hi": 0.089431,
+      "runner": 0.304615,
+      "runner_ex": 0.111088,
+      "runner_lo": 0.23999,
+      "runner_hi": 0.370268,
+      "runner_ex_lo": 0.048153,
+      "runner_ex_hi": 0.173374,
+      "money": 3.614703,
+      "money_ex": 2.81048,
+      "money_lo": 2.276147,
+      "money_hi": 4.827376,
+      "money_ex_lo": 1.526985,
+      "money_ex_hi": 3.959888,
+      "lift": 1.174659,
+      "lift_lo": 0.226912,
+      "lift_hi": 2.126926,
+      "mae": -5.042088,
+      "D_n": 242,
+      "D_target": 3.509804,
+      "D_net": 3.509804,
+      "D_all": 0.852968,
+      "ENS_n": 265,
+      "ENS_target": 3.519332,
+      "ENS_net": 3.519332,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B4",
+     "rule": "Z|IDX:1:1 & P|agree & C|BEARSTATE",
+     "text": "IDX NIFTY 50, Midcap 150, Smallcap 250 closing at or above their 50-session mean (how many): 1 at the signal close & the other engine picked it too (its ranks 1-10) & a bearish stock state at the pick (S08/S09)",
+     "qualifies": true,
+     "conds": [
+      [
+       "zone:IDX",
+       "in",
+       [
+        1,
+        1
+       ]
+      ],
+      [
+       "agree",
+       ">=",
+       1
+      ],
+      [
+       "snap:pre_state_bearish",
+       ">",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 2.229865,
+      "screen": 2.964582,
+      "n": 196,
+      "per_year": 29.412079,
+      "earn_lo": 0.389333,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.586735,
+      "nodip_ex": 0.03933,
+      "nodip_lo": 0.479761,
+      "nodip_hi": 0.704828,
+      "nodip_ex_lo": -0.06312,
+      "nodip_ex_hi": 0.155967,
+      "runner": 0.321429,
+      "runner_ex": 0.127901,
+      "runner_lo": 0.235286,
+      "runner_hi": 0.409698,
+      "runner_ex_lo": 0.042166,
+      "runner_ex_hi": 0.213138,
+      "money": 4.980314,
+      "money_ex": 4.176092,
+      "money_lo": 2.229865,
+      "money_hi": 7.237651,
+      "money_ex_lo": 1.467147,
+      "money_ex_hi": 6.370992,
+      "lift": 0.983424,
+      "lift_lo": 0.12902,
+      "lift_hi": 2.110517,
+      "mae": -4.472149,
+      "D_n": 196,
+      "D_target": 4.980314,
+      "D_net": 4.980314,
+      "D_all": 0.852968,
+      "ENS_n": 196,
+      "ENS_target": 4.980314,
+      "ENS_net": 4.980314,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B5",
+     "rule": "V|x_relvol_20:L3 & Z|RET20:0:0 & C|NIFTY_UP",
+     "text": "x_relvol_20 in its low third at the signal close (<= 2.35963) & RET20 20-session return %: below -10 at the signal close & NIFTY above its 50-day average",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "x_relvol_20",
+       null,
+       2.359631
+      ],
+      [
+       "zone:RET20",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 2.227606,
+      "screen": 3.310223,
+      "n": 371,
+      "per_year": 55.672864,
+      "earn_lo": -1.631533,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.636119,
+      "nodip_ex": 0.088714,
+      "nodip_lo": 0.522431,
+      "nodip_hi": 0.727048,
+      "nodip_ex_lo": -0.022683,
+      "nodip_ex_hi": 0.1751,
+      "runner": 0.363881,
+      "runner_ex": 0.170354,
+      "runner_lo": 0.203456,
+      "runner_hi": 0.515048,
+      "runner_ex_lo": 0.016293,
+      "runner_ex_hi": 0.319216,
+      "money": 4.914483,
+      "money_ex": 4.11026,
+      "money_lo": 2.227606,
+      "money_hi": 7.402384,
+      "money_ex_lo": 1.476552,
+      "money_ex_hi": 6.503273,
+      "lift": 0.770434,
+      "lift_lo": 0.142041,
+      "lift_hi": 1.624902,
+      "mae": -3.454738,
+      "D_n": 215,
+      "D_target": 5.791296,
+      "D_net": 5.791296,
+      "D_all": 0.852968,
+      "ENS_n": 255,
+      "ENS_target": 4.183342,
+      "ENS_net": 4.183342,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B6",
+     "rule": "B|d_upside_vol_ratio:upup & Z|VIX5:0:0 & C|VIX_HIGH",
+     "text": "d_upside_vol_ratio rose on the session before the pick and on the signal day & VIX5 India VIX 5-session change %: below -10 at the signal close & India VIX in the upper half of its last year",
+     "qualifies": true,
+     "conds": [
+      [
+       "pat",
+       "d_upside_vol_ratio",
+       1,
+       1
+      ],
+      [
+       "zone:VIX5",
+       "in",
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "snap:pre_vix_pct250",
+       ">=",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": [
+       {
+        "year": 2026,
+        "n": 75,
+        "diff": 1.991361,
+        "net": 2.41943
+       }
+      ]
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.996093,
+      "screen": 2.765678,
+      "n": 435,
+      "per_year": 65.276808,
+      "earn_lo": 0.36326,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.636782,
+      "nodip_ex": 0.089377,
+      "nodip_lo": 0.548595,
+      "nodip_hi": 0.713971,
+      "nodip_ex_lo": 0.00195,
+      "nodip_ex_hi": 0.166621,
+      "runner": 0.34023,
+      "runner_ex": 0.146703,
+      "runner_lo": 0.256892,
+      "runner_hi": 0.412869,
+      "runner_ex_lo": 0.067779,
+      "runner_ex_hi": 0.217063,
+      "money": 4.050993,
+      "money_ex": 3.24677,
+      "money_lo": 1.996093,
+      "money_hi": 6.000997,
+      "money_ex_lo": 1.350938,
+      "money_ex_hi": 5.084402,
+      "lift": 0.951262,
+      "lift_lo": 0.279096,
+      "lift_hi": 1.544883,
+      "mae": -3.670688,
+      "D_n": 268,
+      "D_target": 4.594575,
+      "D_net": 4.594575,
+      "D_all": 0.852968,
+      "ENS_n": 253,
+      "ENS_target": 4.006548,
+      "ENS_net": 4.006548,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B7",
+     "rule": "V|d_atr_pct:HI & V|d_realvol_20:L3 & C|VIX_HIGH",
+     "text": "d_atr_pct in its upper half at the signal close (> 4.67053) & d_realvol_20 in its low third at the signal close (<= 33.7557) & India VIX in the upper half of its last year",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_atr_pct",
+       4.670529,
+       null
+      ],
+      [
+       "fv",
+       "d_realvol_20",
+       null,
+       33.755718
+      ],
+      [
+       "snap:pre_vix_pct250",
+       ">=",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.967174,
+      "screen": 2.544044,
+      "n": 226,
+      "per_year": 33.913928,
+      "earn_lo": 0.3919,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.584071,
+      "nodip_ex": 0.036667,
+      "nodip_lo": 0.502242,
+      "nodip_hi": 0.671499,
+      "nodip_ex_lo": -0.042047,
+      "nodip_ex_hi": 0.119163,
+      "runner": 0.292035,
+      "runner_ex": 0.098508,
+      "runner_lo": 0.211109,
+      "runner_hi": 0.381168,
+      "runner_ex_lo": 0.022678,
+      "runner_ex_hi": 0.184376,
+      "money": 4.31097,
+      "money_ex": 3.506747,
+      "money_lo": 1.967174,
+      "money_hi": 6.944949,
+      "money_ex_lo": 1.301538,
+      "money_ex_hi": 5.961725,
+      "lift": 2.057896,
+      "lift_lo": 0.604271,
+      "lift_hi": 3.727554,
+      "mae": -4.607778,
+      "D_n": 147,
+      "D_target": 4.537425,
+      "D_net": 4.537425,
+      "D_all": 0.852968,
+      "ENS_n": 145,
+      "ENS_target": 3.538617,
+      "ENS_net": 3.538617,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B8",
+     "rule": "V|d_atr_pct:H3 & V|x_relvol_20:L3 & C|NIFTY_UP",
+     "text": "d_atr_pct in its high third at the signal close (> 5.33687) & x_relvol_20 in its low third at the signal close (<= 2.35963) & NIFTY above its 50-day average",
+     "qualifies": false,
+     "conds": [
+      [
+       "fv",
+       "d_atr_pct",
+       5.336866,
+       null
+      ],
+      [
+       "fv",
+       "x_relvol_20",
+       null,
+       2.359631
+      ],
+      [
+       "snap:pre_nifty_vs_ma50",
+       ">",
+       0.0
+      ]
+     ],
+     "evidence": {
+      "years_better": 5,
+      "years": 5,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": false,
+      "engines_agree": true,
+      "score": 1.832004,
+      "screen": 3.640872,
+      "n": 312,
+      "per_year": 46.819228,
+      "earn_lo": -1.5973,
+      "years": 6,
+      "bad_years": 1,
+      "nodip": 0.63141,
+      "nodip_ex": 0.084006,
+      "nodip_lo": 0.463153,
+      "nodip_hi": 0.735647,
+      "nodip_ex_lo": -0.079148,
+      "nodip_ex_hi": 0.183564,
+      "runner": 0.432692,
+      "runner_ex": 0.239165,
+      "runner_lo": 0.243588,
+      "runner_hi": 0.567505,
+      "runner_ex_lo": 0.055536,
+      "runner_ex_hi": 0.370335,
+      "money": 5.725979,
+      "money_ex": 4.921756,
+      "money_lo": 1.832004,
+      "money_hi": 8.553581,
+      "money_ex_lo": 1.02769,
+      "money_ex_hi": 7.609606,
+      "lift": 0.889133,
+      "lift_lo": -0.081968,
+      "lift_hi": 1.868426,
+      "mae": -3.954245,
+      "D_n": 191,
+      "D_target": 5.811135,
+      "D_net": 5.811135,
+      "D_all": 0.852968,
+      "ENS_n": 198,
+      "ENS_target": 5.553452,
+      "ENS_net": 5.553452,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B9",
+     "rule": "V|x_relvol_20:L3 & X|bigup & C|NOT_OVEREXT",
+     "text": "x_relvol_20 in its low third at the signal close (<= 2.35963) & the signal day rose 2% or more & not overextended at the pick",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "x_relvol_20",
+       null,
+       2.359631
+      ],
+      [
+       "px",
+       "ret1",
+       ">=",
+       2
+      ],
+      [
+       "snap:pre_state_overextended",
+       "<",
+       0.5
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 7,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.794088,
+      "screen": 2.544297,
+      "n": 582,
+      "per_year": 87.335867,
+      "earn_lo": 0.708781,
+      "years": 7,
+      "bad_years": 1,
+      "nodip": 0.572165,
+      "nodip_ex": 0.024761,
+      "nodip_lo": 0.492527,
+      "nodip_hi": 0.645564,
+      "nodip_ex_lo": -0.045245,
+      "nodip_ex_hi": 0.093039,
+      "runner": 0.32646,
+      "runner_ex": 0.132933,
+      "runner_lo": 0.232067,
+      "runner_hi": 0.409027,
+      "runner_ex_lo": 0.046563,
+      "runner_ex_hi": 0.210625,
+      "money": 3.938804,
+      "money_ex": 3.134582,
+      "money_lo": 1.794088,
+      "money_hi": 6.042809,
+      "money_ex_lo": 1.100917,
+      "money_ex_hi": 5.032771,
+      "lift": 0.455267,
+      "lift_lo": -0.130395,
+      "lift_hi": 1.089107,
+      "mae": -4.72449,
+      "D_n": 407,
+      "D_target": 4.021063,
+      "D_net": 4.021063,
+      "D_all": 0.852968,
+      "ENS_n": 295,
+      "ENS_target": 4.275975,
+      "ENS_net": 4.275975,
+      "ENS_all": 0.904068
+     }
+    },
+    {
+     "list": "open list (best by score)",
+     "id": "B10",
+     "rule": "V|d_donch_pos_50_rmean50:L3 & B|d_n_5pct_up_60:up0",
+     "text": "d_donch_pos_50_rmean50 in its low third at the signal close (<= 0.515133) & d_n_5pct_up_60 rose on the signal day",
+     "qualifies": true,
+     "conds": [
+      [
+       "fv",
+       "d_donch_pos_50_rmean50",
+       null,
+       0.515133
+      ],
+      [
+       "fc",
+       "d_n_5pct_up_60",
+       ">"
+      ]
+     ],
+     "evidence": {
+      "years_better": 6,
+      "years": 6,
+      "replay": []
+     },
+     "stats": {
+      "qualifies": true,
+      "engines_agree": true,
+      "score": 1.780768,
+      "screen": 2.469354,
+      "n": 192,
+      "per_year": 28.811832,
+      "earn_lo": 1.165814,
+      "years": 7,
+      "bad_years": 0,
+      "nodip": 0.567708,
+      "nodip_ex": 0.020304,
+      "nodip_lo": 0.460201,
+      "nodip_hi": 0.671126,
+      "nodip_ex_lo": -0.081483,
+      "nodip_ex_hi": 0.119183,
+      "runner": 0.385417,
+      "runner_ex": 0.19189,
+      "runner_lo": 0.278393,
+      "runner_hi": 0.483521,
+      "runner_ex_lo": 0.090137,
+      "runner_ex_hi": 0.284781,
+      "money": 4.586672,
+      "money_ex": 3.782449,
+      "money_lo": 1.780768,
+      "money_hi": 7.130573,
+      "money_ex_lo": 1.181698,
+      "money_ex_hi": 6.204393,
+      "lift": 0.942054,
+      "lift_lo": -0.294105,
+      "lift_hi": 2.376442,
+      "mae": -5.872698,
+      "D_n": 144,
+      "D_target": 3.633149,
+      "D_net": 3.633149,
+      "D_all": 0.852968,
+      "ENS_n": 85,
+      "ENS_target": 5.142682,
+      "ENS_net": 5.142682,
+      "ENS_all": 0.904068
+     }
+    }
+   ],
+   "out_of_sample": {
+    "list": "money",
+    "picks": 862,
+    "money": 1.267893,
+    "money_all": 0.601,
+    "money_ex_lo": -0.732126,
+    "money_ex_hi": 1.86728,
+    "verdict": "NOT SHOWN"
+   }
+  }
+ },
+ "dip_arm": "ZONES_20261108_001: 21538 setup trades, 7403 of them IN their picks zone",
+ "sha256": "1a5e6bef6ef755001fbc260c0ebc2dd6c6b7e545243487a67db30629db2b47a7"
+}
