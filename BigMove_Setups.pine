@@ -1,0 +1,900 @@
+//@version=5
+// BigMove Setups v1.2 (setuplab v1.1, 9 Nov 2026) - the seven frozen setups on ANY daily NSE chart, the calm / jumpy
+// lane of the entry tree (TREE.json), tomorrow's trigger closes, alerts and Pine Screener columns.
+// v1.2: everything sits on the chart and moves with it - a summary box beside the last bar (hover it for details),
+// small triangles for past entries, a thin lane strip at the top, trigger lines only when near; the table is optional.
+//
+// What it does: every session is treated as a possible signal day (a "pseudo-pick"); its watch days are the next
+// five sessions; a setup marks the FIRST open in that window where all its conditions hold - setuplab's own rule.
+// The features are recomputed from this chart's bars with production's formulas (features_daily.py): -DI 14,
+// EMA20 angle, Bollinger 20, WorldQuant 16 / 40 / 44 (ranks over all history since the start date), the 13-week
+// return of the last completed week. A mark is coloured by the setup's zone (setuplab zones, whole market):
+// green = inside, orange = outside, grey = the setup has no zone.
+// The table (after the close): what FIRES / is ARMED at the next open; for every other setup, what TOMORROW's close
+// needs for the open after it (BUILDING): a close below a price (exact for the dip, Bollinger and EMA20-angle
+// conditions), the feature changes still to be read at tomorrow's close, the bad-week read (only on a new week's
+// first session). The LANE: CALM when the simple 14-session ATR / close is at or below the year's cut-off, JUMPY above.
+// Alerts: a setup fires; fires or is armed; a building setup's trigger close within N%; one alert() with the details.
+//
+// Read this first:
+//  * The setups were built and tested on the model's picks (D / ENS ranks 1-10). On other stocks a mark has only
+//    the whole-market study behind it (setuplab zones, ZONES.md) - nothing more.
+//  * TradingView's bars are split-adjusted; production's cache comes from Kite. Where the two differ (a dividend
+//    adjustment, a volume figure), a value - and so a mark - can differ. WorldQuant 16 can differ by one rank step
+//    where two 5-day covariances tie exactly (a price stuck for days).
+//  * Production's panel has no row for a stock's first 312 sessions: no mark before that (as the backtest).
+//  * S1's 1-ATR dip and the lane use pick_meta's ATR (a simple 14-session mean of the true range / close).
+//  * The Pine Screener computes on the last 500 bars only (and alerts may load fewer bars than the chart): the
+//    WorldQuant ranks then run over fewer bars, so S1 / S3 / C3 can differ from the chart now and then. The chart, with
+//    the full history, is the reference; setuplab's nightly scan is the record.
+//  * Use it after the close: during the session the last bar is still forming.
+// Mirror: setuplab\tests\pine_mirror.py computes exactly this, bar by bar; the self-test compares it with production.
+indicator("BigMove Setups", shorttitle = "BM Setups", overlay = true, max_labels_count = 500, max_bars_back = 600)
+
+VERSION = "BigMove Setups v1.2"
+// the frozen setups (FROZEN_SETUPS.json, sha256 483f1539324f3ae5) - the self-test checks this line against it
+SETUPS = "S1:d_wq_16_change>0,pc_vs_d1_atr<-1,w_ret_13w_change<0|S2:d_mdi14_diff5_change>0,gap_pct<0,w_ret_13w_change<0|S3:d_wq_40_change>0,pc_vs_d1<-3,w_ret_13w_change<0|C1:d_mdi14_change>0,pc_vs_d1<-2,w_ret_13w_change<0|C2:d_ema20_angle_deg_change<0,pc_vs_d1<-3,w_ret_13w_change<0|C3:d_bb_bw_20_change>0,d_ema20_angle_deg_change<0,d_wq_44_change>0,w_ret_13w_change<0|N1:d_bb_pctb_20<0,pc_vs_d1<-2"
+// the zone dimensions (setuplab ZONE_DIMS): edges, or #n = a code with n values - the self-test checks this line
+DIMS = "ATRP:2,3,4.5|ATRX:0.85,1.15|TREND:#3|RET20:-10,0,10|RSI14:30,50,70|DD52:-30,-15,-5|RVOL:0.7,1.5|RS20:-5,5|IDX:#4|VIXP:33.333333333333336,66.66666666666667|VIX5:-10,10|NIFTY20:-3,3"
+WARMUP = 312
+FEATS = "d_wq_16,d_mdi14_diff5,d_wq_40,d_mdi14,d_ema20_angle_deg,d_bb_bw_20,d_wq_44,w_ret_13w,d_bb_pctb_20"
+// the entry tree's lane cut-offs (TREE.json, sha256 5cd4571765c2de80): s_atr14 above = JUMPY - the self-test checks this line
+CUTS = "2021:0.05765407554671968|2022:0.05641745604231174|2023:0.05751632249834517|2024:0.053513261982317366|2025:0.05492950265998241|2026:0.05521984442292925"
+
+zoneCode = input.text_area("BMSZ1|S1=|S2=|S3=|C1=|C2=|C3=|N1=", "Zone code", tooltip = "Paste PINE_ZONE_CODE.txt from setuplab zones (once). An empty zone = no filter for that setup.", display = display.none)
+histStart = input.time(timestamp("2015-01-01T00:00:00+05:30"), "History start", tooltip = "The cache's history starts 2015-01-01 (or the listing). The WorldQuant ranks run over all bars since this date: keep it, or a value can differ from production.", display = display.none)
+showList = input.string("S1,S2,S3,C1,C2,C3,N1", "Setups to mark", display = display.none)
+onlyIn = input.bool(false, "Mark only entries inside the setup's zone", display = display.none)
+showBox = input.bool(true, "Summary box beside the last bar", display = display.none)
+laneMode = input.string("Strip", "Calm / jumpy history", options = ["Strip", "Background", "Off"], display = display.none)
+linePct = input.float(5.0, "Trigger lines: only within this % of the close", minval = 0.0, step = 0.5, display = display.none)
+showTable = input.bool(false, "Detail table (fixed on the screen)", display = display.none)
+laterCuts = input.string("", "Lane cut-offs after 2026 (year:percent|...)", tooltip = "Each new year's cut-off as setuplab recorded it (tree --cutoff-year), in percent of the close, e.g. 2027:5.43. A year without one shows no lane.", display = display.none)
+nearPct = input.float(2.0, "Alert: a trigger close within this % of the close", minval = 0.0, step = 0.5, display = display.none)
+
+// ---------------------------------------------------------------------------------------------- bars since the start
+var int n = 0
+inHist = time >= histStart
+if inHist
+    n += 1
+hS = inHist ? high : na
+vS = inHist ? volume : na
+cS = inHist ? close : na
+
+// ------------------------------------------------------------------------------------------------------- helpers
+ewmStep(float y, int cnt, float x, float alpha) =>
+    cnt == 0 ? x : (1 - alpha) * y + alpha * x
+
+xrankPush(float[] a, float x) =>
+    float r = na
+    if not na(x)
+        int lo = 0
+        int hi = array.size(a)
+        while lo < hi
+            int mid = math.floor((lo + hi) / 2)
+            if array.get(a, mid) < x
+                lo := mid + 1
+            else
+                hi := mid
+        array.insert(a, lo, x)
+        int sz = array.size(a)
+        if sz >= 60
+            int a2 = lo
+            int b2 = sz
+            while a2 < b2
+                int m2 = math.floor((a2 + b2) / 2)
+                if array.get(a, m2) <= x
+                    a2 := m2 + 1
+                else
+                    b2 := m2
+            r := (lo + 1 + a2) / 2.0 / sz
+    r
+
+covW(float a, float b, int w, int minp) =>
+    float sa = 0.0
+    float sb = 0.0
+    int cnt = 0
+    for i = w - 1 to 0
+        if not na(a[i]) and not na(b[i])
+            sa += a[i]
+            sb += b[i]
+            cnt += 1
+    float r = na
+    if cnt >= minp
+        float ma = sa / cnt
+        float mb = sb / cnt
+        float s = 0.0
+        for i = w - 1 to 0
+            if not na(a[i]) and not na(b[i])
+                s += (a[i] - ma) * (b[i] - mb)
+        r := s / (cnt - 1)
+    r
+
+corrW(float a, float b, int w, int minp) =>
+    float sa = 0.0
+    float sb = 0.0
+    int cnt = 0
+    float amax = na
+    float amin = na
+    float bmax = na
+    float bmin = na
+    for i = w - 1 to 0
+        if not na(a[i]) and not na(b[i])
+            sa += a[i]
+            sb += b[i]
+            cnt += 1
+            amax := na(amax) ? a[i] : math.max(amax, a[i])
+            amin := na(amin) ? a[i] : math.min(amin, a[i])
+            bmax := na(bmax) ? b[i] : math.max(bmax, b[i])
+            bmin := na(bmin) ? b[i] : math.min(bmin, b[i])
+    float r = na
+    if cnt >= minp and amax != amin and bmax != bmin
+        float ma = sa / cnt
+        float mb = sb / cnt
+        float sab = 0.0
+        float saa = 0.0
+        float sbb = 0.0
+        for i = w - 1 to 0
+            if not na(a[i]) and not na(b[i])
+                sab += (a[i] - ma) * (b[i] - mb)
+                saa += (a[i] - ma) * (a[i] - ma)
+                sbb += (b[i] - mb) * (b[i] - mb)
+        r := sab / math.sqrt(saa * sbb)
+    r
+
+stdW(float a, int w, int minp) =>
+    float s = 0.0
+    int cnt = 0
+    for i = w - 1 to 0
+        if not na(a[i])
+            s += a[i]
+            cnt += 1
+    float r = na
+    if cnt >= minp
+        float m = s / cnt
+        float q = 0.0
+        for i = w - 1 to 0
+            if not na(a[i])
+                q += (a[i] - m) * (a[i] - m)
+        r := math.sqrt(q / (cnt - 1))
+    r
+
+// ---------------------------------------------------------------------------------- the setup features (production's)
+var float atrY = na
+var int atrC = 0
+var float pdmY = na
+var int pdmC = 0
+var float mdmY = na
+var int mdmC = 0
+var float e20Y = na
+var int e20C = 0
+var float e50Y = na
+var int e50C = 0
+var float e200Y = na
+var int e200C = 0
+var float agY = na
+var int agC = 0
+var float alY = na
+var int alC = 0
+var wcl = array.new_float()
+var int curWe = na
+var float curClose = na
+var rkH = array.new_float()
+var rkV = array.new_float()
+var rkC = array.new_float()
+var rkS = array.new_float()
+
+float atrv = na
+float trS = na
+float fSatr = na
+float fMdi = na
+float fAtrp = na
+float ema20 = na
+float fAngle = na
+float fBw = na
+float fPctb = na
+float fW13 = na
+float zAtrx = na
+float zTrend = na
+float zRet20 = na
+float zRsi = na
+float zDd52 = na
+float zRvol = na
+if inHist
+    float tr = n == 1 ? high - low : math.max(high - low, math.abs(high - close[1]), math.abs(low - close[1]))
+    atrY := ewmStep(atrY, atrC, tr, 1.0 / 14)
+    atrC += 1
+    float up = n > 1 ? high - high[1] : na
+    float dn = n > 1 ? low[1] - low : na
+    float pdm = (not na(up) and not na(dn) and up > dn and up > 0) ? up : 0.0
+    float mdm = (not na(up) and not na(dn) and dn > up and dn > 0) ? dn : 0.0
+    pdmY := ewmStep(pdmY, pdmC, pdm, 1.0 / 14)
+    pdmC += 1
+    mdmY := ewmStep(mdmY, mdmC, mdm, 1.0 / 14)
+    mdmC += 1
+    atrv := atrC >= 14 ? atrY : na
+    fMdi := (mdmC >= 14 and not na(atrv) and atrv != 0) ? 100 * mdmY / atrv : na
+    fAtrp := (not na(atrv) and close != 0) ? atrv / close * 100 : na
+    // pick_meta's s_atr14 (S1's 1-ATR dip): a SIMPLE 14-session mean of the true range from the second bar, / close
+    trS := n >= 2 ? math.max(high - low, math.abs(high - close[1]), math.abs(low - close[1])) : na
+    if n >= 15 and close != 0
+        float st = 0.0
+        for i = 13 to 0
+            st += trS[i]
+        fSatr := st / 14 / close
+    e20Y := ewmStep(e20Y, e20C, close, 2.0 / 21)
+    e20C += 1
+    ema20 := e20C >= 20 ? e20Y : na
+    if n >= 20
+        float s20 = 0.0
+        float mx = close
+        float mn = close
+        for i = 19 to 0
+            s20 += close[i]
+            mx := math.max(mx, close[i])
+            mn := math.min(mn, close[i])
+        float m20 = s20 / 20
+        float q20 = 0.0
+        for i = 19 to 0
+            q20 += (close[i] - m20) * (close[i] - m20)
+        float sd20 = math.sqrt(q20 / 19)
+        float width = mx != mn ? 4 * sd20 : 0.0
+        if width != 0
+            fPctb := math.min(5.0, math.max(-5.0, (close - (m20 - 2 * sd20)) / width))
+        if m20 != 0
+            fBw := width / m20
+    // the 13-week return of the last completed week (weeks end on Friday, as pandas W-FRI)
+    int dayNum = math.floor((time + 19800000) / 86400000)
+    int wd = (dayNum + 3) % 7
+    int we = dayNum + ((4 - wd) % 7 + 7) % 7
+    if not na(curWe) and we != curWe
+        array.push(wcl, curClose)
+    curWe := we
+    curClose := close
+    int nw = array.size(wcl)
+    fW13 := nw >= 14 ? (array.get(wcl, nw - 1) / array.get(wcl, nw - 14) - 1) * 100 : na
+    // zones: the stock's own values
+    e50Y := ewmStep(e50Y, e50C, close, 2.0 / 51)
+    e50C += 1
+    e200Y := ewmStep(e200Y, e200C, close, 2.0 / 201)
+    e200C += 1
+    if e50C >= 50 and e200C >= 200
+        zTrend := (close > e50Y and close > e200Y) ? 2.0 : (close < e50Y and close < e200Y) ? 0.0 : 1.0
+    zRet20 := n >= 21 ? (close / close[20] - 1) * 100 : na
+    if n >= 2
+        float dc = close - close[1]
+        agY := ewmStep(agY, agC, math.max(dc, 0.0), 1.0 / 14)
+        agC += 1
+        alY := ewmStep(alY, alC, math.max(-dc, 0.0), 1.0 / 14)
+        alC += 1
+        if agC >= 14
+            zRsi := alY == 0 ? (agY > 0 ? 100.0 : 50.0) : agY == 0 ? 0.0 : 100 - 100 / (1 + agY / alY)
+    if n >= 252
+        float pk = close
+        for i = 251 to 0
+            pk := math.max(pk, close[i])
+        zDd52 := (close / pk - 1) * 100
+    if n >= 21
+        float sv = 0.0
+        for i = 20 to 1
+            sv += volume[i]
+        float vm = sv / 20
+        zRvol := vm != 0 ? volume / vm : na
+
+ema20Prev = ema20[1]
+if inHist and not na(ema20) and not na(ema20Prev) and ema20Prev != 0
+    fAngle := math.todegrees(math.atan((ema20 - ema20Prev) / ema20Prev))
+fDiff5 = inHist and n > 5 ? fMdi - fMdi[5] : na
+// ATR expansion: ATR % / its mean of the last 50 sessions (all 50 known)
+float zAtrxSum = 0.0
+int zAtrxCnt = 0
+for i = 49 to 0
+    if not na(fAtrp[i])
+        zAtrxSum += fAtrp[i]
+        zAtrxCnt += 1
+zAtrx := inHist and zAtrxCnt == 50 ? fAtrp / (zAtrxSum / 50) : na
+
+// WorldQuant 16 / 40 / 44 (expanding ranks over every bar since the start; called on every bar)
+float rh = inHist ? xrankPush(rkH, hS) : na
+float rv = inHist ? xrankPush(rkV, vS) : na
+float cov5 = covW(rh, rv, 5, 3)
+float r16 = inHist ? xrankPush(rkC, cov5) : na
+fWq16 = not na(r16) ? -r16 : na
+float std10 = stdW(hS, 10, 5)
+float r40 = inHist ? xrankPush(rkS, std10) : na
+float c40 = corrW(hS, vS, 10, 5)
+fWq40 = not na(r40) and not na(c40) ? -r40 * c40 : na
+float c44 = corrW(hS, rv, 5, 5)
+fWq44 = not na(c44) ? -c44 : na
+
+// ------------------------------------------------------------------------------- zones: the market (index bars)
+idxCalc() =>
+    float m50 = ta.sma(close, 50)
+    float upv = na(m50) ? na : close >= m50 ? 1.0 : 0.0
+    float r20 = (close / close[20] - 1) * 100
+    [upv, r20]
+
+vixCalc() =>
+    float v5 = (close / close[5] - 1) * 100
+    int cnt = 0
+    int le = 0
+    for i = 249 to 0
+        if not na(close[i])
+            cnt += 1
+            if close[i] <= close
+                le += 1
+    float vp = cnt >= 60 ? le * 100.0 / cnt : na
+    [v5, vp]
+
+[upN, retN] = request.security("NSE:NIFTY", "D", idxCalc())
+[upM, retM] = request.security("NSE:NIFTYMIDCAP150", "D", idxCalc())
+[upSm, retSm] = request.security("NSE:NIFTYSMLCAP250", "D", idxCalc())
+[vix5, vixp] = request.security("NSE:INDIAVIX", "D", vixCalc())
+zIdx = na(upN) or na(upM) or na(upSm) ? na : upN + upM + upSm
+zRs20 = na(zRet20) or na(retSm) ? na : zRet20 - retSm
+
+// --------------------------------------------------------------------------------------- parsing (first bar only)
+var string[] sIds = array.new_string()
+var int[] sStart = array.new_int()
+var int[] sCount = array.new_int()
+var int[] cField = array.new_int()
+var int[] cChg = array.new_int()
+var int[] cOp = array.new_int()
+var float[] cVal = array.new_float()
+var float[] dEdges = array.new_float()
+var int[] dStart = array.new_int()
+var int[] dCount = array.new_int()
+var int[] dCode = array.new_int()
+var int[] zStart = array.new_int()
+var int[] zCount = array.new_int()
+var int[] zDim = array.new_int()
+var int[] zLo = array.new_int()
+var int[] zHi = array.new_int()
+var string zoneMsg = "no zone code"
+var string[] cName = array.new_string()
+var string[] zText = array.new_string()
+
+featId(string nm) =>
+    array.indexof(str.split(FEATS, ","), nm)
+
+dimId(string nm) =>
+    int r = -1
+    string[] ds = str.split(DIMS, "|")
+    for i = 0 to array.size(ds) - 1
+        if array.get(str.split(array.get(ds, i), ":"), 0) == nm
+            r := i
+    r
+
+condName(string base, bool chg, int op, float val) =>
+    string nm = switch base
+        "d_wq_16" => "WQ16"
+        "d_wq_40" => "WQ40"
+        "d_wq_44" => "WQ44"
+        "d_mdi14" => "-DI"
+        "d_mdi14_diff5" => "-DI 5d chg"
+        "d_ema20_angle_deg" => "EMA20 angle"
+        "d_bb_bw_20" => "BB width"
+        "w_ret_13w" => "13w return"
+        "d_bb_pctb_20" => "BB %b"
+        => base
+    chg ? nm + (op == 0 or op == 2 ? "↑" : "↓") : nm + (op == 0 ? " > " : op == 1 ? " < " : op == 2 ? " >= " : " <= ") + str.tostring(val)
+
+if barstate.isfirst
+    for item in str.split(SETUPS, "|")
+        string[] p = str.split(item, ":")
+        array.push(sIds, array.get(p, 0))
+        array.push(sStart, array.size(cField))
+        string[] cs = str.split(array.get(p, 1), ",")
+        array.push(sCount, array.size(cs))
+        for c in cs
+            int op = str.contains(c, ">=") ? 2 : str.contains(c, "<=") ? 3 : str.contains(c, ">") ? 0 : 1
+            string sep = op == 2 ? ">=" : op == 3 ? "<=" : op == 0 ? ">" : "<"
+            string[] lr = str.split(c, sep)
+            string nm = array.get(lr, 0)
+            bool chg = str.endswith(nm, "_change")
+            string base = chg ? str.substring(nm, 0, str.length(nm) - 7) : nm
+            int fid = base == "gap_pct" ? 100 : base == "pc_vs_d1" ? 101 : base == "pc_vs_d1_atr" ? 102 : featId(base)
+            array.push(cField, fid)
+            array.push(cChg, chg ? 1 : 0)
+            array.push(cOp, op)
+            array.push(cVal, str.tonumber(array.get(lr, 1)))
+            array.push(cName, condName(base, chg, op, str.tonumber(array.get(lr, 1))))
+    for item in str.split(DIMS, "|")
+        string[] p = str.split(item, ":")
+        string ev = array.get(p, 1)
+        array.push(dStart, array.size(dEdges))
+        if str.startswith(ev, "#")
+            array.push(dCode, int(str.tonumber(str.substring(ev, 1))))
+            array.push(dCount, 0)
+        else
+            string[] es = str.split(ev, ",")
+            array.push(dCode, 0)
+            array.push(dCount, array.size(es))
+            for e in es
+                array.push(dEdges, str.tonumber(e))
+    // the zone code: BMSZ1|S1=ATRP:2:3+VIXP:0:0|S2=|...
+    for i = 0 to array.size(sIds) - 1
+        array.push(zStart, 0)
+        array.push(zCount, 0)
+        array.push(zText, "")
+    string code = str.replace_all(str.replace_all(zoneCode, " ", ""), "\n", "")
+    string[] zp = str.split(code, "|")
+    bool okCode = array.size(zp) > 1 and array.get(zp, 0) == "BMSZ1"
+    if okCode
+        for i = 1 to array.size(zp) - 1
+            string[] kv = str.split(array.get(zp, i), "=")
+            int si = array.indexof(sIds, array.get(kv, 0))
+            if si < 0 or array.size(kv) != 2
+                okCode := false
+            else
+                array.set(zStart, si, array.size(zDim))
+                string zs = array.get(kv, 1)
+                if str.length(zs) > 0
+                    string[] parts = str.split(zs, "+")
+                    array.set(zCount, si, array.size(parts))
+                    array.set(zText, si, zs)
+                    for pz in parts
+                        string[] q = str.split(pz, ":")
+                        int di = dimId(array.get(q, 0))
+                        if di < 0 or array.size(q) != 3
+                            okCode := false
+                        else
+                            array.push(zDim, di)
+                            array.push(zLo, int(str.tonumber(array.get(q, 1))))
+                            array.push(zHi, int(str.tonumber(array.get(q, 2))))
+    zoneMsg := okCode ? "zone code OK" : "ZONE CODE NOT READ - marks shown without zones"
+    if not okCode
+        for i = 0 to array.size(sIds) - 1
+            array.set(zCount, i, 0)
+
+// ---------------------------------------------------------------------------- v1.1: the lane (TREE.json cut-offs)
+var int[] cutY = array.new_int()
+var float[] cutV = array.new_float()
+if barstate.isfirst
+    for item in str.split(CUTS, "|")
+        string[] pc = str.split(item, ":")
+        array.push(cutY, int(str.tonumber(array.get(pc, 0))))
+        array.push(cutV, str.tonumber(array.get(pc, 1)))
+    string lcut = str.replace_all(laterCuts, " ", "")
+    if str.length(lcut) > 0
+        for item in str.split(lcut, "|")
+            string[] pl = str.split(item, ":")
+            if array.size(pl) == 2
+                float yv = str.tonumber(array.get(pl, 0))
+                float cv = str.tonumber(array.get(pl, 1))
+                if not na(yv) and not na(cv)
+                    if array.indexof(cutY, int(yv)) < 0
+                        array.push(cutY, int(yv))
+                        array.push(cutV, cv / 100)
+
+cutFor(int y) =>
+    int ci = array.indexof(cutY, y)
+    ci >= 0 ? array.get(cutV, ci) : na
+
+// 1 CALM (the simple ATR / close at or below the bar year's cut-off), 2 JUMPY, 0 no cut-off for the year, -1 no ATR
+float cutBar = cutFor(year(time))
+int laneCode = na(fSatr) ? -1 : na(cutBar) ? 0 : fSatr > cutBar ? 2 : 1
+bgcolor(laneMode == "Background" and laneCode == 1 ? color.new(#2962FF, 94) : laneMode == "Background" and laneCode == 2 ? color.new(#AB47BC, 92) : na, title = "Lane background")
+plotshape(laneMode == "Strip" and laneCode == 1, "Calm", shape.square, location.top, color.new(#2962FF, 35), size = size.tiny, display = display.pane)
+plotshape(laneMode == "Strip" and laneCode == 2, "Jumpy", shape.square, location.top, color.new(#AB47BC, 25), size = size.tiny, display = display.pane)
+
+monName(int m) =>
+    switch m
+        1 => "Jan"
+        2 => "Feb"
+        3 => "Mar"
+        4 => "Apr"
+        5 => "May"
+        6 => "Jun"
+        7 => "Jul"
+        8 => "Aug"
+        9 => "Sep"
+        10 => "Oct"
+        11 => "Nov"
+        => "Dec"
+
+// a bar's date in the exchange's time zone
+dateTx(int t) =>
+    str.tostring(dayofmonth(t)) + " " + monName(month(t))
+
+// ------------------------------------------------------------------------------------- values at a bar offset
+featAt(int fid, int off) =>
+    switch fid
+        0 => fWq16[off]
+        1 => fDiff5[off]
+        2 => fWq40[off]
+        3 => fMdi[off]
+        4 => fAngle[off]
+        5 => fBw[off]
+        6 => fWq44[off]
+        7 => fW13[off]
+        8 => fPctb[off]
+        => na
+
+dimAt(int di, int off) =>
+    switch di
+        0 => fAtrp[off]
+        1 => zAtrx[off]
+        2 => zTrend[off]
+        3 => zRet20[off]
+        4 => zRsi[off]
+        5 => zDd52[off]
+        6 => zRvol[off]
+        7 => zRs20[off]
+        8 => zIdx[off]
+        9 => vixp[off]
+        10 => vix5[off]
+        11 => retN[off]
+        => na
+
+bucketOf(int di, float x) =>
+    int b = -1
+    if not na(x)
+        int nc = array.get(dCode, di)
+        if nc > 0
+            b := math.max(0, math.min(nc - 1, int(math.round(x))))
+        else
+            b := 0
+            int st = array.get(dStart, di)
+            for i = 0 to array.get(dCount, di) - 1
+                if array.get(dEdges, st + i) <= x
+                    b += 1
+    b
+
+// 1 inside, 0 outside, -1 = the setup has no zone
+inZone(int si, int off) =>
+    int r = -1
+    int cnt = array.get(zCount, si)
+    if cnt > 0
+        r := 1
+        int st = array.get(zStart, si)
+        for i = 0 to cnt - 1
+            int b = bucketOf(array.get(zDim, st + i), dimAt(array.get(zDim, st + i), off))
+            if b < array.get(zLo, st + i) or b > array.get(zHi, st + i)
+                r := 0
+    r
+
+// a condition field for watch day j of the pseudo-pick k bars before the entry bar; sh = 0: the entry bar is this
+// bar, sh = -1: the entry bar is the next session (tonight)
+fieldAt(int fid, int chg, int k, int j, int sh) =>
+    int xo = k - j + 1 + sh
+    int eo = k - j + sh
+    int d1o = k - 1 + sh
+    int dso = k + sh
+    float r = na
+    if fid < 100
+        if chg == 1
+            r := n[xo + 1] > WARMUP ? featAt(fid, xo) - featAt(fid, xo + 1) : na
+        else
+            r := n[xo] > WARMUP ? featAt(fid, xo) : na
+    else if fid == 100
+        r := (open[eo] / close[eo + 1] - 1) * 100
+    else if j == 1
+        r := 0.0
+    else if fid == 101
+        r := (close[xo] / open[math.max(d1o, 0)] - 1) * 100
+    else
+        r := (close[xo] / open[math.max(d1o, 0)] - 1) / fSatr[dso]
+    r
+
+// 1 = every condition holds, 0 = one fails, -1 = unknown (the pseudo-pick stops), 2 = all known hold, the open's gap
+// rule still to come (tonight)
+dayResult(int si, int k, int j, int sh, bool pend) =>
+    bool anyF = false
+    bool anyN = false
+    bool pending = false
+    int st = array.get(sStart, si)
+    for i = 0 to array.get(sCount, si) - 1
+        int fid = array.get(cField, st + i)
+        if pend and fid == 100
+            pending := true
+        else
+            float a = fieldAt(fid, array.get(cChg, st + i), k, j, sh)
+            if na(a)
+                anyN := true
+            else
+                float x = math.round(a, 9)
+                float val = math.round(array.get(cVal, st + i), 9)
+                int op = array.get(cOp, st + i)
+                bool ok = op == 0 ? x > val : op == 1 ? x < val : op == 2 ? x >= val : x <= val
+                if not ok
+                    anyF := true
+    anyF ? 0 : anyN ? -1 : pending ? 2 : 1
+
+// ------------------------------------------------------------- v1.1: what tomorrow's close needs (the open after)
+// the close below which tomorrow's Bollinger %b (20, 2: the last 19 closes and it) is under val
+bbGap(float cx, float s19, float q19, float val) =>
+    float mb = (s19 + cx) / 20
+    float vr = (q19 + cx * cx - 20 * mb * mb) / 19
+    float sdb = vr > 0 ? math.sqrt(vr) : 0.0
+    sdb > 0 ? cx - mb - (4 * val - 2) * sdb : na
+
+bbTarget(float val) =>
+    float r = na
+    if n >= 19
+        float s19 = 0.0
+        float q19 = 0.0
+        for i = 18 to 0
+            s19 += close[i]
+            q19 += close[i] * close[i]
+        float g0 = bbGap(0.0, s19, q19, val)
+        if not na(g0) and g0 < 0
+            float lo2 = 0.0
+            float hi2 = 3 * close
+            for it = 1 to 60
+                float mid = (lo2 + hi2) / 2
+                float g = bbGap(mid, s19, q19, val)
+                if not na(g) and g < 0
+                    lo2 := mid
+                else
+                    hi2 := mid
+            r := lo2
+    r
+
+// the close below which tomorrow's EMA20 angle minus tonight's is under val (the EMA's alpha is 2/21)
+angleTarget(float val) =>
+    float r = na
+    if not na(ema20) and not na(fAngle)
+        float ang = fAngle + val
+        if math.abs(ang) < 89.9
+            r := ema20 * (1 + math.tan(math.toradians(ang)) / (2.0 / 21))
+    r
+
+// tomorrow's 13-week-return change (the next session taken as the next weekday): 0 inside a week; on a new week the
+// completed week's close is tonight's, so it is known tonight
+weeklyNext(float val, int op) =>
+    int dn = math.floor((time + 19800000) / 86400000)
+    int wdT = (dn + 3) % 7
+    int nd = dn + (wdT == 4 ? 3 : wdT == 5 ? 2 : 1)
+    int wdN = (nd + 3) % 7
+    int weN = nd + ((4 - wdN) % 7 + 7) % 7
+    float chgT = 0.0
+    if weN != curWe
+        int nw2 = array.size(wcl)
+        chgT := nw2 >= 13 and not na(fW13) ? (close / array.get(wcl, nw2 - 13) - 1) * 100 - fW13 : na
+    bool ok = false
+    if not na(chgT)
+        float xw = math.round(chgT, 9)
+        float vw = math.round(val, 9)
+        ok := op == 0 ? xw > vw : op == 1 ? xw < vw : op == 2 ? xw >= vw : xw <= vw
+    ok
+
+// the pseudo-pick whose next open is its watch day k: can tomorrow's close fire it at the open after (day k + 1)?
+// -> [possible, trigger close (na = none), feature changes read tomorrow, other notes, the weekly read failed,
+//     a dip measured from tomorrow's own open]
+buildReq(int si, int k) =>
+    bool possible = true
+    float target = na
+    string needs = ""
+    string notes = ""
+    bool wkFail = false
+    bool rel = false
+    int st = array.get(sStart, si)
+    for i = 0 to array.get(sCount, si) - 1
+        int fid = array.get(cField, st + i)
+        int chg = array.get(cChg, st + i)
+        int op = array.get(cOp, st + i)
+        float val = array.get(cVal, st + i)
+        bool upper = op == 1 or op == 3
+        float thr = na
+        bool priced = false
+        if fid == 100
+            notes += " + open < close"
+        else if (fid == 101 or fid == 102) and upper
+            if k == 1
+                rel := true
+                notes += " + close " + str.tostring(fid == 101 ? -val : -val * fSatr * 100, "#.##") + "% under the D1 open"
+            else
+                priced := true
+                thr := fid == 101 ? open[k - 2] * (1 + val / 100) : open[k - 2] * (1 + val * fSatr[k - 1])
+        else if fid == 8 and chg == 0 and upper
+            priced := true
+            thr := bbTarget(val)
+        else if fid == 4 and chg == 1 and upper
+            priced := true
+            thr := angleTarget(val)
+        else if fid == 7 and chg == 1
+            if not weeklyNext(val, op)
+                possible := false
+                wkFail := true
+        else
+            needs += " + " + array.get(cName, st + i)
+        if priced
+            if na(thr)
+                possible := false
+            else
+                target := na(target) ? thr : math.min(target, thr)
+    [possible, target, needs, notes, wkFail, rel]
+
+// --------------------------------------------------------------------------------------------- the marks
+var string[] lastMark = array.new_string()
+if barstate.isfirst
+    for i = 0 to array.size(sIds) - 1
+        array.push(lastMark, "-")
+string txt = ""
+string tip = ""
+int zin = -2
+if inHist and n > WARMUP + 1
+    for si = 0 to array.size(sIds) - 1
+        string sid = array.get(sIds, si)
+        if str.contains(showList, sid)
+            bool marked = false
+            for k = 1 to 5
+                if not marked and n[k] > WARMUP
+                    int res = 0
+                    for j = 1 to k
+                        if res == 0
+                            res := dayResult(si, k, j, 0, false)
+                            if res == 1
+                                res := j == k ? 3 : 4
+                            else if res == -1
+                                res := 4
+                    if res == 3
+                        marked := true
+            if marked
+                int z = inZone(si, 1)
+                if not onlyIn or z == 1
+                    txt += (txt == "" ? "" : " ") + sid
+                    tip += sid + (z == 1 ? " in its zone" : z == 0 ? " outside its zone" : " (no zone)") + "\n"
+                    zin := math.max(zin, z)
+                array.set(lastMark, si, dateTx(time) + " " + str.tostring(year(time)) + (z == 1 ? " IN" : z == 0 ? " OUT" : ""))
+if txt != ""
+    color col = zin == 1 ? color.new(#26A69A, 0) : zin == 0 ? color.new(#FF9800, 0) : color.new(#B0BEC5, 0)
+    label.new(bar_index, low, txt, yloc = yloc.belowbar, style = label.style_triangleup, color = col, textcolor = col, size = size.tiny, tooltip = "Setup entry at this open (" + VERSION + ")\n" + tip + "Bought at this open; setuplab sells the fresh exit at the close 4 sessions later (S/C setups: the pick's D5 close on real picks).")
+
+// ------------------------------------------------------------- after the close: the next open, tomorrow, the lane
+var int[] stCode = array.new_int()
+var line[] tLines = array.new_line()
+var label[] tLabels = array.new_label()
+var table tb = showTable ? table.new(position.bottom_right, 4, 12, bgcolor = color.new(color.black, 15), border_width = 1) : na
+var label sumL = na
+int firesN = 0
+int armedN = 0
+float nearest = na
+string alertMsg = ""
+if barstate.islast
+    array.clear(stCode)
+    for ln in tLines
+        line.delete(ln)
+    array.clear(tLines)
+    for lb in tLabels
+        label.delete(lb)
+    array.clear(tLabels)
+    label.delete(sumL)
+    float cutT = cutFor(year(time))
+    string laneTx = laneCode == 1 ? "CALM" : laneCode == 2 ? "JUMPY" : laneCode == 0 ? "NO CUT-OFF" : "NO ATR"
+    string sumTxt = syminfo.ticker + "  " + laneTx + (laneCode >= 1 ? "  ATR " + str.tostring(fSatr * 100, "0.0") + "% (cut-off " + str.tostring(cutT * 100, "0.0") + "%)" : laneCode == 0 ? "  - type " + str.tostring(year(time)) + "'s cut-off in the inputs" : "")
+    string actTxt = ""
+    string bldTxt = ""
+    string tipTxt = "After the close of " + dateTx(time) + " " + str.tostring(year(time)) + " (" + VERSION + ")\n"
+    tipTxt += laneCode == 1 ? "CALM: as a model pick the tree buys it at the open (ENS always; D if it is the best-ranked calm pick opening at or above " + str.tostring(close, "#.##") + ").\n" : laneCode == 2 ? "JUMPY: as a model pick no open buy - only the first frozen setup that fills, else skipped.\n" : ""
+    if showTable
+        table.cell(tb, 0, 0, syminfo.ticker + " - after the close of " + dateTx(time) + ": the next open", text_color = color.white, text_size = size.small)
+        table.cell(tb, 1, 0, "building: what tomorrow's close needs (for the open after)", text_color = color.white, text_size = size.small)
+        table.cell(tb, 2, 0, "zone", text_color = color.white, text_size = size.small)
+        table.cell(tb, 3, 0, "last mark", text_color = color.white, text_size = size.small)
+        string laneDet = laneCode >= 1 ? " - ATR " + str.tostring(fSatr * 100, "#.##") + "% of the close, cut-off " + str.tostring(cutT * 100, "#.##") + "% (" + str.tostring(year(time)) + ")" : laneCode == 0 ? " - type " + str.tostring(year(time)) + "'s cut-off in the inputs" : ""
+        string treeTx = laneCode == 1 ? "as a model pick: bought at the open (ENS always; D if it is the best-ranked calm pick opening at or above " + str.tostring(close, "#.##") + ")" : laneCode == 2 ? "as a model pick: no open buy - only through a frozen setup, else skipped" : ""
+        color laneBg = laneCode == 1 ? color.new(#2962FF, 40) : laneCode == 2 ? color.new(#AB47BC, 40) : color.new(color.gray, 60)
+        table.cell(tb, 0, 1, "LANE " + laneTx + laneDet, text_color = color.white, text_size = size.small, bgcolor = laneBg, tooltip = "The entry tree (TREE.json, 9 Nov 2026) on the model's D / ENS top 3: CALM picks - ENS buys every one at the open; D buys the best-ranked calm pick whose open is at or above its close. JUMPY picks - no open buy; only the first frozen setup that fills. ETFs are skipped.")
+        table.cell(tb, 1, 1, treeTx, text_color = color.white, text_size = size.small, bgcolor = laneBg)
+        table.cell(tb, 2, 1, "", text_color = color.white, text_size = size.small)
+        table.cell(tb, 3, 1, "", text_color = color.white, text_size = size.small)
+    for si = 0 to array.size(sIds) - 1
+        string sid = array.get(sIds, si)
+        int code = 0
+        int kHit = 0
+        int bestK = 0
+        float bestT = na
+        bool bestRel = false
+        string bestNeeds = ""
+        string bestNotes = ""
+        bool blocked = false
+        if inHist and n > WARMUP
+            for k = 1 to 5
+                if n[k - 1] > WARMUP
+                    bool alive = true
+                    if k > 1
+                        for j = 1 to k - 1
+                            if alive
+                                if dayResult(si, k, j, -1, false) != 0
+                                    alive := false
+                    if alive
+                        int r = dayResult(si, k, k, -1, true)
+                        if r == 1 and code < 3
+                            code := 3
+                            kHit := k
+                        else if r == 2 and code < 2
+                            code := 2
+                            kHit := k
+                        else if r == 0 and k <= 4
+                            [pos, tg, nd, nt, wkf, rl] = buildReq(si, k)
+                            if pos
+                                bool better = bestK == 0
+                                if not better
+                                    int aC = rl ? 0 : 1
+                                    int aB = bestRel ? 0 : 1
+                                    if aC != aB
+                                        better := aC > aB
+                                    else if na(tg) != na(bestT)
+                                        better := not na(tg)
+                                    else if not na(tg)
+                                        better := tg > bestT
+                                if better
+                                    bestK := k
+                                    bestT := tg
+                                    bestRel := rl
+                                    bestNeeds := nd
+                                    bestNotes := nt
+                            else if wkf
+                                blocked := true
+        if code == 0 and bestK > 0
+            code := 1
+        array.push(stCode, code)
+        if code == 3
+            firesN += 1
+        else if code == 2
+            armedN += 1
+        if code == 1 and not na(bestT)
+            float pctT = (bestT / close - 1) * 100
+            nearest := na(nearest) ? pctT : math.max(nearest, pctT)
+            if linePct > 0 and math.abs(pctT) <= linePct
+                array.push(tLines, line.new(bar_index + 1, bestT, bar_index + 6, bestT, color = color.new(color.yellow, 20), style = line.style_dashed, width = 1))
+                array.push(tLabels, label.new(bar_index + 7, bestT, sid + " " + str.tostring(bestT, "#.##"), style = label.style_none, textcolor = color.new(color.yellow, 0), size = size.tiny))
+        // the summary box: what the next open does, what tomorrow's close needs (the distance from tonight's close)
+        if code == 3
+            actTxt += "\n" + sid + " FIRES: buy at the open"
+        else if code == 2
+            actTxt += "\n" + sid + " ARMED: buy if the open < " + str.tostring(close, "#.##")
+        else if code == 1
+            string need = na(bestT) ? "" : "close < " + str.tostring(bestT, "#.##") + " (" + (bestT >= close ? "+" : "") + str.tostring((bestT / close - 1) * 100, "0.0") + "%)"
+            string more = bestNotes + bestNeeds
+            if str.length(need) == 0 and str.length(more) > 3
+                more := str.substring(more, 3)
+            bldTxt += "\n" + sid + " needs " + need + more
+        string zTx = inZone(si, 0) == 1 ? "in its zone" : inZone(si, 0) == 0 ? "outside its zone" : "no zone"
+        tipTxt += "\n" + sid + ": " + (code == 3 ? "FIRES at the next open (signal " + dateTx(time[kHit - 1]) + ", D" + str.tostring(kHit) + ")" : code == 2 ? "ARMED for the next open (signal " + dateTx(time[kHit - 1]) + ", D" + str.tostring(kHit) + ")" : code == 1 ? "building - tomorrow's close decides the open after (signal " + dateTx(time[bestK - 1]) + ", D" + str.tostring(bestK + 1) + ")" : blocked ? "its bad-week read comes only on a new week's first session" : "nothing") + "; " + zTx + "; last entry " + array.get(lastMark, si)
+        if code >= 2
+            alertMsg += (alertMsg == "" ? "" : "; ") + sid + (code == 3 ? " FIRES" : " ARMED (buy only if the open < " + str.tostring(close, "#.##") + ")")
+        if showTable
+            string stx = code == 3 ? "FIRES - buy at the open" : code == 2 ? "ARMED - buy only if the open < " + str.tostring(close, "#.##") : "-"
+            if code >= 2
+                stx += " (signal " + dateTx(time[kHit - 1]) + ", D" + str.tostring(kHit) + ")"
+            string btx = code == 0 and blocked ? "- (its bad-week read comes only on a new week's first session)" : "-"
+            if code == 1
+                string req = (na(bestT) ? "" : " + close < " + str.tostring(bestT, "#.##")) + bestNotes + bestNeeds
+                btx := (str.length(req) > 3 ? str.substring(req, 3) : "any close") + " (signal " + dateTx(time[bestK - 1]) + ", D" + str.tostring(bestK + 1) + ")"
+            int z = inZone(si, 0)
+            color bg = code >= 2 ? (z == 0 ? color.new(color.orange, 30) : color.new(color.green, 30)) : code == 1 ? color.new(color.yellow, 70) : color.new(color.gray, 70)
+            table.cell(tb, 0, si + 2, sid + "  " + stx, text_color = color.white, text_size = size.small, bgcolor = bg)
+            table.cell(tb, 1, si + 2, btx, text_color = color.white, text_size = size.small, bgcolor = code == 1 ? color.new(color.yellow, 70) : color.new(color.gray, 85))
+            table.cell(tb, 2, si + 2, z == 1 ? "IN" : z == 0 ? "OUT" : "no zone", text_color = color.white, text_size = size.small)
+            table.cell(tb, 3, si + 2, array.get(lastMark, si), text_color = color.white, text_size = size.small)
+    if showTable
+        table.cell(tb, 0, array.size(sIds) + 2, zoneMsg + " | bars since start " + str.tostring(n) + (n <= WARMUP ? " (marks start after " + str.tostring(WARMUP) + ")" : ""), text_color = color.white, text_size = size.tiny)
+        table.cell(tb, 0, array.size(sIds) + 3, "Building: the close is exact; a feature change (arrow) is read at tomorrow's close; the bad-week read comes only on a new week's first session.", text_color = color.white, text_size = size.tiny)
+        table.cell(tb, 0, array.size(sIds) + 4, VERSION + " - values from TradingView's bars; use after the close", text_color = color.white, text_size = size.tiny)
+    if showBox
+        string body = (actTxt == "" ? "\nNothing fires at the next open" : actTxt) + bldTxt
+        tipTxt += "\n\nBuilding: the close is exact (dip, ATR dip, lower Bollinger band, EMA20 angle); an arrow is a feature change read at tomorrow's close; the bad-week read comes only on a new week's first session. Sells: S/C at the pick's D5 close, N1 4 sessions after its own entry."
+        sumL := label.new(bar_index, high, sumTxt + body, style = label.style_label_lower_left, color = color.new(#131722, 10), textcolor = color.white, size = size.small, textalign = text.align_left, tooltip = tipTxt)
+    if alertMsg != ""
+        alertMsg := "BM Setups " + syminfo.ticker + " (" + laneTx + "): " + alertMsg + " - for the next open"
+        alert(alertMsg, alert.freq_once_per_bar_close)
+
+// ------------------------------------------------------------------- alerts and the Pine Screener's columns
+alertcondition(firesN > 0, "BM: a setup FIRES at the next open", "BM Setups {{exchange}}:{{ticker}} - a frozen setup FIRES at the next open (close {{close}})")
+alertcondition(firesN + armedN > 0, "BM: a setup FIRES or is ARMED", "BM Setups {{exchange}}:{{ticker}} - a frozen setup fires or is armed for the next open (close {{close}})")
+alertcondition(not na(nearest) and nearest >= -nearPct, "BM: a trigger close is near", "BM Setups {{exchange}}:{{ticker}} - a building setup's trigger close for tomorrow is within the set % of {{close}}")
+plot(laneCode, "Lane: 1 calm, 2 jumpy, 0 no cut-off, -1 no ATR", display = display.data_window)
+plot(fSatr * 100, "ATR % of the close (simple 14)", display = display.data_window)
+plot(barstate.islast ? firesN : na, "Setups firing at the next open", display = display.data_window)
+plot(barstate.islast ? armedN : na, "Setups armed for the next open", display = display.data_window)
+plot(nearest, "Nearest trigger close, % from the close", display = display.data_window)
+plot(array.size(stCode) > 0 ? array.get(stCode, 0) : na, "S1: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 1 ? array.get(stCode, 1) : na, "S2: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 2 ? array.get(stCode, 2) : na, "S3: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 3 ? array.get(stCode, 3) : na, "C1: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 4 ? array.get(stCode, 4) : na, "C2: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 5 ? array.get(stCode, 5) : na, "C3: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
+plot(array.size(stCode) > 6 ? array.get(stCode, 6) : na, "N1: 3 fires, 2 armed, 1 building, 0 none", display = display.data_window)
