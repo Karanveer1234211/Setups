@@ -1,0 +1,54 @@
+{
+ "version": "setuplab v1.1",
+ "made": "2026-11-09T14:03:12+05:30",
+ "tree_file": "C:\\Users\\karanvsi\\PyCharmMiscProject\\setuplab\\TREE.json",
+ "tree_sha256": "5cd4571765c2de802c8492e7fd24511b16e7465fadcebc9c81c742b894a0606f",
+ "frozen_sha256": "483f1539324f3ae5c06756b00b32c189f5eb995f73956a681673f005ce399c8f",
+ "tags_run": "C:\\QuantData\\setuplab\\TAGS\\TAGS_20261108_001",
+ "watchlist": "C:\\QuantData\\setuplab\\WL_R1_10\\watchlist.parquet",
+ "window": [
+  "2021-01-01",
+  "2026-09-22"
+ ],
+ "reconciled": true,
+ "cutoffs": {
+  "2021": 0.05765407554671968,
+  "2022": 0.05641745604231174,
+  "2023": 0.05751632249834517,
+  "2024": 0.053513261982317366,
+  "2025": 0.05492950265998241,
+  "2026": 0.05521984442292925
+ },
+ "books": {
+  "D baseline": {
+   "a_year_pct": 58.25350872931532,
+   "worst_fall_pct": 46.71482797884438,
+   "rs_5l_became_lakh": 72.19914322127616
+  },
+  "D tree": {
+   "a_year_pct": 117.44154095889094,
+   "worst_fall_pct": 24.110156934403207,
+   "rs_5l_became_lakh": 423.8769070243288
+  },
+  "ENS baseline": {
+   "a_year_pct": 79.52534305758346,
+   "worst_fall_pct": 45.31018283994648,
+   "rs_5l_became_lakh": 169.44183854586976
+  },
+  "ENS tree": {
+   "a_year_pct": 107.53194380655995,
+   "worst_fall_pct": 29.46200528849361,
+   "rs_5l_became_lakh": 324.03984923445705
+  },
+  "both baselines (Rs 2.5 L each)": {
+   "a_year_pct": 72.83212432516521,
+   "worst_fall_pct": 41.75798143112637,
+   "rs_5l_became_lakh": 120.82049088357297
+  },
+  "both trees (Rs 2.5 L each)": {
+   "a_year_pct": 112.79362796291302,
+   "worst_fall_pct": 25.887042850274014,
+   "rs_5l_became_lakh": 373.95837812939294
+  }
+ }
+}
